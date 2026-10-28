@@ -15,6 +15,13 @@ def main():
     parser = argparse.ArgumentParser(prog="sqw",description=__doc__)
     commands = parser.add_subparsers(dest="command",required=True)
     commands.add_parser("doctor",help="Inspect Python modules and native executables")
+    ecosystem = commands.add_parser("ecosystem", help="Generic multi-engine project workflow")
+    ecosystem.add_argument("action",choices=["doctor","plan","run","verify"])
+    ecosystem.add_argument("--project",help="Workflow JSON specification")
+    ecosystem.add_argument("--out",help="Immutable run directory")
+    ecosystem.add_argument("--allow-project-code",action="store_true",help="Execute trusted local Quantum Metal Python factory")
+    ecosystem.add_argument("--allow-solvers",action="store_true",help="Explicitly authorize Julia/SQDMetal solver runs")
+    ecosystem.add_argument("--allow-plugins",action="store_true",help="Load trusted third-party sqw.ecosystem_adapters entry points")
     p = commands.add_parser("verify",help="Verify artifact integrity and stage freshness")
     p.add_argument("--run",required=True)
     p = commands.add_parser("qualify",help="Prepare independent capacitor/cavity reference problems")
@@ -61,6 +68,28 @@ def main():
             result["executables"] = {x:shutil.which(x) for x in ("palace","mpiexec","klayout")}
             result["reference_modules"] = {x:importlib.util.find_spec(x) is not None
                                            for x in ("scqubits","qpdk","gmsh","qutip")}
+            print(json.dumps(result,indent=2))
+        elif command == "ecosystem":
+            from pathlib import Path
+            from . import ecosystem as ecosystem_api
+            if args['allow_plugins']:
+                ecosystem_api.load_plugins()
+            if args['action'] == 'doctor':
+                result = ecosystem_api.doctor()
+            elif args['action'] == 'verify':
+                if not args['out']: raise ValueError('--out required for verify')
+                result = ecosystem_api.verify(args['out'])
+            else:
+                if not args['project']: raise ValueError('--project required')
+                project_path=Path(args['project']).resolve()
+                project=json.loads(project_path.read_text(encoding='utf-8'))
+                if args['action'] == 'plan':
+                    result=ecosystem_api.plan(project,project_path.parent)
+                else:
+                    if not args['out']: raise ValueError('--out required for run')
+                    result=ecosystem_api.execute(project,project_path.parent,args['out'],
+                            allow_project_code=args['allow_project_code'],
+                            allow_solvers=args['allow_solvers'])
             print(json.dumps(result,indent=2))
         elif command == "assemble-mask":
             from .assembly import assemble

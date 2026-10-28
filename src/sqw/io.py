@@ -69,7 +69,7 @@ def write_csv(path, columns):
 
 def environment():
     versions = {}
-    for name in ("numpy", "scipy", "matplotlib", "scqubits", "qpdk", "gdsfactory", "gmsh", "qutip"):
+    for name in ("numpy", "scipy", "matplotlib", "scqubits", "qpdk", "gdsfactory", "gmsh", "qutip", "quantum-metal", "SQDMetal"):
         try:
             versions[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:

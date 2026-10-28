@@ -17,8 +17,9 @@ import subprocess
 from sqw.studio.process import document, resolve
 from sqw.physical_qpu import default_spec, export_package, mesh, solve, verify_solve, extract_capacitance
 from sqw.io import read_json, sha256
+from sqw import qpu_validation, fem_audit
 
-CASES = ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode', 'driven', 'mesh_smoke', 'solver_sanity', 'reference_prepare', 'reference_cap_L1', 'reference_cap_L2', 'reference_cap_compare', 'reference_eigenmode')
+CASES = ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode', 'driven', 'mesh_smoke', 'solver_sanity', 'reference_prepare', 'reference_cap_L1', 'reference_cap_L2', 'reference_cap_compare', 'reference_eigenmode', 'qpu_cap_prepare', 'qpu_cap_L0', 'qpu_cap_L1', 'qpu_cap_assess', 'qpu_mode_prepare', 'qpu_mode_L0', 'qpu_mode_L1', 'qpu_mode_assess', 'qpu_mesh_audit', 'qpu_amr_prepare', 'qpu_amr_run', 'qpu_amr_assess')
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
     parser.add_argument('--case', choices=CASES, required=True)
     parser.add_argument('--workspace', required=True)
     parser.add_argument('--solver', default='palace')
-    parser.add_argument('--profile', choices=('quick','standard','numerical','full'), default='full')
+    parser.add_argument('--profile', choices=('quick','standard','numerical','full','qpu','qpu_modes','qpu_audit','qpu_amr'), default='full')
     parser.add_argument('--deadline', type=int, default=160)
     args = parser.parse_args()
     workspace = Path(args.workspace).resolve()
@@ -37,7 +38,7 @@ def main():
     if args.case in ('geometry','mesh'):
         cfg, _ = resolve(document())
         spec = default_spec(cfg, 1)
-    if args.profile == 'standard' and cfg is not None:
+    if args.profile in ('standard','qpu','qpu_modes') and cfg is not None:
         # Only the diagnostic reference uses these coarser meshing values.
         # This is for execution tests, NOT mesh-converged physics.
         cfg['em']['mesh_min_um'] = max(cfg['em']['mesh_min_um'], 25.0)
@@ -45,6 +46,8 @@ def main():
     start = time.monotonic()
     result = {'case':args.case, 'source':'fixed_single_transmon_reference',
               'scientific_qualification':False}
+    if args.case.startswith('qpu_'):
+        result['source'] = 'isolated_single_transmon_QPU_convergence'
     if args.case.startswith('reference_'):
         result['source'] = 'independent_analytical_reference'
     elif args.case in ('mesh_smoke','solver_sanity'):
@@ -117,6 +120,26 @@ def main():
             raise ValueError('Geometry and meshing source do not match')
         result.update(nodes=generated['nodes'],volume_elements=generated['volume_elements'],
                       mesh_sha256=generated['mesh_sha256'])
+    elif args.case == 'qpu_mesh_audit':
+        result.update(fem_audit.geometry_boundary_audit(workspace))
+        result['acceptance_pass'] = result['preflight_pass']
+    elif args.case == 'qpu_amr_prepare':
+        result.update(qpu_validation.prepare_amr(workspace))
+    elif args.case == 'qpu_amr_run':
+        result.update(qpu_validation.run_amr(workspace, timeout=max(30,args.deadline-15)))
+    elif args.case == 'qpu_amr_assess':
+        result.update(qpu_validation.assess_amr(workspace))
+    elif args.case in ('qpu_cap_prepare','qpu_mode_prepare'):
+        problem = 'electrostatic' if args.case == 'qpu_cap_prepare' else 'eigenmode'
+        result.update(qpu_validation.prepare(workspace, problem))
+    elif args.case in ('qpu_cap_L0','qpu_cap_L1','qpu_mode_L0','qpu_mode_L1'):
+        problem = 'electrostatic' if args.case.startswith('qpu_cap') else 'eigenmode'
+        level = int(args.case[-1])
+        result.update(qpu_validation.run_level(workspace, problem, level,
+                      timeout=max(30, args.deadline-15)))
+    elif args.case in ('qpu_cap_assess','qpu_mode_assess'):
+        problem = 'electrostatic' if args.case == 'qpu_cap_assess' else 'eigenmode'
+        result.update(qpu_validation.assess(workspace, problem, tolerance=0.01))
     elif args.case == 'capacitance':
         extracted = extract_capacitance(workspace)
         from sqw.numerical_validation import matrix_summary

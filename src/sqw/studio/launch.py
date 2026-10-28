@@ -29,6 +29,8 @@ def main():
     origin=f'http://{args.host}:{args.port}'
     settings=Settings(args.data,origin,True,args.concurrent_jobs,args.cpus,args.memory_gb)
     application=Application(settings)
+    if os.environ.get('SQE_AUTO_INSTALL', '1') == '1':
+        application.dependencies.auto_once()
     token=application.auth.setup_token()
     print(f'SQE Studio: {origin}',flush=True)
     if token: print(f'One-time administrator setup: {origin}/#setup={token}',flush=True)

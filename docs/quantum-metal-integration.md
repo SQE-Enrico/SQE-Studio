@@ -13,3 +13,11 @@ Interchange of named polygons is not equivalent to validated QComponent routing,
 ## Future adapter contract
 
 Preserve unit conversion, net names, layer and component IDs, junction orientations, positive/negative polygons, ports and mesh-boundary assignments. Add round-trip equivalence tests before claiming a bidirectional interchange, and ensure external toolkit versions remain pinned and optional.
+
+## Update 0.15.0
+
+The generic `sqw ecosystem` workflow accepts either the existing positive-
+metal QGeometry manifest or a trusted Python `build_design()` factory that
+creates a real Quantum Metal QDesign, and can hand that QDesign to SQDMetal's
+public Palace preparation APIs; see [the multi-engine guide](ecosystem-workflow.md).
+No automatic positive-mask-to-qualified-Palace geometry equivalence is claimed.

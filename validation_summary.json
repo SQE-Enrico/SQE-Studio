@@ -107,16 +107,20 @@
     "pass": true,
     "boundary_model": "Insulated sides; full bottom/top plates; exact linear potential; no fringing"
   },
-  "release": "0.9.0",
+  "release": "0.15.0",
   "current_release_checks": {
-    "full_regression_tests": "118 tests executed, 0 errors, 4 optional skips",
-    "focused_diagnostic_smoke": "51 curated tests pass using real bundled collector on Linux",
-    "diagnostic_privacy_tests": "8 tests pass; ZIP allowlisting, checksum, scrub, timeout, no projects",
-    "windows_powershell_fallback": "implemented; NOT TESTED on Windows",
-    "wsl2_palace_spack_detection": "implemented; NOT TESTED on Windows/WSL2",
-    "julia_package_import": "implemented optional read-only probe; Julia not installed in delivery",
-    "full_native_palace_execution": "NOT RUN; no scientific solver qualification",
-    "windows_real_hardware_test": "AWAITING USER DIAGNOSTIC BUNDLE"
+    "baseline_full_pytest": "172 passed, 4 skipped, 18 subtests passed (45.27 s); run after initial v0.15 adapter implementation",
+    "targeted_adapter_contracts": "11 passed using core runtime and explicit public-API mocks",
+    "focused_palace_and_qpu_regression": "35 passed (5.33 s), no live Palace executable",
+    "subsequent_full_suite_retry": "NOT COMPLETED: timed out during later regression run; focused tests passed",
+    "native_ecosystem_smoke": "3/3 stages executed and artifact SHA-256 verified for 1Q example",
+    "external_Quantum_Metal": "NOT EXECUTED; dependency not installed",
+    "external_SQDMetal": "NOT EXECUTED; dependency not installed; mocked public API contract only",
+    "external_JosephsonCircuits": "NOT EXECUTED; Julia not installed; fake process I/O contract only",
+    "external_scqubits": "NOT EXECUTED; dependency not installed; fake constructor contract only",
+    "native_Palace_QPU_convergence": "NOT EXECUTED; retain v0.14.1 nonconverged evidence and tests",
+    "ads_quantumpro_parity": "NOT CLAIMED"
   },
-  "legacy_checks_note": "Historical checks and software_version refer to earlier milestones. See validation/delivery-0.9.0.md for current release evidence."
+  "legacy_checks_note": "Historical checks and software_version refer to earlier milestones. See validation/delivery-0.9.0.md for current release evidence.",
+  "current_release_explanation": "Historical fields describe earlier versions and are preserved. Use current_release_checks and validation/ecosystem-delivery-0.15.0.md for this release."
 }

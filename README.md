@@ -1,9 +1,23 @@
-# SQE Studio 0.13.0 — Web-first Quantum EDA Research Workstation
+# SQE Studio 0.17.0 — Unified Web Research Workspace
+
+**One user workflow: Project → Setup → Run → Results → Support ZIP.** The redesigned default browser interface combines project selection, optional scientific engine setup, test/experiment execution, results inspection and single-ZIP debugging. All user-facing workflows and new documentation are in English.
+
+On Windows, extract the archive and double-click **`WINDOWS-FIRST-START.cmd`**. At first launch, best-effort background provisioning checks optional scqubits, Gmsh, Quantum Metal, SQDMetal and JosephsonCircuits.jl. Scientific and native solvers that need missing runtimes or external dependencies remain flagged as requiring attention. Automatic installation is not a certificate of scientific validation.
+
+Read [Getting Started](GETTING-STARTED.md), [Unified Web Workflow](docs/unified-web-workflow.md), and [Release 0.17.0](RELEASE-0.17.0.md). Detailed design controls remain accessible from **Advanced editor** and existing data remains compatible.
+
+---
+
+## Historical capabilities and scientific limitations
 
 **An open-source, browser-based environment for superconducting quantum-circuit design, reproducible simulations, and scientific review.**
 
 SQE Studio combines a persistent project workspace with parameterized QPU designs, reduced-order circuit models, GDSII/Quantum Metal interchange, Gmsh meshing, Palace FEM integration, and a JosephsonCircuits.jl export bridge. The project is available under the Apache-2.0 license. Scientific limitations are recorded explicitly: this is **research software, not a validated fabrication-ready EDA product**.
 
+
+## v0.14 — QPU Mesh Convergence & Field Evidence (Web UI)
+
+From **System & Diagnostics → Palace scientific diagnostics**, choose **QPU C convergence** to run two real electrostatic Palace refinements (L0 and L1) of the *same fixed one-transmon geometry* and compare verified Maxwell and differential capacitance matrices in fF. **QPU Modes** is an optional, more expensive two-level eigenfrequency comparison; it does **not** track modes by field overlap and reports a `WARN` for the identity check. Both profiles collect stage logs, original CSV hashes, limited field/energy metadata and a downloadable, privacy-minimized `scientific-results.json`. L0 requests one ParaView field frame for inventory, not an in-browser 3D render. **Two-level numerical stability is not physical device qualification.** See [v0.14 validation guide](docs/WORKFLOW-VALIDATION-0.14.0.md).
 
 ## v0.13 — Analytical FEM benchmark & numerical results (Web UI)
 
@@ -14,14 +28,14 @@ In **System & Diagnostics**, select **Palace scientific diagnostics → Numerica
 1. Extract this complete archive into a **new writable folder**, not an elevated/system folder. Keep backups of `studio-data` from any earlier installation.
 2. Double-click **`WINDOWS-FIRST-START.cmd`**. The first launch creates `.venv` and installs Python dependencies. Subsequent launches reuse it. Gmsh installation is optional and does not prevent the Web application from starting.
 3. Your browser opens **http://127.0.0.1:8000/**. Follow the one-time administrator setup link on the first launch.
-4. From the left navigation choose **Quantum Design Lab** for QPU design and **System & Diagnostics** for operating-system and scientific-software checks.
+4. From the left navigation choose **Quantum Design Lab** for QPU design, **Research Experiments** for multi-engine tests, and **System & Diagnostics** for software regressions and Palace audits.
 5. Run diagnostics from the Web UI and download the resulting ZIP. Open and review the ZIP before sharing. Nothing is automatically uploaded.
 
-**Web endpoints:** `/` (projects), `/quantumlab.html` (QPU design), `/control.html` (diagnostics, local administrator only).
+**Web endpoints:** `/` (projects), `/quantumlab.html` (QPU design), `/experiments.html` (multi-engine experiments, local administrator only), `/control.html` (regression and Palace diagnostics, local administrator only).
 
 If the Web application cannot start at all, use **`WINDOWS-DIAGNOSTICS.cmd`** as an offline fallback. No command-line work is required for routine design and diagnostic tasks once the application is running. Installing native solvers still requires explicit OS-level approval; no hidden elevation or compilation is initiated by the browser.
 
-Read [Getting started](GETTING-STARTED.md), [Windows installation](docs/windows.md), [Web diagnostics](docs/diagnostics-windows.md), and [scientific development roadmap](docs/roadmap-quantumpro-open-eda.md).
+Read [Web-first experiments](docs/web-first-experiments.md), [Getting started](GETTING-STARTED.md), [Windows installation](docs/windows.md), [Web diagnostics](docs/diagnostics-windows.md), and [scientific development roadmap](docs/roadmap-quantumpro-open-eda.md).
 
 ## Current capabilities
 
@@ -31,8 +45,10 @@ Read [Getting started](GETTING-STARTED.md), [Windows installation](docs/windows.
 | Parametric QPU | Configurable materials, stack-up, Dolan/Manhattan JJ process-intent, qubit shapes, physical couplers and CPW routes | Multilayer 3D mesher and foundry DRC/LVS remain incomplete |
 | Circuit studies | Modes, weak-Kerr estimates, RF S-parameters, flux sweeps, Bloch sequences, reduced Duffing, yield and loss assumptions | Reduced models, not general nonlinear circuit or gate simulation |
 | Gmsh / Palace | Gmsh mesh tools; Palace electrostatic, eigenmode, linearized JJ, and driven configurations; convergence job contracts | A real electrostatic QPU solve was reported successful on Windows/WSL2 in v0.12; independent numerical references still require workstation validation |
-| JosephsonCircuits.jl | SI netlist export and separate Julia environment setup | Actual harmonic-balance execution is not yet integrated into Web jobs |
-| Quantum Metal | QGeometry manifest, optional separate environment | Interchange does not imply a qualified mesh or fabricated device |
+| JosephsonCircuits.jl | SI export and experimental opt-in Julia linear S sweep from the Research Experiments browser page | Full pumped harmonic balance and Web worker execution not qualified |
+| Quantum Metal | QGeometry bridge plus trusted QDesign factory/inventory in browser-run experiments | Interchange does not imply a qualified mesh or fabricated device |
+| SQDMetal | Optional API adapter prepares Palace Gmsh meshes/configs from QDesign via browser-run experiments | Actual target-workstation solver execution, extraction mapping and geometry qualification pending |
+| Research Experiments | Browser project catalog, safe workflow ZIP import, step plans, optional adapters, isolated jobs, progress, logs, one-click support ZIPs | External solver validation and separate environment setup required |
 | System & Diagnostics | Web Standard/Extended health tests and opt-in scientific Quick/Standard/Numerical/Full profiles; per-stage logs, bounded jobs and ZIP reports | The new Numerical profile runs independent analytical references; passing it does not prove QPU geometry convergence or fabrication readiness |
 
 ## Why Palace and JosephsonCircuits.jl?

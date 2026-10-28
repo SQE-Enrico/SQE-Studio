@@ -14,6 +14,12 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python scripts/bootstrap.py --profile core
+      - run: .venv/bin/python -m unittest -q tests.test_ecosystem_v015
+      - run: .venv/bin/python -m unittest discover -s tests/studio -p 'test_web_experiments_v016.py' -q
+      - run: .venv/bin/python -m unittest discover -s tests/studio -p 'test_unified_workspace_v017.py' -q
+      - run: .venv/bin/python -m unittest discover -s tests/studio -p 'test_diagnostic_control.py' -q
+      - run: .venv/bin/python -m sqw ecosystem run --project examples/ecosystem/native-1q/workflow.json --out build/ecosystem-1q
+      - run: .venv/bin/python -m sqw ecosystem verify --out build/ecosystem-1q
       - run: .venv/bin/python -m sqw run --mode imported --extraction examples/data/synthetic_extraction.json --out build/imported
       - run: .venv/bin/python -m sqw verify --run build/first-run
       - run: .venv/bin/python -m sqw verify --run build/imported

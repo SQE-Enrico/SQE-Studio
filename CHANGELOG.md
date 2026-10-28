@@ -1,3 +1,58 @@
+## 0.17.0 — 2026-10-28
+
+- Rebuilt the Web home page as a single, responsive five-step workflow from project to support ZIP.
+- Consolidated project workflows, full regression suites and scientific diagnostics into one run-and-results journey while preserving specialist editors.
+- Added best-effort first-launch provisioning of optional scientific packages and bounded, allowlisted browser-based repair.
+- Isolated the Quantum Metal/SQDMetal stack in Python 3.11 and the JosephsonCircuits package in a Julia project, with diagnostic smoke checks and ZIP evidence.
+- Added dependency manager access-control and failure-report tests; preserved the Palace validation and example projects.
+- Kept all new source, messages and documentation in English, clearly separating package readiness from solver accuracy.
+
+## v0.16.0 — Web-first multi-engine experiments and support bundles
+
+- Added Research Experiments Web workspace with engine readiness, reference-project plans, bounded asynchronous worker runs, live status, logs, cancellation and one-click ZIP exports.
+- Added secure custom workflow ZIP import with path, size, file-type and executable-code restrictions.
+- Added per-job Web support ZIP with SHA-256 manifest, explicit file exclusions, size limits and access controls.
+- Added a minimal support ZIP for failed workstation diagnostic runs.
+- Kept Palace numeric diagnostics, scientific reference profiles, existing project formats and all previous test projects.
+- Added regression tests for permissions, CSRF, Web experiment execution, support archives and hostile ZIP input.
+- Entire new UX, source and documentation are English; updated the release and diagnostics versions.
+- External solver installation, numerical accuracy, manufacturing qualification and commercial-grade parity remain unverified.
+
+## [0.15.0] — 2026-10-28 — Multi-engine adapter and workflow refactor
+
+- Added a **separate topology-independent research workflow** with validated
+  per-step engine/operation/source/dependencies, reproducible immutable runs,
+  local input snapshots, artifact SHA-256 and explicit epistemic statuses.
+- Added lazy, real API adapters to Quantum Metal/QGeometry, SQDMetal Palace
+  capacitance/eigenmode prepare and opt-in native execution, scqubits Transmon,
+  Fluxonium, TunableTransmon and custom Circuit YAML, JosephsonCircuits.jl SI
+  export and experimental opt-in Julia linear S-parameter sweep.
+- Preserved legacy Palace/Gmsh, QPU geometric audit and convergence tests,
+  Web diagnostics, existing GUI and project capsules unchanged. Added three
+  non-production example projects and 8 new contract tests.
+- Added explicit security gates for trusted Python design factories and native
+  solver execution. SQDMetal and JosephsonCircuits solver paths were **not**
+  exercised against real external runtimes here; no FEM convergence or
+  QuantumPro commercial equivalence is claimed.
+
+## v0.14.1 — QPU FEM Geometry & Convergence Audit
+
+- Added browser-based QPU Geometry & Boundary Audit against real MSH 2.2 physical element groups, terminal order and electrostatic boundary conditions.
+- Added opt-in, resource-bounded experimental electrostatic Palace AMR profile with strict audit preflight.
+- Added per-terminal energy consistency check using authentic hashed `domain-E.csv` and `terminal-C.csv` values, without silent rescaling or overriding convergence status.
+- Added small authenticated scientific evidence CSVs to diagnostic ZIPs, along with SHA-256 checksum verification and strict allowlists.
+- Preserved all v0.14 profiles and read-only local Web control workflow; no project migration or solver reinstall required.
+- Synthetic regression tests cover preflight, mismatches, tampering, AMR setup and UI options. New Palace solve remains unverified on Windows.
+
+## v0.14.0 — QPU Mesh Convergence & Field Evidence
+
+- Added opt-in browser-based **QPU C convergence** and **QPU Modes** scientific profiles, with two levels of Palace uniform h-refinement on the same fixed single-transmon model.
+- Added verified, size-bounded C matrix comparison, projected differential coordinates, frequency tables, field/energy CSV metadata, and L0 ParaView file inventory.
+- Enhanced failure handling, state reports, SHA-256 provenance checks and reduced unnecessary second-level solver execution on failure.
+- Preserved numerical values even when a tolerance is not met. Clearly marked eigenmode matching as **index-only** and numerical results as **not physically qualified**.
+- Added 0.14 regression fixtures, documentation and Windows-first acceptance steps; retained Quick / Standard / Numerical / Full.
+- **Pending:** real Palace 0.16.0 multi-level QPU runs, visual 3D field viewer, mesh-independent mode overlap matching, and independent physical QPU validation.
+
 ## v0.13.0 — FEM Numerical Validation & Results
 
 - Add the browser-controlled **Numerical** scientific profile with real Palace solves of an isolated parallel-plate capacitor (two independent mesh levels) and PEC rectangular cavity eigenmode.

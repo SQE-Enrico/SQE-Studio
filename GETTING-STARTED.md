@@ -1,17 +1,32 @@
-# Getting started — Web-first local workstation
+# SQE Studio v0.17.0 — Getting Started
 
-1. Extract the release into a writable folder and double-click `WINDOWS-FIRST-START.cmd`.
-2. Complete the first administrator setup in the automatically opened browser. Use the one-time link printed by the launcher if the browser does not open.
-3. Open **System & Diagnostics** in the Studio navigation. Choose **Standard** to check Python and the core application, or **Extended** for Gmsh 3D, WSL/Ubuntu and optional Julia checks.
-4. Check the report on screen, download the ZIP, and review its contents before sharing. Nothing is uploaded automatically.
-5. Open **Quantum Design Lab** to create and edit a QPU design, save a revision, submit a job, and inspect numerical results and saved files.
+**Normal use requires no command-line interaction.** On Windows, extract the ZIP into a new writable directory, then double-click **`WINDOWS-FIRST-START.cmd`**. Your browser opens the local SQE Studio. On first use, create the administrator account through the one-time browser link.
 
-**Optional native tools:** Palace runs through Ubuntu/WSL2 or Linux; Quantum Metal and JosephsonCircuits.jl use their own environments. Installers remain explicit OS-level operations. The Web app reports the observed environment but does not request administrator privileges or compile solvers without your action.
+## One workspace, five steps
 
-**If startup fails:** double-click `WINDOWS-DIAGNOSTICS.cmd` to produce a minimal support bundle without opening the Web UI. See `docs/windows.md` and `docs/diagnostics-windows.md`.
+1. **Project** — Choose a reference workflow, create a design, or import a trusted declarative workflow ZIP.
+2. **Setup** — Review automatically detected and smoke-tested engines. First launch starts background installation of supported optional tools. Choose **Install / repair available engines** to retry failed components from the browser.
+3. **Run** — Launch the selected workflow, an ordinary Studio analysis, the complete software test suite, or an optional Palace scientific diagnostic profile.
+4. **Results** — Examine step states, scientific classification, checks and logs directly in the browser.
+5. **Support ZIP** — Download the single report bundle for the selected completed or failed run. Attach the ZIP for debugging; do not manually collect logs.
 
-**Upgrade safety:** do not overwrite or distribute an existing `studio-data` folder. Back up data and run the new release from a separate folder first. It is expected that the ZIP contains no `.venv` and no `studio-data`.
+The detailed device design and process editors are available behind **Advanced editor** in the workspace toolbar. The old experiment and diagnostic URLs are kept for compatibility but are not separate required steps.
 
-## FEM numerical reference checks (v0.13)
+## Automatic optional dependencies
 
-Once the app is open and Palace is available, use **System & Diagnostics → Palace scientific diagnostics → Numerical**. This launches two small reference capacitor meshes and a PEC cavity eigenmode solve in isolated temporary workspaces. View numeric results in the browser, then download the allowlisted diagnostic ZIP. For interpretation and limitations see `docs/WORKFLOW-VALIDATION-0.13.0.md`. Do not start this profile in parallel with another FEM run.
+The local launcher starts best-effort provisioning **in the background**, without blocking the Web interface. The allowlisted automatic targets are **scqubits, Gmsh, Quantum Metal, SQDMetal and JosephsonCircuits.jl**. Installation and smoke-test results appear under **Setup**, with a downloadable support ZIP for each attempt.
+
+- **scqubits and Gmsh:** installed into the isolated Studio Python environment, then exercised by a small scientific/native API smoke test.
+- **Quantum Metal and SQDMetal:** installed into a separate Python 3.11 environment if a Python 3.11 interpreter is available. An existing Python 3.12/3.13 Studio environment is not downgraded. Missing Python 3.11 is flagged with an action in Setup instead of silently installing an outdated interpreter.
+- **JosephsonCircuits.jl:** installed into a dedicated Julia project if Julia is installed; Julia itself is a native runtime prerequisite.
+- **Palace:** probed but never installed automatically. It needs a qualified native or WSL build, solver configuration and physical validation.
+
+A smoke-test pass shows that an import or small API operation works. It **does not** qualify FEM accuracy, Quantum Metal layout equivalence, SQDMetal extraction, nonlinear harmonic balance or fabrication readiness. Internet access and package-index policy can prevent installation; these failures are visible and reportable without command-line work.
+
+## Troubleshooting and privacy
+
+Every experiment, Studio job, diagnostics run and dependency setup attempt has a **Support ZIP**. The archive contains available inputs, state, logs, checksums and scientific-status warnings. ZIPs stay local until explicitly downloaded. **Review files before sharing**, because logs and project snapshots may include design details.
+
+If the Web application cannot launch, double-click `WINDOWS-DIAGNOSTICS.cmd` as the offline fallback. To upgrade, back up `studio-data` and test the new release from a new folder; the release archive deliberately excludes private workspace data and installed virtual environments.
+
+See [Unified Web Workflow](docs/unified-web-workflow.md), [Detailed science limitations](docs/ecosystem-workflow.md), and [Windows diagnostics](docs/diagnostics-windows.md).

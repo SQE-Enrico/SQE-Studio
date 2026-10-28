@@ -139,7 +139,7 @@ try {
 
 Write-Host '[4/4] Starting the local Web interface and queue worker...' -ForegroundColor Cyan
 Write-Host 'First login requires administrator setup; the workspace opens in the browser.'
-Write-Host 'After login: System & Diagnostics is available in the left navigation.'
+Write-Host 'After login: Project -> Setup -> Run -> Results -> Support ZIP.'
 Write-Host 'All data stays inside studio-data. Press Ctrl+C to stop the service.'
 $argsList=@('-m','sqw.studio.launch','--data',(Join-Path $root 'studio-data'),'--host','127.0.0.1','--port',"$Port",'--cpus',"$CPUs",'--memory-gb',"$MemoryGB",'--concurrent-jobs','1')
 if (-not $NoBrowser) { $argsList+='--open-browser' }

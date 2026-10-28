@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "name": "Quantum Metal reusable QDesign and SQDMetal Palace preparation",
+  "steps": [
+    {"id": "layout", "engine": "quantum-metal", "operation": "inspect", "source": "design.py"},
+    {"id": "palace-prepare", "engine": "sqdmetal", "operation": "palace_capacitance", "source": "design.py",
+     "needs": ["layout"],
+     "settings": {"name": "sqe_q1_candidate", "metal_layer": 1, "add_ground_plane": true,
+                  "solver_options": {"mesh_refinement":0,"dielectric_material":"silicon","solver_order":2,"num_cpus":2}}}
+  ]
+}

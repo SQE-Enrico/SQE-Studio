@@ -66,7 +66,7 @@ def signature(stage,doc,mode):
 
 
 def capabilities(settings):
-    packages={name:importlib.util.find_spec(name) is not None for name in ('qpdk','scqubits','qutip','gmsh','klayout')}
+    packages={name:importlib.util.find_spec(name) is not None for name in ('qpdk','scqubits','qutip','gmsh','klayout','qiskit_metal','SQDMetal')}
     from ..palace_bridge import readiness
     palace = readiness(settings.palace)
     return {'packages':packages,'palace':palace['installed'],'palace_details':palace,

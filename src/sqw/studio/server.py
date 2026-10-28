@@ -17,6 +17,9 @@ from .process import resolve,wafer_positions,document
 from .projects import Projects
 from .settings import Settings
 from .diagnostic_control import DiagnosticControl
+from .ecosystem_control import EcosystemControl
+from .dependencies import DependencyManager
+from .support_bundles import create_support_bundle
 
 STATIC=Path(__file__).parent/'static'
 
@@ -37,6 +40,8 @@ class Application:
         self.auth=Auth(self.store); self.projects=Projects(self.store); self.jobs=Jobs(self.store)
         self.auth.setup_token()
         self.diagnostics = DiagnosticControl(self.store.root, Path(__file__).resolve().parents[3])
+        self.dependencies = DependencyManager(self.store.root, Path(__file__).resolve().parents[3])
+        self.ecosystem = EcosystemControl(self.store.root, Path(__file__).resolve().parents[3], self.dependencies)
 
     def __call__(self,env,start_response):
         status=200; headers=[]
@@ -108,13 +113,15 @@ class Application:
                     raise Problem('Diagnostics are available only on the local workstation',403)
                 if user['role'] != 'admin': raise Problem('Administrator access required',403)
                 if path=='/api/system/diagnostics':
-                    if method=='GET': result={'runs':self.diagnostics.list(), 'available':True,
+                    if method=='GET':
+                        from ..diagnostics import PROFILES
+                        result={'runs':self.diagnostics.list(), 'available':True, 'profiles':list(PROFILES),
                         'privacy':'Review the contents of every ZIP before sharing. Nothing is uploaded.',
                         'native_fem_validated':False}
                     else:
                         need('POST'); args=body()
-                        if set(args)-{'extended','skip_tests','scientific','scientific_profile'}: raise Problem('Unknown diagnostic option')
-                        result=self.diagnostics.start(extended=args.get('extended',False),skip_tests=args.get('skip_tests',False),scientific=args.get('scientific',False), scientific_profile=args.get('scientific_profile','quick'))
+                        if set(args)-{'extended','skip_tests','scientific','scientific_profile','full_regressions'}: raise Problem('Unknown diagnostic option')
+                        result=self.diagnostics.start(extended=args.get('extended',False),skip_tests=args.get('skip_tests',False),scientific=args.get('scientific',False), scientific_profile=args.get('scientific_profile','quick'), full_regressions=args.get('full_regressions',False))
                 elif len(parts)==5 and parts[:3]==['api','system','diagnostics']:
                     need('GET')
                     if parts[4]=='bundle':
@@ -125,6 +132,60 @@ class Application:
                     if method=='GET': result=self.diagnostics.detail(parts[3])
                     else: need('DELETE'); result=self.diagnostics.delete(parts[3])
                 else: raise Problem('Unknown diagnostic endpoint',404)
+            elif path.startswith('/api/system/engines'):
+                if not self.settings.development or urlsplit(self.settings.origin).hostname not in ('127.0.0.1','localhost'):
+                    raise Problem('Engine setup is only available on the local workstation',403)
+                if user['role'] != 'admin': raise Problem('Administrator access required',403)
+                if path=='/api/system/engines':
+                    need('GET')
+                    if query.get('refresh') == '1': self.dependencies.invalidate()
+                    result=self.dependencies.status()
+                elif path=='/api/system/engines/install':
+                    need('POST'); data=body()
+                    if set(data)-{'engines'}: raise Problem('Unknown engine setup option')
+                    result=self.dependencies.start(data.get('engines'))
+                elif len(parts)==5 and parts[:4]==['api','system','engines','runs']:
+                    need('GET'); result=self.dependencies.detail(parts[4])
+                elif len(parts)==6 and parts[:4]==['api','system','engines','runs'] and parts[5]=='bundle':
+                    need('GET'); result=self.dependencies.archive(parts[4])
+                    headers.append(('Content-Disposition', 'attachment; filename="SQE-engine-setup-support.zip"'))
+                else: raise Problem('Unknown engine setup endpoint',404)
+            elif path.startswith('/api/system/ecosystem'):
+                # Importing project input archives and launching external scientific
+                # engines are intentionally local-admin-only operations.
+                if not self.settings.development or urlsplit(self.settings.origin).hostname not in ('127.0.0.1','localhost'):
+                    raise Problem('Experiments are available only on the local workstation',403)
+                if user['role'] != 'admin': raise Problem('Administrator access required',403)
+                if path=='/api/system/ecosystem':
+                    need('GET'); result=self.ecosystem.catalog()
+                elif path=='/api/system/ecosystem/import':
+                    need('POST')
+                    if env.get('CONTENT_TYPE','').split(';')[0] not in ('application/zip','application/octet-stream'):
+                        raise Problem('Upload an application/zip file',415)
+                    result=self.ecosystem.import_project(body(binary=True))
+                elif path=='/api/system/ecosystem/preview':
+                    need('GET'); result=self.ecosystem.preview(query.get('project',''))
+                elif path=='/api/system/ecosystem/runs':
+                    if method=='GET': result={'runs':self.ecosystem.list()}
+                    else:
+                        need('POST'); data=body()
+                        if set(data)-{'project','allow_project_code','allow_solvers'}:
+                            raise Problem('Unknown experiment run option')
+                        result=self.ecosystem.start(data.get('project',''),
+                          allow_project_code=data.get('allow_project_code',False),
+                          allow_solvers=data.get('allow_solvers',False))
+                elif len(parts) in (5,6) and parts[:4]==['api','system','ecosystem','runs']:
+                    run_id=parts[4]
+                    if len(parts)==5:
+                        if method=='GET': result=self.ecosystem.detail(run_id)
+                        else: need('DELETE'); result=self.ecosystem.delete(run_id)
+                    elif parts[5]=='bundle':
+                        need('GET'); result=self.ecosystem.archive(run_id)
+                        headers.append(('Content-Disposition',f'attachment; filename="SQE-experiment-{run_id[:8]}.zip"'))
+                    elif parts[5]=='cancel':
+                        need('POST'); result=self.ecosystem.cancel(run_id)
+                    else: raise Problem('Unknown experiment endpoint',404)
+                else: raise Problem('Unknown experiment endpoint',404)
             elif path=='/api/system/queue':
                 need('GET')
                 if user['role']!='admin': raise Problem('Administrator access required',403)
@@ -296,6 +357,14 @@ class Application:
                         files=list(islice((f.relative_to(folder).as_posix() for f in folder.rglob('*')
                                            if f.is_file() and not f.is_symlink()),2001)) if folder.exists() else []
                         result={'job':job,'files':files[:2000],'files_truncated':len(files)>2000}
+                    elif len(parts)==6 and parts[5]=='bundle':
+                        need('GET')
+                        # All project members with read permission can export
+                        # the corresponding job's bounded support bundle.
+                        result=create_support_bundle(folder/'SQE-job-support.zip',folder,
+                            category='studio-job',job=job)
+                        headers.append(('Content-Disposition',
+                          'attachment; filename="SQE-job-'+job['id'][:8]+'-support.zip"'))
                     elif parts[5]=='logs':
                         path=folder/'worker.log'
                         if path.exists():
@@ -326,7 +395,7 @@ class Application:
                 else: raise Problem('Route not found',404)
             elif not path.startswith('/api/'):
                 filename=path.lstrip('/') or 'index.html'
-                if filename not in ('index.html','app.js','styles.css','mark.svg','quantumlab.html','quantumlab.js','quantumlab.css','control.html','control.js','control.css'): raise Problem('Not found',404)
+                if filename not in ('index.html','app.js','styles.css','mark.svg','quantumlab.html','quantumlab.js','quantumlab.css','control.html','control.js','control.css','experiments.html','experiments.js','experiments.css','editor.html','workspace.js','workspace.css'): raise Problem('Not found',404)
                 result=STATIC/filename
             else: raise Problem('Route not found',404)
         except Problem as exc: status=exc.status; result={'error':str(exc)}

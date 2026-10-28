@@ -14,9 +14,10 @@ import re
 import shutil
 import threading
 import uuid
+import zipfile
 
 from .auth import Problem
-from ..diagnostics import bundle, scrub, PROFILES
+from ..diagnostics import VERSION, bundle, scrub, PROFILES, profile_cases
 
 ID = re.compile(r"^[0-9a-f]{32}$")
 LIMIT = 15
@@ -72,11 +73,14 @@ class DiagnosticControl:
                 continue
         return sorted(values, key=lambda x: x.get('created_utc',''), reverse=True)[:LIMIT]
 
-    def start(self, *, extended=False, skip_tests=False, scientific=False, scientific_profile="quick"):
-        if not all(isinstance(value, bool) for value in (extended, skip_tests, scientific)):
+    def start(self, *, extended=False, skip_tests=False, scientific=False,
+              scientific_profile="quick", full_regressions=False):
+        if not all(isinstance(value, bool) for value in (extended, skip_tests, scientific, full_regressions)):
             raise Problem('Diagnostic options must be booleans')
+        if skip_tests and full_regressions:
+            raise Problem('Cannot request full regressions and skip tests together')
         if scientific_profile not in PROFILES:
-            raise Problem('Scientific profile must be quick, standard, numerical or full')
+            raise Problem('Unknown scientific profile')
         with self.lock:
             if self.active is not None:
                 raise Problem('A diagnostic run is already active', 409)
@@ -87,25 +91,25 @@ class DiagnosticControl:
             folder = self.storage / run_id
             folder.mkdir(mode=0o700)
             state = {'id': run_id, 'state': 'queued', 'mode': 'scientific' if scientific else 'extended' if extended else 'standard',
-                     'skip_tests': skip_tests, 'scientific_profile': scientific_profile if scientific else None, 'created_utc': datetime.now(timezone.utc).isoformat(),
+                     'skip_tests': skip_tests, 'full_regressions': full_regressions, 'scientific_profile': scientific_profile if scientific else None, 'created_utc': datetime.now(timezone.utc).isoformat(),
                      'completed_utc': None, 'summary': None, 'counts': None, 'error': None, 'progress': None}
             self._atomic(folder / 'status.json', state)
             self.active = run_id
             # Daemon execution permits Ctrl+C to stop the local server without
             # waiting for a slow external Julia/WSL timeout; interrupted runs
             # are marked on the next start.
-            self.worker = threading.Thread(target=self._run, args=(run_id, extended, skip_tests, scientific, scientific_profile),
+            self.worker = threading.Thread(target=self._run, args=(run_id, extended, skip_tests, scientific, scientific_profile, full_regressions),
                                            name='sqe-diagnostics', daemon=True)
             self.worker.start()
             return state
 
-    def _run(self, run_id, extended, skip_tests, scientific, scientific_profile):
+    def _run(self, run_id, extended, skip_tests, scientific, scientific_profile, full_regressions):
         folder = self._folder(run_id)
         state = self._state(run_id)
         try:
             state['state'] = 'running'
             if scientific:
-                state['progress'] = {'current_check':'preflight', 'completed':0, 'total':2 if scientific_profile=='quick' else 4 if scientific_profile=='standard' else 5 if scientific_profile=='numerical' else 6, 'message':'System checks and software preflight'}
+                state['progress'] = {'current_check':'preflight', 'completed':0, 'total': len(profile_cases(scientific_profile)), 'message':'System checks and software preflight'}
             self._atomic(folder / 'status.json', state)
             def progress(update):
                 # Each stage completion remains inspectable while the run executes.
@@ -114,6 +118,8 @@ class DiagnosticControl:
                     current['progress'] = update
                     self._atomic(folder / 'status.json', current)
             options = dict(extended=extended, skip_tests=skip_tests)
+            if full_regressions:
+                options['full_regressions'] = True
             if scientific:
                 options.update(scientific=True, stage_callback=progress, scientific_profile=scientific_profile)
             zip_path, checks = bundle(self.source_root, folder, **options)
@@ -124,7 +130,21 @@ class DiagnosticControl:
             state['summary'] = ('FAIL' if counts['FAIL'] else 'WARN' if counts['WARN'] else 'PASS')
             state['bundle'] = zip_path.name
         except Exception as exc:
-            state.update(state='failed', summary='FAIL', error=scrub(str(exc), self.source_root)[:300])
+            message = scrub(str(exc), self.source_root)[:300]
+            state.update(state='failed', summary='FAIL', error=message)
+            # Unexpected probe failures must still be reportable by one click.
+            # The fallback archive contains no project files or arbitrary logs.
+            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%SZ')
+            name = f'SQE-DIAGNOSTICS-v{VERSION}-{timestamp}.zip'
+            with zipfile.ZipFile(folder / name, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr('SUMMARY.txt', 'Diagnostic execution failed.\n' + message + '\n')
+                archive.writestr('checks.json', json.dumps([{
+                    'id': 'diagnostics.worker', 'status': 'FAIL', 'code': 'WORKER_EXCEPTION',
+                    'detail': message, 'next_action': 'Inspect the system and retry.'}]))
+                archive.writestr('environment.json', '{}')
+                archive.writestr('README-PRIVACY.txt',
+                                 'Review this sanitized, best-effort failure report before sharing.\n')
+            state['bundle'] = name
         finally:
             state['completed_utc'] = datetime.now(timezone.utc).isoformat()
             self._atomic(folder / 'status.json', state)
@@ -145,8 +165,7 @@ class DiagnosticControl:
 
     def detail(self, run_id):
         state = self._state(run_id)
-        if state['state'] == 'completed':
-            import zipfile
+        if state['state'] in ('completed', 'failed') and state.get('bundle'):
             path = self.archive(run_id)
             with zipfile.ZipFile(path) as z:
                 for name, field in [('SUMMARY.txt', 'summary_text'), ('checks.json','checks'), ('environment.json','environment')]:
@@ -158,7 +177,7 @@ class DiagnosticControl:
 
     def archive(self, run_id):
         state = self._state(run_id)
-        if state.get('state') != 'completed':
+        if state.get('state') not in ('completed', 'failed'):
             raise Problem('The diagnostic ZIP is not ready yet', 409)
         name = state.get('bundle','')
         if not re.fullmatch(r'SQE-DIAGNOSTICS-v[0-9.]+-[0-9]{8}-[0-9]{6}Z\.zip', name):

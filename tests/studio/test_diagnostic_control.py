@@ -81,6 +81,42 @@ class DiagnosticWebTests(unittest.TestCase):
             self.assertEqual(self.call(url+'/'+run_id,'DELETE',token=self.token,csrf=self.csrf)['json']['deleted'],True)
             self.assertEqual(self.call(url+'/'+run_id,token=self.token)['code'],404)
 
+    def test_failed_diagnostic_still_has_downloadable_zip(self):
+        with patch('sqw.studio.diagnostic_control.bundle', side_effect=RuntimeError('Tool execution stopped')):
+            created = self.call('/api/system/diagnostics', 'POST', {}, self.token, self.csrf)
+            run_id = created['json']['id']
+            for _ in range(100):
+                report = self.call('/api/system/diagnostics/' + run_id, token=self.token)
+                if report['json']['state'] == 'failed':
+                    break
+                time.sleep(.02)
+            self.assertEqual(report['json']['state'], 'failed')
+            archive = self.call('/api/system/diagnostics/' + run_id + '/bundle', token=self.token)
+            self.assertEqual(archive['code'], 200)
+            with zipfile.ZipFile(io.BytesIO(archive['body'])) as z:
+                self.assertIn('Tool execution stopped', z.read('SUMMARY.txt').decode())
+                self.assertIn('checks.json', z.namelist())
+
+    def test_full_regression_is_explicit_and_skip_is_incompatible(self):
+        url = '/api/system/diagnostics'
+        rejected = self.call(url, 'POST', {'full_regressions': True, 'skip_tests': True},
+                             self.token, self.csrf)
+        self.assertEqual(rejected['code'], 400)
+        calls = []
+        def make_report(root, folder, **kwargs):
+            calls.append(kwargs)
+            return self.fake_bundle(root, folder)
+        with patch('sqw.studio.diagnostic_control.bundle', side_effect=make_report):
+            created = self.call(url, 'POST', {'full_regressions': True}, self.token, self.csrf)
+            self.assertEqual(created['code'], 200)
+            for _ in range(100):
+                status = self.call(url + '/' + created['json']['id'], token=self.token)
+                if status['json']['state'] == 'completed':
+                    break
+                time.sleep(.02)
+        self.assertTrue(calls)
+        self.assertIs(calls[0]['full_regressions'], True)
+
     def test_nonadmin_cannot_access_or_start_tests(self):
         invited=self.app.auth.invite(self.user,'guest@example.org','Guest','researcher')
         self.app.auth.activate(invited['activation_url'].split('=')[-1],PASSWORD)

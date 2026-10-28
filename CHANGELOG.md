@@ -1,3 +1,13 @@
+## v0.13.0 — FEM Numerical Validation & Results
+
+- Add the browser-controlled **Numerical** scientific profile with real Palace solves of an isolated parallel-plate capacitor (two independent mesh levels) and PEC rectangular cavity eigenmode.
+- Add analytical comparisons, explicit physical units, independent provenance/hashes, tolerance gates and distinct `PASS` / `FAIL` / `SKIP` diagnostics.
+- Preserve measurable numerical results even when a tolerance fails; retain bounded solver log tails for failure analysis.
+- Add Web capacitance-matrix tables with terminal ordering, fF units, symmetry and minimum-eigenvalue information for Standard/Full QPU extraction.
+- Add allowlisted `scientific-results.json` to Web diagnostic bundles, in the SHA-256 manifest.
+- Add regression tests for reference generation, patch-test metrics, eigenfrequency parsing, tamper rejection and failure handling.
+- Do not claim QPU convergence or full Palace scientific qualification; new solver benchmarks still require Windows/WSL2 acceptance.
+
 ## [0.12.0] - 2026-10-28
 
 ### Palace benchmarking profiles and solver observability

@@ -23,9 +23,9 @@ import tempfile
 import zipfile
 
 SCHEMA = "sqe-diagnostics/1"
-VERSION = "0.12.0"
+VERSION = "0.13.0"
 MAX_LOG = 48000
-PROFILES = ("quick", "standard", "full")
+PROFILES = ("quick", "standard", "numerical", "full")
 CORE_MODULES = ("numpy", "scipy", "matplotlib", "shapely", "gmsh")
 SAFE_FILE_NAMES = ("README-PRIVACY.txt", "environment.json", "checks.json", "test-results.txt", "SUMMARY.txt", "manifest.json")
 
@@ -85,7 +85,7 @@ def run_regressions(root: Path, timeout: int = 35):
     test_env["PYTHONPATH"] = str(root / "src")
     test_env["PYTHONNOUSERSITE"] = "1"
     filenames = ("test_quantumlab.py", "test_physical_qpu.py", "test_parametric_qpu.py",
-                 "test_palace_quality.py", "test_diagnostics.py")
+                 "test_palace_quality.py", "test_diagnostics.py", "test_numerical_validation_v013.py")
     collected = []
     count = 0
     failed = False
@@ -380,7 +380,7 @@ def _isolated_case(root: Path, workspace: Path, case: str, timeout: int, profile
     after the temporary FEM workspace is removed. No project files are copied.
     """
     allowed = ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode',
-               'driven', 'mesh_smoke', 'solver_sanity')
+               'driven', 'mesh_smoke', 'solver_sanity', 'reference_prepare', 'reference_cap_L1', 'reference_cap_L2', 'reference_cap_compare', 'reference_eigenmode')
     if case not in allowed or profile not in PROFILES:
         raise ValueError('Unknown fixed scientific case or profile')
     args = [sys.executable, str(root / 'scripts' / 'sqe_scientific_probe.py'),
@@ -424,9 +424,9 @@ def _isolated_case(root: Path, workspace: Path, case: str, timeout: int, profile
         result = _parse_probe_result(decoded) if not timed_out else None
         tails = []
         # Only fixed solver log filenames, never arbitrary files or project paths.
-        for key in ('electrostatic', 'eigenmode', 'driven-1', 'driven-2'):
+        for key in ('electrostatic', 'eigenmode', 'driven-1', 'driven-2', 'reference-capacitor-L1', 'reference-capacitor-L2', 'reference-cavity-L1'):
             path = workspace / (key + '.log')
-            if path.is_file() and case in ('electrostatic', 'eigenmode', 'driven'):
+            if path.is_file() and case in ('electrostatic', 'eigenmode', 'driven', 'reference_cap_L1', 'reference_cap_L2', 'reference_eigenmode'):
                 tails.append('=== Palace '+key+' solver log (last 8 KiB) ===\n'+_read_tail(path, limit=8192))
         # The stage's machine-readable result is still parsed before scrubbing.
         text = scrub(decoded + ('\n'+'\n'.join(tails) if tails else ''), root)
@@ -446,11 +446,15 @@ def profile_cases(profile: str):
     if profile == 'standard':
         return [('geometry', 40), ('mesh', 240), ('electrostatic', 450),
                 ('capacitance', 40)]
+    if profile == 'numerical':
+        return [('reference_prepare', 95), ('reference_cap_L1', 300),
+                ('reference_cap_L2', 300), ('reference_cap_compare', 40),
+                ('reference_eigenmode', 360)]
     return [('geometry', 40), ('mesh', 360), ('electrostatic', 780),
             ('capacitance', 40), ('eigenmode', 780), ('driven', 1500)]
 
 
-def scientific_workflow(root: Path, stage_callback=None, profile: str = 'quick'):
+def scientific_workflow(root: Path, stage_callback=None, profile: str = 'quick', results_sink=None):
     """Fixed local benchmark stages; PASS is execution, NOT physics qualification.
 
     Quick: one minimal Gmsh box and Palace executable test (no QPU).
@@ -467,30 +471,42 @@ def scientific_workflow(root: Path, stage_callback=None, profile: str = 'quick')
         has_palace = False
     prerequisites = True
     electrostatic_ok = False
+    reference_prepared = False
+    reference_caps = set()
     with tempfile.TemporaryDirectory(prefix='sqe-scientific-validation-') as tmp:
         workspace = Path(tmp)
         for index, (case, deadline) in enumerate(cases):
             if stage_callback:
                 stage_callback({'current_check':case, 'completed':index, 'total':len(cases),
                                 'message':f'{profile}: {case} (deadline {deadline}s)'})
-            reason = ('Electrostatic output is required for capacitance extraction' if case == 'capacitance' and not electrostatic_ok else
+            reason = ('Both verified Palace capacitor outputs are required' if case == 'reference_cap_compare' and reference_caps != {1, 2} else
+                      'Reference geometry preparation failed' if case.startswith('reference_') and case != 'reference_prepare' and not reference_prepared else
+                      'Electrostatic output is required for capacitance extraction' if case == 'capacitance' and not electrostatic_ok else
                       'Gmsh is not installed' if case in ('mesh', 'mesh_smoke') and not has_gmsh else
-                      'Palace is not detected' if case in ('solver_sanity','electrostatic','eigenmode','driven') and not has_palace else
+                      'Palace is not detected' if case in ('solver_sanity','electrostatic','eigenmode','driven','reference_cap_L1','reference_cap_L2','reference_eigenmode') and not has_palace else
                       'A preceding workflow stage failed' if not prerequisites else '')
             if reason:
+                if results_sink is not None: results_sink['stages'].append({'stage':case,'status':'SKIP', 'reason':reason})
                 check(checks, 'workflow.'+case, 'SKIP', 'PREREQUISITE_NOT_MET', reason)
                 logs.append('=== '+case+' ===\nSkipped: '+reason)
                 if case in ('geometry', 'mesh', 'mesh_smoke'): prerequisites = False
                 continue
             rc, timed, seconds, text, result = _isolated_case(root, workspace, case, deadline, profile)
-            ok = rc == 0 and result is not None and not timed
+            ok = rc == 0 and result is not None and not timed and result.get('acceptance_pass', True) is not False
             explanation = ('; '.join(f'{key}={result[key]}' for key in ('nodes','volume_elements') if key in result)
-                           if ok and result else 'timed out (solver logs preserved below)' if timed else 'see scrubbed stage/solver logs')
+                           if ok and result else 'timed out (solver logs preserved below)' if timed else 'numerical tolerance exceeded' if result and result.get('acceptance_pass') is False else 'see scrubbed stage/solver logs')
             check(checks, 'workflow.'+case, 'PASS' if ok else 'FAIL',
                   'WORKFLOW_OK' if ok else 'WORKFLOW_TIMEOUT' if timed else 'WORKFLOW_FAILED',
                   f'{case}: {seconds}s; '+('artifacts verified; '+explanation if ok else explanation),
                   'Review the diagnostic log; do not immediately rerun an expensive profile.' if not ok else '')
             logs.append('=== '+case+f' (profile={profile}, {seconds}s, return={rc}, timeout={timed}) ===\n'+text)
+            if results_sink is not None:
+                results_sink['stages'].append({'stage': case, 'status': 'PASS' if ok else 'FAIL',
+                                               'elapsed_seconds': seconds,
+                                               'result': result if result is not None else None})
+            if case == 'reference_prepare': reference_prepared = ok
+            if case == 'reference_cap_L1' and ok: reference_caps.add(1)
+            if case == 'reference_cap_L2' and ok: reference_caps.add(2)
             if case == 'electrostatic': electrostatic_ok = ok
             if not ok and case in ('geometry', 'mesh', 'mesh_smoke'):
                 prerequisites = False
@@ -511,21 +527,28 @@ def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: 
             env['mode'] = 'scientific'
             env['scientific_profile'] = scientific_profile
         if scientific:
-            more_checks, test_log = scientific_workflow(root, stage_callback=stage_callback, profile=scientific_profile)
+            numeric_results = {'schema_version': 1, 'profile': scientific_profile, 'stages': [],
+                               'scientific_qualification': False,
+                               'scope': 'isolated fixed references; never user projects'}
+            more_checks, test_log = scientific_workflow(root, stage_callback=stage_callback,
+                                                        profile=scientific_profile, results_sink=numeric_results)
             checks.extend(more_checks)
             if any(item['status'] == 'SKIP' for item in more_checks):
                 check(checks, 'workflow.completeness', 'WARN', 'SCIENTIFIC_STAGES_SKIPPED',
                       'Some scientific stages were skipped; this profile is not fully verified',
                       'Review the SKIP reasons in checks.json before attempting a more expensive profile.')
             tests += '\n\n=== SCIENTIFIC WORKFLOW VALIDATION ===\n'+test_log
-            env['scientific_workflow_scope'] = ('isolated Gmsh box/Palace runtime sanity' if scientific_profile=='quick' else 'isolated 1-transmon prototype; EM outputs only; no physics qualification')
+            env['scientific_workflow_scope'] = ('isolated Gmsh box/Palace runtime sanity' if scientific_profile=='quick' else
+               'independent capacitor patch test and PEC cavity; not a QPU' if scientific_profile=='numerical' else
+               'isolated 1-transmon prototype; EM outputs only; no physics qualification')
+            (stage / 'scientific-results.json').write_text(json.dumps(numeric_results, indent=2, allow_nan=False) + '\n', encoding='utf-8')
         status = ("FAIL" if any(c["status"] == "FAIL" for c in checks)
                   else "WARN" if any(c["status"] == "WARN" for c in checks) else "PASS")
         totals = {s: sum(x["status"] == s for x in checks) for s in ("PASS", "WARN", "FAIL", "SKIP")}
         (stage / "environment.json").write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         (stage / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         (stage / "test-results.txt").write_text(tests if tests else "Regression tests skipped.\n", encoding="utf-8")
-        lines = ["SQE Studio v0.12.0 - local diagnostic summary", "Overall: " + status,
+        lines = ["SQE Studio v0.13.0 - local diagnostic summary", "Overall: " + status,
                  "Checks: " + ", ".join(f"{s}={n}" for s, n in totals.items()), ""]
         for c in checks:
             lines.append("[" + c["status"] + "] " + c["id"] + " / " + c["code"] + " - " + c["detail"])
@@ -548,18 +571,18 @@ def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: 
         manifest = {"schema": SCHEMA, "status": status, "release": VERSION,
                     "created_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
                     "mode": "scientific" if scientific else "extended" if extended else "standard", "counts": totals,
-                    "contents": list(SAFE_FILE_NAMES) + ["SHA256SUMS.txt"]}
+                    "contents": list(SAFE_FILE_NAMES) + (["scientific-results.json"] if scientific else []) + ["SHA256SUMS.txt"]}
         (stage / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
         checksums = []
-        for name in SAFE_FILE_NAMES:
+        for name in list(SAFE_FILE_NAMES) + (["scientific-results.json"] if scientific else []):
             checksums.append(hashlib.sha256((stage / name).read_bytes()).hexdigest() + "  " + name)
         (stage / "SHA256SUMS.txt").write_text("\n".join(checksums) + "\n", encoding="utf-8")
         timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
-        path = output_dir / ("SQE-DIAGNOSTICS-v0.12.0-" + timestamp + ".zip")
+        path = output_dir / ("SQE-DIAGNOSTICS-v0.13.0-" + timestamp + ".zip")
         if path.exists():
             raise FileExistsError("Diagnostic bundle with this timestamp already exists")
         with zipfile.ZipFile(path, "x", compression=zipfile.ZIP_DEFLATED) as z:
-            for name in list(SAFE_FILE_NAMES) + ["SHA256SUMS.txt"]:
+            for name in list(SAFE_FILE_NAMES) + (["scientific-results.json"] if scientific else []) + ["SHA256SUMS.txt"]:
                 z.write(stage / name, arcname=name)
     return path, checks
 

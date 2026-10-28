@@ -5,3 +5,9 @@
 #scientific-profile{width:100%;max-width:100%;padding:12px;border-radius:9px;border:1px solid var(--border);background:var(--raised);color:var(--text);font:inherit;white-space:normal}
 #scientific-profile:disabled{opacity:.55}
 #scientific-profile:focus-visible{outline:3px solid #75ecda;outline-offset:2px}
+
+/* FEM scientific result tables (scroll within the panel on narrow screens). */
+.matrix-scroll {max-width:100%; overflow-x:auto; margin:12px 0 18px;}
+.scientific-matrix {border-collapse:collapse; font-variant-numeric:tabular-nums; width:max-content; min-width:100%; font-size:0.85rem;}
+.scientific-matrix th,.scientific-matrix td {border:1px solid var(--border, #cbd5e1); padding:8px 10px; text-align:right; white-space:nowrap;}
+.scientific-matrix th:first-child {position:sticky; left:0; background:var(--panel, #fff); text-align:left;}

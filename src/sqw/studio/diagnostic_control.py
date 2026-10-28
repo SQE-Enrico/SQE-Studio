@@ -76,7 +76,7 @@ class DiagnosticControl:
         if not all(isinstance(value, bool) for value in (extended, skip_tests, scientific)):
             raise Problem('Diagnostic options must be booleans')
         if scientific_profile not in PROFILES:
-            raise Problem('Scientific profile must be quick, standard or full')
+            raise Problem('Scientific profile must be quick, standard, numerical or full')
         with self.lock:
             if self.active is not None:
                 raise Problem('A diagnostic run is already active', 409)
@@ -105,7 +105,7 @@ class DiagnosticControl:
         try:
             state['state'] = 'running'
             if scientific:
-                state['progress'] = {'current_check':'preflight', 'completed':0, 'total':2 if scientific_profile=='quick' else 4 if scientific_profile=='standard' else 6, 'message':'System checks and software preflight'}
+                state['progress'] = {'current_check':'preflight', 'completed':0, 'total':2 if scientific_profile=='quick' else 4 if scientific_profile=='standard' else 5 if scientific_profile=='numerical' else 6, 'message':'System checks and software preflight'}
             self._atomic(folder / 'status.json', state)
             def progress(update):
                 # Each stage completion remains inspectable while the run executes.
@@ -152,6 +152,8 @@ class DiagnosticControl:
                 for name, field in [('SUMMARY.txt', 'summary_text'), ('checks.json','checks'), ('environment.json','environment')]:
                     data = z.read(name)
                     state[field] = json.loads(data) if name.endswith('.json') else data.decode('utf-8','replace')[:20000]
+                if 'scientific-results.json' in z.namelist():
+                    state['scientific_results'] = json.loads(z.read('scientific-results.json'))
         return state
 
     def archive(self, run_id):

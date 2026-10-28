@@ -18,7 +18,7 @@ from sqw.studio.process import document, resolve
 from sqw.physical_qpu import default_spec, export_package, mesh, solve, verify_solve, extract_capacitance
 from sqw.io import read_json, sha256
 
-CASES = ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode', 'driven', 'mesh_smoke', 'solver_sanity')
+CASES = ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode', 'driven', 'mesh_smoke', 'solver_sanity', 'reference_prepare', 'reference_cap_L1', 'reference_cap_L2', 'reference_cap_compare', 'reference_eigenmode')
 
 
 def main():
@@ -26,16 +26,18 @@ def main():
     parser.add_argument('--case', choices=CASES, required=True)
     parser.add_argument('--workspace', required=True)
     parser.add_argument('--solver', default='palace')
-    parser.add_argument('--profile', choices=('quick','standard','full'), default='full')
+    parser.add_argument('--profile', choices=('quick','standard','numerical','full'), default='full')
     parser.add_argument('--deadline', type=int, default=160)
     args = parser.parse_args()
     workspace = Path(args.workspace).resolve()
     # Caller creates a private, isolated temporary folder. Never follow symlinks.
     if not workspace.is_dir() or workspace.is_symlink():
         raise ValueError('Invalid isolated diagnostics workspace')
-    cfg, _ = resolve(document())
-    spec = default_spec(cfg, 1)
-    if args.profile == 'standard':
+    cfg = spec = None
+    if args.case in ('geometry','mesh'):
+        cfg, _ = resolve(document())
+        spec = default_spec(cfg, 1)
+    if args.profile == 'standard' and cfg is not None:
         # Only the diagnostic reference uses these coarser meshing values.
         # This is for execution tests, NOT mesh-converged physics.
         cfg['em']['mesh_min_um'] = max(cfg['em']['mesh_min_um'], 25.0)
@@ -43,6 +45,10 @@ def main():
     start = time.monotonic()
     result = {'case':args.case, 'source':'fixed_single_transmon_reference',
               'scientific_qualification':False}
+    if args.case.startswith('reference_'):
+        result['source'] = 'independent_analytical_reference'
+    elif args.case in ('mesh_smoke','solver_sanity'):
+        result['source'] = 'tooling_sanity_no_device'
     if args.case == 'mesh_smoke':
         # A unit box takes seconds rather than constructing a million-cell QPU.
         import gmsh
@@ -82,6 +88,19 @@ def main():
         result.update(solver_executable_ready=True,
                       numerical_solver_executed=False,
                       method='Spack activation and executable permission check; not a solve')
+    elif args.case.startswith('reference_'):
+        from sqw import numerical_validation as numerical
+        if args.case == 'reference_prepare':
+            result.update(numerical.prepare(workspace))
+        elif args.case == 'reference_cap_L1':
+            result.update(numerical.execute(workspace, 'capacitor', 1, timeout=args.deadline))
+        elif args.case == 'reference_cap_L2':
+            result.update(numerical.execute(workspace, 'capacitor', 2, timeout=args.deadline))
+        elif args.case == 'reference_cap_compare':
+            result.update(numerical.capacitance_assessment(workspace))
+        elif args.case == 'reference_eigenmode':
+            result.update(numerical.execute(workspace, 'cavity', 1, timeout=args.deadline))
+            result.update(numerical.eigenmode_assessment(workspace))
     elif args.case == 'geometry':
         export_package(cfg, spec, workspace)
         contract = read_json(workspace/'contract.json')
@@ -100,9 +119,11 @@ def main():
                       mesh_sha256=generated['mesh_sha256'])
     elif args.case == 'capacitance':
         extracted = extract_capacitance(workspace)
+        from sqw.numerical_validation import matrix_summary
         result.update(source=extracted['source'],
                       capacitance_matrix_size=len(extracted['projected_maxwell_c_ff']),
-                      solver_completed=True)
+                      solver_completed=True,
+                      capacitance=matrix_summary(extracted))
     else:
         problems = ['driven-1', 'driven-2'] if args.case == 'driven' else [args.case]
         if args.case == 'electrostatic' or args.case == 'eigenmode' or args.case == 'driven':

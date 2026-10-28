@@ -1,8 +1,13 @@
-# SQE Studio 0.12.0 — Web-first Quantum EDA Research Workstation
+# SQE Studio 0.13.0 — Web-first Quantum EDA Research Workstation
 
 **An open-source, browser-based environment for superconducting quantum-circuit design, reproducible simulations, and scientific review.**
 
 SQE Studio combines a persistent project workspace with parameterized QPU designs, reduced-order circuit models, GDSII/Quantum Metal interchange, Gmsh meshing, Palace FEM integration, and a JosephsonCircuits.jl export bridge. The project is available under the Apache-2.0 license. Scientific limitations are recorded explicitly: this is **research software, not a validated fabrication-ready EDA product**.
+
+
+## v0.13 — Analytical FEM benchmark & numerical results (Web UI)
+
+In **System & Diagnostics**, select **Palace scientific diagnostics → Numerical** to solve a parallel-plate capacitor at two independently generated mesh levels and a small PEC cavity. The Web UI displays verified Palace capacitance matrices (in fF), analytical errors, a mesh-level patch-test comparison and a lowest-frequency cavity check. The downloadable report contains `scientific-results.json`, SHA-256 checksums and bounded logs. Existing Quick / Standard / Full profiles are retained. **Numerical reference validation is not QPU mesh-convergence or full scientific qualification.** See [v0.13 validation guide](docs/WORKFLOW-VALIDATION-0.13.0.md).
 
 ## Start on Windows 11
 
@@ -25,10 +30,10 @@ Read [Getting started](GETTING-STARTED.md), [Windows installation](docs/windows.
 | Web workspace | Accounts, projects, immutable revisions, worker jobs, artifacts, project export/import | Local SQLite; multi-host distributed scheduler not implemented |
 | Parametric QPU | Configurable materials, stack-up, Dolan/Manhattan JJ process-intent, qubit shapes, physical couplers and CPW routes | Multilayer 3D mesher and foundry DRC/LVS remain incomplete |
 | Circuit studies | Modes, weak-Kerr estimates, RF S-parameters, flux sweeps, Bloch sequences, reduced Duffing, yield and loss assumptions | Reduced models, not general nonlinear circuit or gate simulation |
-| Gmsh / Palace | Gmsh mesh tools; Palace electrostatic, eigenmode, linearized JJ, and driven configurations; convergence job contracts | Authentic FEM benchmark/accuracy validation on Windows/WSL2 is pending |
+| Gmsh / Palace | Gmsh mesh tools; Palace electrostatic, eigenmode, linearized JJ, and driven configurations; convergence job contracts | A real electrostatic QPU solve was reported successful on Windows/WSL2 in v0.12; independent numerical references still require workstation validation |
 | JosephsonCircuits.jl | SI netlist export and separate Julia environment setup | Actual harmonic-balance execution is not yet integrated into Web jobs |
 | Quantum Metal | QGeometry manifest, optional separate environment | Interchange does not imply a qualified mesh or fabricated device |
-| System & Diagnostics | Web Standard/Extended health tests and opt-in scientific Quick/Standard/Full profiles; per-stage logs, bounded jobs and ZIP reports | Solver invocation is **not** numerical convergence, an independent benchmark or fab readiness |
+| System & Diagnostics | Web Standard/Extended health tests and opt-in scientific Quick/Standard/Numerical/Full profiles; per-stage logs, bounded jobs and ZIP reports | The new Numerical profile runs independent analytical references; passing it does not prove QPU geometry convergence or fabrication readiness |
 
 ## Why Palace and JosephsonCircuits.jl?
 
@@ -61,6 +66,6 @@ SQE Studio was initiated for superconducting quantum electronics research at INR
 
 ## Scientific workflow diagnostics (v0.11)
 
-The local administrator can run **Scientific workflow validation** from **System & Diagnostics**. This is an opt-in, bounded series of geometry/GDS, Gmsh 3D mesh and authentic Palace capacitance/eigenmode/RF checks on an isolated fixed reference. All stages are reported with PASS/FAIL/SKIP, elapsed time, log excerpts and a downloadable ZIP. No projects, passwords or data folders are copied. See [docs/WORKFLOW-VALIDATION-0.12.0.md](docs/WORKFLOW-VALIDATION-0.12.0.md).
+The local administrator can run **Scientific workflow validation** from **System & Diagnostics**. This is an opt-in, bounded series of geometry/GDS, Gmsh 3D mesh and authentic Palace capacitance/eigenmode/RF checks on an isolated fixed reference. All stages are reported with PASS/FAIL/SKIP, elapsed time, log excerpts and a downloadable ZIP. No projects, passwords or data folders are copied. See [docs/WORKFLOW-VALIDATION-0.13.0.md](docs/WORKFLOW-VALIDATION-0.13.0.md).
 
 The **Compute queue health** panel helps distinguish a queued job from a running FEM computation. The Palace workbench now exposes worker logs and cancellation. A PASS does not certify EM accuracy or fab readiness.

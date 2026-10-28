@@ -11,3 +11,7 @@
 **If startup fails:** double-click `WINDOWS-DIAGNOSTICS.cmd` to produce a minimal support bundle without opening the Web UI. See `docs/windows.md` and `docs/diagnostics-windows.md`.
 
 **Upgrade safety:** do not overwrite or distribute an existing `studio-data` folder. Back up data and run the new release from a separate folder first. It is expected that the ZIP contains no `.venv` and no `studio-data`.
+
+## FEM numerical reference checks (v0.13)
+
+Once the app is open and Palace is available, use **System & Diagnostics → Palace scientific diagnostics → Numerical**. This launches two small reference capacitor meshes and a PEC cavity eigenmode solve in isolated temporary workspaces. View numeric results in the browser, then download the allowlisted diagnostic ZIP. For interpretation and limitations see `docs/WORKFLOW-VALIDATION-0.13.0.md`. Do not start this profile in parallel with another FEM run.

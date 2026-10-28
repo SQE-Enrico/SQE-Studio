@@ -15,6 +15,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ScientificWorkflowTests(unittest.TestCase):
+    def test_probe_json_marker_accepts_windows_crlf_and_unix_lf(self):
+        marker = 'SQE_PROBE_RESULT={"case":"geometry","gds_generated":true}'
+        for ending in ('\n', '\r\n', '\r'):
+            result = diagnostics._parse_probe_result('log before' + ending + marker + ending)
+            self.assertEqual(result['case'], 'geometry')
+            self.assertTrue(result['gds_generated'])
+        self.assertIsNone(diagnostics._parse_probe_result('SQE_PROBE_FAILURE=broken\r\n'))
+
+    def test_wsl_runner_accepts_two_driven_port_configs(self):
+        script = (ROOT / 'scripts' / 'palace-wsl-run.sh').read_text(encoding='utf-8')
+        self.assertIn('driven(-[12])?', script)
+
     def test_geometry_case_uses_actual_export_contract(self):
         with tempfile.TemporaryDirectory() as dirname:
             rc, timeout, seconds, log, obj = diagnostics._isolated_case(ROOT, Path(dirname), 'geometry', 25)

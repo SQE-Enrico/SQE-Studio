@@ -346,6 +346,23 @@ def collect(root: Path, *, extended: bool = False, skip_tests: bool = False):
     return env, items, "\n\n".join(output)
 
 
+def _parse_probe_result(output: str):
+    """Read the fixed probe's JSON marker on Unix or Windows (CRLF) output.
+
+    Parse the unmodified subprocess output, not the redacted human-readable log.
+    This prevents Windows newline conventions or text redaction from changing
+    machine-readable protocol messages.
+    """
+    for line in reversed(output.splitlines()):
+        if line.startswith('SQE_PROBE_RESULT='):
+            try:
+                value = json.loads(line.partition('=')[2])
+            except (ValueError, TypeError):
+                return None
+            return value if isinstance(value, dict) else None
+    return None
+
+
 def _isolated_case(root: Path, workspace: Path, case: str, timeout: int):
     """Run a fixed diagnostic in a process group with a hard deadline.
 
@@ -385,9 +402,9 @@ def _isolated_case(root: Path, workspace: Path, case: str, timeout: int):
             proc.kill()
             raw, _ = proc.communicate(timeout=10)
             timed_out = True
-        text = scrub(raw[-12000:].decode('utf-8', 'replace'), root)
-        match = re.search(r'^SQE_PROBE_RESULT=(\{.*\})$', text, re.M)
-        result = json.loads(match.group(1)) if match and not timed_out else None
+        decoded = raw[-12000:].decode('utf-8', 'replace')
+        result = _parse_probe_result(decoded) if not timed_out else None
+        text = scrub(decoded, root)
         return proc.returncode, timed_out, round(time.monotonic() - start, 1), text, result
     except (OSError, subprocess.TimeoutExpired) as exc:
         if proc and proc.poll() is None:

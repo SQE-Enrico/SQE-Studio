@@ -3,7 +3,7 @@ set -euo pipefail
 # Called by Windows backend. Work in ext4 /tmp rather than DrvFS for MPI/mesh IO.
 if [[ $# != 3 ]]; then echo 'usage: palace-wsl-run.sh WORKDIR CONFIG.json RANKS' >&2; exit 2; fi
 source_dir="$1"; config="$2"; ranks="$3"
-[[ -d "$source_dir" && "$config" =~ ^(electrostatic|eigenmode|linearized|driven)\.json$ && "$ranks" =~ ^[1-9][0-9]*$ ]] || exit 2
+[[ -d "$source_dir" && "$config" =~ ^(electrostatic|eigenmode|linearized|driven(-[12])?)\.json$ && "$ranks" =~ ^[1-9][0-9]*$ ]] || exit 2
 [[ "$ranks" -le 128 ]] || { echo 'Too many MPI ranks' >&2; exit 2; }
 work="$(mktemp -d "${TMPDIR:-/tmp}/sqe-palace-XXXXXXXX")"
 trap 'rm -rf -- "$work"' EXIT

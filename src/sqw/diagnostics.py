@@ -23,8 +23,9 @@ import tempfile
 import zipfile
 
 SCHEMA = "sqe-diagnostics/1"
-VERSION = "0.11.0"
-MAX_LOG = 32000
+VERSION = "0.12.0"
+MAX_LOG = 48000
+PROFILES = ("quick", "standard", "full")
 CORE_MODULES = ("numpy", "scipy", "matplotlib", "shapely", "gmsh")
 SAFE_FILE_NAMES = ("README-PRIVACY.txt", "environment.json", "checks.json", "test-results.txt", "SUMMARY.txt", "manifest.json")
 
@@ -363,16 +364,28 @@ def _parse_probe_result(output: str):
     return None
 
 
-def _isolated_case(root: Path, workspace: Path, case: str, timeout: int):
-    """Run a fixed diagnostic in a process group with a hard deadline.
+def _read_tail(path: Path, *, limit: int = 10000) -> str:
+    if not path.is_file():
+        return ""
+    with path.open('rb') as file:
+        file.seek(0, os.SEEK_END)
+        file.seek(max(0, file.tell() - limit))
+        return file.read().decode('utf-8', 'replace')
 
-    Only a bounded, scrubbed log tail is retained; all source files and FEM
-    artifacts stay in the temporary directory and are deleted after testing.
+
+def _isolated_case(root: Path, workspace: Path, case: str, timeout: int, profile: str = 'full'):
+    """Fixed subprocess with disk-backed output, deadline and bounded log capture.
+
+    The stage log plus solver log tails are retained in the diagnostic report
+    after the temporary FEM workspace is removed. No project files are copied.
     """
-    if case not in ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode', 'driven'):
-        raise ValueError('Unknown fixed scientific case')
+    allowed = ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode',
+               'driven', 'mesh_smoke', 'solver_sanity')
+    if case not in allowed or profile not in PROFILES:
+        raise ValueError('Unknown fixed scientific case or profile')
     args = [sys.executable, str(root / 'scripts' / 'sqe_scientific_probe.py'),
-            '--case', case, '--workspace', str(workspace)]
+            '--case', case, '--profile', profile, '--deadline', str(max(15, timeout - 20)),
+            '--workspace', str(workspace)]
     env = os.environ.copy()
     env['PYTHONPATH'] = str(root / 'src')
     env['PYTHONNOUSERSITE'] = '1'
@@ -382,45 +395,70 @@ def _isolated_case(root: Path, workspace: Path, case: str, timeout: int):
              else {'start_new_session': True})
     start = time.monotonic()
     proc = None
+    stage_log = workspace / ('diagnostic-' + case + '.log')
+    timed_out = False
     try:
-        proc = subprocess.Popen(args, cwd=root, stdin=subprocess.DEVNULL,
-                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                env=env, **flags)
-        try:
-            raw, _ = proc.communicate(timeout=timeout)
-            timed_out = False
-        except subprocess.TimeoutExpired:
-            if os.name == 'nt':
-                # Terminate the process tree; do not leave an expensive mesh
-                # calculation running after a browser-side timeout.
-                subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                               timeout=10, check=False)
-            else:
-                try: os.killpg(proc.pid, signal.SIGKILL)
-                except ProcessLookupError: pass
-            proc.kill()
-            raw, _ = proc.communicate(timeout=10)
-            timed_out = True
-        decoded = raw[-12000:].decode('utf-8', 'replace')
+        with stage_log.open('wb') as stream:
+            proc = subprocess.Popen(args, cwd=root, stdin=subprocess.DEVNULL,
+                                    stdout=stream, stderr=subprocess.STDOUT,
+                                    env=env, **flags)
+            try:
+                proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                if os.name == 'nt':
+                    try:
+                        subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                       timeout=12, check=False)
+                    except (OSError, subprocess.TimeoutExpired):
+                        pass
+                else:
+                    try: os.killpg(proc.pid, signal.SIGKILL)
+                    except ProcessLookupError: pass
+                if proc.poll() is None:
+                    proc.kill()
+                try: proc.wait(timeout=10)
+                except subprocess.TimeoutExpired: pass
+        decoded = _read_tail(stage_log, limit=15000)
         result = _parse_probe_result(decoded) if not timed_out else None
-        text = scrub(decoded, root)
-        return proc.returncode, timed_out, round(time.monotonic() - start, 1), text, result
+        tails = []
+        # Only fixed solver log filenames, never arbitrary files or project paths.
+        for key in ('electrostatic', 'eigenmode', 'driven-1', 'driven-2'):
+            path = workspace / (key + '.log')
+            if path.is_file() and case in ('electrostatic', 'eigenmode', 'driven'):
+                tails.append('=== Palace '+key+' solver log (last 8 KiB) ===\n'+_read_tail(path, limit=8192))
+        # The stage's machine-readable result is still parsed before scrubbing.
+        text = scrub(decoded + ('\n'+'\n'.join(tails) if tails else ''), root)
+        return (proc.returncode if proc else None), timed_out, round(time.monotonic() - start, 1), text, result
     except (OSError, subprocess.TimeoutExpired) as exc:
         if proc and proc.poll() is None:
             proc.kill()
         return None, False, round(time.monotonic() - start, 1), type(exc).__name__, None
 
 
-def scientific_workflow(root: Path, stage_callback=None):
-    """Validate bounded geometry -> mesh -> authentic solver outputs.
+def profile_cases(profile: str):
+    """Each higher profile is explicitly opt-in; quick never meshes a full QPU."""
+    if profile not in PROFILES:
+        raise ValueError('Unknown scientific benchmark profile')
+    if profile == 'quick':
+        return [('mesh_smoke', 45), ('solver_sanity', 100)]
+    if profile == 'standard':
+        return [('geometry', 40), ('mesh', 240), ('electrostatic', 450),
+                ('capacitance', 40)]
+    return [('geometry', 40), ('mesh', 360), ('electrostatic', 780),
+            ('capacitance', 40), ('eigenmode', 780), ('driven', 1500)]
 
-    No project read, no install/build, no simulated solver success. A failed
-    prerequisite skips dependent steps; no physical accuracy claim is made.
+
+def scientific_workflow(root: Path, stage_callback=None, profile: str = 'quick'):
+    """Fixed local benchmark stages; PASS is execution, NOT physics qualification.
+
+    Quick: one minimal Gmsh box and Palace executable test (no QPU).
+    Standard: coarser prototype geometry, mesh and one electrostatic solve.
+    Full: reference QPU geometry, EM solves and both driven excitations.
     """
     checks, logs = [], []
-    cases = [('geometry', 35), ('mesh', 180), ('electrostatic', 180),
-             ('capacitance', 30), ('eigenmode', 180), ('driven', 360)]
+    cases = profile_cases(profile)
     has_gmsh = versions()['gmsh'] is not None
     try:
         from .palace_bridge import readiness
@@ -434,52 +472,60 @@ def scientific_workflow(root: Path, stage_callback=None):
         for index, (case, deadline) in enumerate(cases):
             if stage_callback:
                 stage_callback({'current_check':case, 'completed':index, 'total':len(cases),
-                                'message':f'Checking {case} (limit: {deadline} seconds)'})
+                                'message':f'{profile}: {case} (deadline {deadline}s)'})
             reason = ('Electrostatic output is required for capacitance extraction' if case == 'capacitance' and not electrostatic_ok else
-                      'Gmsh is not installed' if case == 'mesh' and not has_gmsh else
-                      'Palace is not detected' if case in ('electrostatic','eigenmode','driven') and not has_palace else
+                      'Gmsh is not installed' if case in ('mesh', 'mesh_smoke') and not has_gmsh else
+                      'Palace is not detected' if case in ('solver_sanity','electrostatic','eigenmode','driven') and not has_palace else
                       'A preceding workflow stage failed' if not prerequisites else '')
             if reason:
                 check(checks, 'workflow.'+case, 'SKIP', 'PREREQUISITE_NOT_MET', reason)
                 logs.append('=== '+case+' ===\nSkipped: '+reason)
-                if case in ('geometry', 'mesh'): prerequisites=False
+                if case in ('geometry', 'mesh', 'mesh_smoke'): prerequisites = False
                 continue
-            rc, timed, seconds, text, result = _isolated_case(root, workspace, case, deadline)
+            rc, timed, seconds, text, result = _isolated_case(root, workspace, case, deadline, profile)
             ok = rc == 0 and result is not None and not timed
+            explanation = ('; '.join(f'{key}={result[key]}' for key in ('nodes','volume_elements') if key in result)
+                           if ok and result else 'timed out (solver logs preserved below)' if timed else 'see scrubbed stage/solver logs')
             check(checks, 'workflow.'+case, 'PASS' if ok else 'FAIL',
                   'WORKFLOW_OK' if ok else 'WORKFLOW_TIMEOUT' if timed else 'WORKFLOW_FAILED',
-                  f'{case}: {seconds}s; '+('artifacts verified' if ok else 'timed out' if timed else 'see scrubbed log'),
-                  'Review the diagnostic log and inspect the fixed geometry/mesh parameters.' if not ok else '')
-            logs.append('=== '+case+f' ({seconds}s) ===\n'+text)
+                  f'{case}: {seconds}s; '+('artifacts verified; '+explanation if ok else explanation),
+                  'Review the diagnostic log; do not immediately rerun an expensive profile.' if not ok else '')
+            logs.append('=== '+case+f' (profile={profile}, {seconds}s, return={rc}, timeout={timed}) ===\n'+text)
             if case == 'electrostatic': electrostatic_ok = ok
-            if not ok and case in ('geometry', 'mesh'):
-                prerequisites=False
+            if not ok and case in ('geometry', 'mesh', 'mesh_smoke'):
+                prerequisites = False
             if stage_callback:
                 stage_callback({'current_check':case, 'completed':index+1, 'total':len(cases),
                                 'message':f'{case}: '+('PASS' if ok else 'FAIL')})
     return checks, '\n\n'.join(logs)
 
-
-def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: bool = False, scientific: bool = False, stage_callback=None) -> tuple[Path, list]:
+def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: bool = False, scientific: bool = False, stage_callback=None, scientific_profile: str = "quick") -> tuple[Path, list]:
     root = root.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     # No network, no recursive project scan. Build a whitelist-only archive.
     with tempfile.TemporaryDirectory(prefix="sqe-diagnostics-") as tmp:
         stage = Path(tmp)
         env, checks, tests = collect(root, extended=extended or scientific, skip_tests=skip_tests)
-        if scientific: env['mode'] = 'scientific'
         if scientific:
-            more_checks, test_log = scientific_workflow(root, stage_callback=stage_callback)
+            if scientific_profile not in PROFILES: raise ValueError('Invalid scientific profile')
+            env['mode'] = 'scientific'
+            env['scientific_profile'] = scientific_profile
+        if scientific:
+            more_checks, test_log = scientific_workflow(root, stage_callback=stage_callback, profile=scientific_profile)
             checks.extend(more_checks)
+            if any(item['status'] == 'SKIP' for item in more_checks):
+                check(checks, 'workflow.completeness', 'WARN', 'SCIENTIFIC_STAGES_SKIPPED',
+                      'Some scientific stages were skipped; this profile is not fully verified',
+                      'Review the SKIP reasons in checks.json before attempting a more expensive profile.')
             tests += '\n\n=== SCIENTIFIC WORKFLOW VALIDATION ===\n'+test_log
-            env['scientific_workflow_scope'] = 'isolated fixed 1-transmon prototype; real solver when detected; no physics qualification'
+            env['scientific_workflow_scope'] = ('isolated Gmsh box/Palace runtime sanity' if scientific_profile=='quick' else 'isolated 1-transmon prototype; EM outputs only; no physics qualification')
         status = ("FAIL" if any(c["status"] == "FAIL" for c in checks)
                   else "WARN" if any(c["status"] == "WARN" for c in checks) else "PASS")
         totals = {s: sum(x["status"] == s for x in checks) for s in ("PASS", "WARN", "FAIL", "SKIP")}
         (stage / "environment.json").write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         (stage / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         (stage / "test-results.txt").write_text(tests if tests else "Regression tests skipped.\n", encoding="utf-8")
-        lines = ["SQE Studio v0.11.0 - local diagnostic summary", "Overall: " + status,
+        lines = ["SQE Studio v0.12.0 - local diagnostic summary", "Overall: " + status,
                  "Checks: " + ", ".join(f"{s}={n}" for s, n in totals.items()), ""]
         for c in checks:
             lines.append("[" + c["status"] + "] " + c["id"] + " / " + c["code"] + " - " + c["detail"])
@@ -509,7 +555,7 @@ def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: 
             checksums.append(hashlib.sha256((stage / name).read_bytes()).hexdigest() + "  " + name)
         (stage / "SHA256SUMS.txt").write_text("\n".join(checksums) + "\n", encoding="utf-8")
         timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
-        path = output_dir / ("SQE-DIAGNOSTICS-v0.11.0-" + timestamp + ".zip")
+        path = output_dir / ("SQE-DIAGNOSTICS-v0.12.0-" + timestamp + ".zip")
         if path.exists():
             raise FileExistsError("Diagnostic bundle with this timestamp already exists")
         with zipfile.ZipFile(path, "x", compression=zipfile.ZIP_DEFLATED) as z:

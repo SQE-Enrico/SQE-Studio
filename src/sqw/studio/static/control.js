@@ -1,7 +1,7 @@
 'use strict';
 const app = document.getElementById('app');
 const safe = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state={csrf:'',runs:[],selected:null,busy:false,details:null,startup:null,error:null,authenticated:false,mode:'standard',skipTests:false,queue:null};
+const state={csrf:'',runs:[],selected:null,busy:false,details:null,startup:null,error:null,authenticated:false,mode:'standard',profile:'quick',skipTests:false,queue:null};
 async function request(endpoint,method='GET',payload){const response=await fetch('/api'+endpoint,{method,credentials:'same-origin',headers:method==='POST'?{'Content-Type':'application/json','X-CSRF-Token':state.csrf}:{},body:payload?JSON.stringify(payload):undefined});const data=await response.json();if(!response.ok)throw Error(data.error||`HTTP ${response.status}`);return data;}
 function stamp(text){const date=new Date(text);return Number.isNaN(date.getTime())?'Unknown time':date.toLocaleString();}
 function countsHtml(c={}){return `<div class="figures">${['PASS','WARN','FAIL'].map(key=>`<div class="figure"><b>${Number(c[key]||0)}</b><span>${key.toLowerCase()} checks</span></div>`).join('')}</div>`;}
@@ -16,11 +16,18 @@ function render(){
  <section class="panel"><div class="line"><h2>Run a diagnostic</h2><span class="pill">LOCAL ONLY</span></div><p>No installations, privilege elevation or user-project execution. Checks run independently of the interface.</p>
  <div class="stack"><label class="control"><input type="radio" name="mode" value="standard" ${state.mode==='standard'?'checked':''}><span><strong>Standard health check</strong><small>Python dependencies, local resources, WSL/Ubuntu presence, Julia runtime, focused regression tests.</small></span></label>
  <label class="control"><input type="radio" name="mode" value="extended" ${state.mode==='extended'?'checked':''}><span><strong>Extended native-tool smoke test</strong><small>Standard checks plus native Gmsh, WSL/Palace detection and Julia checks. No solver run.</small></span></label>
- <label class="control"><input type="radio" name="mode" value="scientific" ${state.mode==='scientific'?'checked':''}><span><strong>Scientific workflow validation (resource-intensive)</strong><small>Fixed reference device: geometry and GDS, real 3D mesh, Palace electrostatic, capacitance extraction, eigenmode, both RF excitations. One process at a time, 1 MPI rank, individual timeouts. Runs may take several minutes; no installation or project changes.</small></span></label></div>
+ <label class="control"><input type="radio" name="mode" value="scientific" ${state.mode==='scientific'?'checked':''}><span><strong>Palace scientific diagnostics</strong><small>Select Quick, Standard or Full below. No project modifications, and every stage has a deadline. Numerical accuracy is NOT established by successful execution.</small></span></label></div>
+ <div class="stack" style="margin-top:14px"><label for="scientific-profile"><strong>Scientific test profile</strong></label>
+ <select id="scientific-profile" aria-label="Scientific test profile" ${state.mode!=='scientific'?'disabled':''}>
+ <option value="quick" ${state.profile==='quick'?'selected':''}>Quick — small Gmsh box + Palace executable check (no FEM solve)</option>
+ <option value="standard" ${state.profile==='standard'?'selected':''}>Standard — reduced-resolution QPU mesh + electrostatic solve</option>
+ <option value="full" ${state.profile==='full'?'selected':''}>Full — original QPU mesh + electrostatic, eigenmodes and RF (long running)</option>
+ </select>
+ <p class="muted">Start with Quick. Standard and Full may run for many minutes and use substantial RAM. Only use Full after Standard succeeds.</p></div>
  <div class="buttons"><button id="start" class="primary" ${active||state.busy?'disabled':''}>${active?'Diagnostic running…':'Run checks'}</button><label><input type="checkbox" id="skip-tests" ${state.skipTests?'checked':''}> Skip software regressions</label></div>
- <div class="notice">A scientific workflow PASS confirms artifact generation and execution, <strong>not</strong> electromagnetic accuracy, mesh convergence or fabrication readiness. Solver steps are skipped when Palace is unavailable.</div></section>
+ <div class="notice">Scientific Quick verifies tooling only; Standard and Full may invoke Palace. A PASS confirms artifact generation and execution, <strong>not</strong> electromagnetic accuracy, mesh convergence or fabrication readiness. Solver steps are skipped when Palace is unavailable.</div></section>
  <section class="panel"><div class="line"><h2>Diagnostic history</h2><button id="refresh">Refresh</button></div><p>Persistent local runs. The server can be restarted without losing completed reports.</p>
- <div class="history">${state.runs.length?state.runs.map(item=>`<button data-id="${safe(item.id)}" class="${state.selected===item.id?'selected':''}"><span><strong>${safe(item.mode)} · ${stamp(item.created_utc)}</strong><small>${safe(item.id.slice(0,8))} · ${safe(item.summary||item.state)}</small></span><span class="pill ${safe(item.state)}">${safe(item.state)}</span></button>`).join(''):'<div class="placeholder">No diagnostic reports yet.</div>'}</div></section>
+ <div class="history">${state.runs.length?state.runs.map(item=>`<button data-id="${safe(item.id)}" class="${state.selected===item.id?'selected':''}"><span><strong>${safe(item.mode)} · ${stamp(item.created_utc)}</strong><small>${safe(item.scientific_profile||'')} · ${safe(item.id.slice(0,8))} · ${safe(item.summary||item.state)}</small></span><span class="pill ${safe(item.state)}">${safe(item.state)}</span></button>`).join(''):'<div class="placeholder">No diagnostic reports yet.</div>'}</div></section>
  ${run?`<section class="panel"><div class="line"><h2>Report ${safe(run.id.slice(0,8))}</h2><span class="pill ${safe(run.summary||run.state)}">${safe(run.summary||run.state)}</span></div>
  ${run.counts?countsHtml(run.counts):'<p>The diagnostic worker is running isolated checks.</p>'}${run.progress?`<p class="notice">Progress: ${safe(run.progress.completed)}/${safe(run.progress.total)} · ${safe(run.progress.message||run.progress.current_check||'Running')}</p>`:''}
  ${run.error?`<div class="notice error">${safe(run.error)}</div>`:''}
@@ -31,6 +38,7 @@ function render(){
  <section class="panel"><h2>Workstation readiness</h2><p>Values below reflect the selected report, not assumed installed components.</p><dl class="meta">${[['Platform',environment.platform||'Not checked'],['Python',environment.python_version||'Not checked'],['Gmsh',checkMap['python.gmsh']?.detail||'Not checked'],['WSL/Ubuntu',checkMap['wsl.shell']?.detail||checkMap['wsl.command']?.detail||'Not checked'],['Palace',checkMap['palace.wsl']?.detail||checkMap['palace.native']?.detail||'Not checked'],['JosephsonCircuits.jl',checkMap['julia.josephsoncircuits']?.detail||checkMap['julia.runtime']?.detail||'Not checked'],['Quantum Metal','Optional external environment, not verified here']].map(([k,v])=>`<div><dt>${safe(k)}</dt><dd>${safe(v)}</dd></div>`).join('')}</dl></section>
  <section class="panel"><h2>Privacy & safety</h2><p>Only the authenticated local administrator can run and download diagnostics. Reports exclude project files and credentials by design.</p><p>Native solver installations still require deliberate local setup and OS-level permission. Web diagnostics do not silently change the system.</p></section></div></div>`;
  document.querySelectorAll('input[name="mode"]').forEach(el=>el.addEventListener('change',()=>{state.mode=el.value;render();}));
+ document.getElementById('scientific-profile').addEventListener('change',el=>{state.profile=el.target.value;});
  document.getElementById('skip-tests').addEventListener('change',e=>{state.skipTests=e.target.checked;});
  document.getElementById('start').addEventListener('click',start);
  document.getElementById('refresh').addEventListener('click',()=>reload(true));
@@ -38,7 +46,7 @@ function render(){
  document.getElementById('delete-report')?.addEventListener('click',deleteReport);
 }
 async function select(id){state.selected=id;state.error=null;try{state.details=await request('/system/diagnostics/'+id)}catch(e){state.error=e.message;}render();}
-async function start(){try{state.busy=true;state.error=null;render();const r=await request('/system/diagnostics','POST',{extended:state.mode!=='standard',scientific:state.mode==='scientific',skip_tests:state.skipTests});state.selected=r.id;await reload();}catch(e){state.error=e.message;}finally{state.busy=false;render();}}
+async function start(){try{state.busy=true;state.error=null;render();const r=await request('/system/diagnostics','POST',{extended:state.mode!=='standard',scientific:state.mode==='scientific',scientific_profile:state.profile,skip_tests:state.skipTests});state.selected=r.id;await reload();}catch(e){state.error=e.message;}finally{state.busy=false;render();}}
 async function deleteReport(){
  if(!state.selected||!confirm('Delete this local diagnostic bundle permanently? Download it first if you need it.'))return;
  try{await request('/system/diagnostics/'+state.selected,'DELETE');state.selected=null;state.details=null;await reload();}catch(e){state.error=e.message;render();}

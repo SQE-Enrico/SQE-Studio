@@ -113,8 +113,8 @@ class Application:
                         'native_fem_validated':False}
                     else:
                         need('POST'); args=body()
-                        if set(args)-{'extended','skip_tests','scientific'}: raise Problem('Unknown diagnostic option')
-                        result=self.diagnostics.start(extended=args.get('extended',False),skip_tests=args.get('skip_tests',False),scientific=args.get('scientific',False))
+                        if set(args)-{'extended','skip_tests','scientific','scientific_profile'}: raise Problem('Unknown diagnostic option')
+                        result=self.diagnostics.start(extended=args.get('extended',False),skip_tests=args.get('skip_tests',False),scientific=args.get('scientific',False), scientific_profile=args.get('scientific_profile','quick'))
                 elif len(parts)==5 and parts[:3]==['api','system','diagnostics']:
                     need('GET')
                     if parts[4]=='bundle':

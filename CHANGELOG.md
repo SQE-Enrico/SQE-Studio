@@ -1,3 +1,15 @@
+## [0.12.0] - 2026-10-28
+
+### Palace benchmarking profiles and solver observability
+
+- Replaced one expensive default scientific run with opt-in **Quick**, **Standard**, and **Full** profiles in the Web control center. Quick is the default and never runs a full QPU mesh or FEM solve.
+- Quick checks a small native Gmsh 3D box and actually invokes the Palace command-line `--help` through the current Ubuntu/Spack environment.
+- Standard generates a reduced-resolution one-transmon reference and performs electrostatic extraction when Palace is installed; Full retains the comprehensive capacitance, eigenmode and two-port driven workflow. Neither profile claims numerical convergence or fabrication readiness.
+- Captures disk-backed, bounded stage output and Palace solver-log tails even when a stage exits with error or reaches its deadline; error messages and paths are redacted best-effort in support ZIPs.
+- Adds Linux-side bounded process execution for WSL launched Palace, preventing unlimited solver life after an interrupted Windows proxy. Adds optional GNU time CPU/memory accounting to solver logs where available.
+- Adds profile-specific progress, elapsed-time and element-count evidence; retains authenticated localhost-only Web diagnostics, immutable projects, prior login and Windows startup fixes.
+- Adds profile and failure-log regression tests. Real Palace/FEM qualification on the Windows/WSL2 workstation remains the next acceptance milestone.
+
 ## [0.11.0] - 2026-10-28
 
 ### Windows workstation consolidation and scientific workflow diagnostics

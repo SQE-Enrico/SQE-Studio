@@ -22,7 +22,13 @@ fi
 cd "$work"
 echo "Running Palace inside WSL2 ($ranks MPI ranks), scratch=$work" >&2
 # Palace writes to the configured local subdirectory. Exit code is preserved.
-"$exe" -np "$ranks" "$config"
+if [[ -x /usr/bin/time ]]; then
+  echo "SQE_RESOURCE_ACCOUNTING=GNU_TIME" >&2
+  /usr/bin/time -v "$exe" -np "$ranks" "$config"
+else
+  echo "SQE_RESOURCE_ACCOUNTING=UNAVAILABLE" >&2
+  "$exe" -np "$ranks" "$config"
+fi
 output="$(python3 - "$config" <<'PY'
 import json,sys
 cfg=json.load(open(sys.argv[1],encoding='utf-8'))

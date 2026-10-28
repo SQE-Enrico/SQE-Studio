@@ -40,7 +40,7 @@ class ScientificWorkflowTests(unittest.TestCase):
     def test_prerequisites_skipped_not_faked(self):
         with patch('sqw.diagnostics.versions', return_value={'gmsh': None}), \
              patch('sqw.palace_bridge.readiness', return_value={'installed':False}):
-            checks, log = diagnostics.scientific_workflow(ROOT)
+            checks, log = diagnostics.scientific_workflow(ROOT, profile='full')
         actual={entry['id']:entry['status'] for entry in checks}
         self.assertEqual(actual['workflow.geometry'],'PASS')
         self.assertEqual(actual['workflow.mesh'],'SKIP')

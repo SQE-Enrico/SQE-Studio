@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "open-superconducting-qubit-workflow"
-version = "0.11.0"
+version = "0.12.0"
 description = "SQE Studio: INRiM's open superconducting quantum electronics research workspace"
 authors = [{name = "Emanuele Enrico", email = "e.enrico@inrim.it"}]
 readme = "README.md"

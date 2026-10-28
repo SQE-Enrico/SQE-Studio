@@ -12,6 +12,8 @@ SQE Studio offers **System & Diagnostics** at `/control.html`. Access is restric
 4. Inspect the result summary, itemized check codes, warnings and suggestions.
 5. Download the support ZIP **only after the run completes**, open and review its contents, then share it intentionally.
 
+Three additional scientific profiles are available directly in the same Web interface: Quick (a small Gmsh mesh and Palace executable check; recommended first), Standard (reduced-resolution QPU electrostatic solver), and Full (large QPU eigenmode and RF pipeline). Refer to [Palace benchmark profiles](WORKFLOW-VALIDATION-0.12.0.md).
+
 The standard mode checks runtime versions, OS resources, installed scientific modules, Julia availability, WSL presence and focused regressions. Extended mode additionally attempts an Ubuntu shell probe, optional JosephsonCircuits.jl import and Gmsh 3D unit-box meshing. A successful meshing test **does not validate a Palace FEM solve or quantum results**.
 
 Diagnostic ZIPs include only `SUMMARY.txt`, `environment.json`, `checks.json`, `test-results.txt`, `README-PRIVACY.txt`, `manifest.json`, and `SHA256SUMS.txt`. No user project directory is crawled, and no automatic network uploads occur. Secret/path scrubbing is best-effort; users must personally review each ZIP before sharing.
@@ -24,4 +26,4 @@ Double-click `WINDOWS-DIAGNOSTICS.cmd` (optionally with `-Extended`) if installa
 
 ## Scientific qualification
 
-Distinguish (1) package import, (2) mesh generation, (3) Palace executing a real FEM problem, (4) convergence against mesh refinement, and (5) agreement with an independent physical benchmark. Only the first two are automatically covered by the current diagnostic page. Scientific FEM benchmark workflows are planned future milestones; do not infer an accuracy certificate from green checks.
+Distinguish (1) package import, (2) mesh generation, (3) Palace executing a real FEM problem, (4) convergence against mesh refinement, and (5) agreement with an independent physical benchmark. Quick covers only package and solver invocation checks. Standard and Full additionally attempt real Palace FEM solves, but neither includes a reference-accuracy threshold or convergence certification. Do not infer an accuracy certificate from green checks.

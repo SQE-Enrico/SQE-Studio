@@ -371,6 +371,11 @@ def solve(out,problems,ranks=1,executable='palace',timeout=14400):
         dest=out/key
         if dest.exists() and any(dest.iterdir()):raise ValueError('Refusing to overwrite solver output '+key)
         args,identity=command(out,key,ranks,executable)
+        if args and args[0].lower().endswith('wsl.exe'):
+            # Bound the Linux process even if the Windows WSL proxy is killed.
+            # No shell interpretation or user-controlled command text.
+            args = args[:4] + ['timeout', '--signal=TERM', '--kill-after=10s',
+                                str(int(timeout))+'s'] + args[4:]
         record={'status':'running','configuration_sha256':sha256(cfgfile),
                 'geometry_sha256':contract['geometry_sha256'],'mesh_sha256':mesh_hash,
                 'solver_identity':identity,'command':args}

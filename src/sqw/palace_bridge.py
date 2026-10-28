@@ -33,7 +33,7 @@ def distro():
 
 def wsl_path(path, *, invoke=subprocess.run):
     source = str(Path(path).resolve())
-    result = invoke(['wsl.exe', '-d', distro(), '--', 'wslpath', '-a', source],
+    result = invoke(['wsl.exe', '-d', distro(), '--exec', 'wslpath', '-a', '-u', source],
                     text=True, capture_output=True, timeout=20, check=True)
     translated = result.stdout.strip()
     if not translated.startswith('/') or '\n' in translated:

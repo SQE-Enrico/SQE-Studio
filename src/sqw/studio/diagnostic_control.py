@@ -72,8 +72,8 @@ class DiagnosticControl:
                 continue
         return sorted(values, key=lambda x: x.get('created_utc',''), reverse=True)[:LIMIT]
 
-    def start(self, *, extended=False, skip_tests=False):
-        if not isinstance(extended, bool) or not isinstance(skip_tests, bool):
+    def start(self, *, extended=False, skip_tests=False, scientific=False):
+        if not all(isinstance(value, bool) for value in (extended, skip_tests, scientific)):
             raise Problem('Diagnostic options must be booleans')
         with self.lock:
             if self.active is not None:
@@ -84,27 +84,39 @@ class DiagnosticControl:
             run_id = uuid.uuid4().hex
             folder = self.storage / run_id
             folder.mkdir(mode=0o700)
-            state = {'id': run_id, 'state': 'queued', 'mode': 'extended' if extended else 'standard',
+            state = {'id': run_id, 'state': 'queued', 'mode': 'scientific' if scientific else 'extended' if extended else 'standard',
                      'skip_tests': skip_tests, 'created_utc': datetime.now(timezone.utc).isoformat(),
-                     'completed_utc': None, 'summary': None, 'counts': None, 'error': None}
+                     'completed_utc': None, 'summary': None, 'counts': None, 'error': None, 'progress': None}
             self._atomic(folder / 'status.json', state)
             self.active = run_id
             # Daemon execution permits Ctrl+C to stop the local server without
             # waiting for a slow external Julia/WSL timeout; interrupted runs
             # are marked on the next start.
-            self.worker = threading.Thread(target=self._run, args=(run_id, extended, skip_tests),
+            self.worker = threading.Thread(target=self._run, args=(run_id, extended, skip_tests, scientific),
                                            name='sqe-diagnostics', daemon=True)
             self.worker.start()
             return state
 
-    def _run(self, run_id, extended, skip_tests):
+    def _run(self, run_id, extended, skip_tests, scientific):
         folder = self._folder(run_id)
         state = self._state(run_id)
         try:
             state['state'] = 'running'
+            if scientific:
+                state['progress'] = {'current_check':'preflight', 'completed':0, 'total':6, 'message':'System checks and software preflight'}
             self._atomic(folder / 'status.json', state)
-            zip_path, checks = bundle(self.source_root, folder, extended=extended, skip_tests=skip_tests)
+            def progress(update):
+                # Each stage completion remains inspectable while the run executes.
+                current = self._state(run_id)
+                if current['state'] == 'running':
+                    current['progress'] = update
+                    self._atomic(folder / 'status.json', current)
+            options = dict(extended=extended, skip_tests=skip_tests)
+            if scientific:
+                options.update(scientific=True, stage_callback=progress)
+            zip_path, checks = bundle(self.source_root, folder, **options)
             counts = {name: sum(c['status'] == name for c in checks) for name in ('PASS','WARN','FAIL','SKIP')}
+            state = self._state(run_id)
             state['counts'] = counts
             state['state'] = 'completed'
             state['summary'] = ('FAIL' if counts['FAIL'] else 'WARN' if counts['WARN'] else 'PASS')

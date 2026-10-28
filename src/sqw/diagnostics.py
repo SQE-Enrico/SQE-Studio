@@ -15,13 +15,15 @@ from pathlib import Path
 import platform
 import re
 import shutil
+import signal
+import time
 import subprocess
 import sys
 import tempfile
 import zipfile
 
 SCHEMA = "sqe-diagnostics/1"
-VERSION = "0.10.0"
+VERSION = "0.11.0"
 MAX_LOG = 32000
 CORE_MODULES = ("numpy", "scipy", "matplotlib", "shapely", "gmsh")
 SAFE_FILE_NAMES = ("README-PRIVACY.txt", "environment.json", "checks.json", "test-results.txt", "SUMMARY.txt", "manifest.json")
@@ -249,7 +251,7 @@ def collect(root: Path, *, extended: bool = False, skip_tests: bool = False):
                           'if [ -f "$HOME/.sqe/spack/share/spack/setup-env.sh" ]; then '
                           'echo SQE_SPACK=1; '
                           'source "$HOME/.sqe/spack/share/spack/setup-env.sh" >/dev/null 2>&1; '
-                          'if spack find --installed --format "{name}" palace 2>/dev/null | grep -qx palace; then echo SQE_PALACE_SPACK=1; else echo SQE_PALACE_SPACK=0; fi; '
+                          'if spack find --format "{name}" palace 2>/dev/null | grep -qx palace; then echo SQE_PALACE_SPACK=1; else echo SQE_PALACE_SPACK=0; fi; '
                           'else echo SQE_SPACK=0; fi; '
                           'command -v python3 >/dev/null && echo SQE_PYTHON3=1 || echo SQE_PYTHON3=0')
                 prc, pout, _, ptime = run([wsl, "-d", ubuntu_name, "--", "bash", "-lc", script], root=root, timeout=40)
@@ -263,6 +265,20 @@ def collect(root: Path, *, extended: bool = False, skip_tests: bool = False):
                 check(items, "wsl.shell", "SKIP", "WSL_NOT_READY", "Ubuntu WSL2 not detected")
     else:
         check(items, "wsl.command", "SKIP", "NOT_WINDOWS", "WSL checks apply only to Windows")
+
+    if win and extended:
+        try:
+            from .palace_bridge import readiness
+            status = readiness()
+            detected = bool(status.get('installed'))
+            check(items, "palace.wsl", "PASS" if detected else "WARN",
+                  "PALACE_SPACK_PRESENT" if detected else "PALACE_NOT_DETECTED",
+                  "Palace installation detected via the application backend" if detected else
+                  "Palace not detected by the application backend",
+                  "Check Palace installation in Ubuntu; do not reinstall solely based on this report." if not detected else
+                  "A real Palace solve is still required to verify execution and scientific validity.")
+        except (ValueError, OSError) as exc:
+            check(items, "palace.wsl", "WARN", "PALACE_PROBE_ERROR", type(exc).__name__)
 
     # Julia check never loads packages or downloads anything unless extended was chosen.
     julia = shutil.which("julia")
@@ -330,20 +346,123 @@ def collect(root: Path, *, extended: bool = False, skip_tests: bool = False):
     return env, items, "\n\n".join(output)
 
 
-def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: bool = False) -> tuple[Path, list]:
+def _isolated_case(root: Path, workspace: Path, case: str, timeout: int):
+    """Run a fixed diagnostic in a process group with a hard deadline.
+
+    Only a bounded, scrubbed log tail is retained; all source files and FEM
+    artifacts stay in the temporary directory and are deleted after testing.
+    """
+    if case not in ('geometry', 'mesh', 'electrostatic', 'capacitance', 'eigenmode', 'driven'):
+        raise ValueError('Unknown fixed scientific case')
+    args = [sys.executable, str(root / 'scripts' / 'sqe_scientific_probe.py'),
+            '--case', case, '--workspace', str(workspace)]
+    env = os.environ.copy()
+    env['PYTHONPATH'] = str(root / 'src')
+    env['PYTHONNOUSERSITE'] = '1'
+    for variable in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
+        env[variable] = '2' if variable == 'OMP_NUM_THREADS' else '1'
+    flags = ({'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == 'nt'
+             else {'start_new_session': True})
+    start = time.monotonic()
+    proc = None
+    try:
+        proc = subprocess.Popen(args, cwd=root, stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                env=env, **flags)
+        try:
+            raw, _ = proc.communicate(timeout=timeout)
+            timed_out = False
+        except subprocess.TimeoutExpired:
+            if os.name == 'nt':
+                # Terminate the process tree; do not leave an expensive mesh
+                # calculation running after a browser-side timeout.
+                subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                               timeout=10, check=False)
+            else:
+                try: os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError: pass
+            proc.kill()
+            raw, _ = proc.communicate(timeout=10)
+            timed_out = True
+        text = scrub(raw[-12000:].decode('utf-8', 'replace'), root)
+        match = re.search(r'^SQE_PROBE_RESULT=(\{.*\})$', text, re.M)
+        result = json.loads(match.group(1)) if match and not timed_out else None
+        return proc.returncode, timed_out, round(time.monotonic() - start, 1), text, result
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        if proc and proc.poll() is None:
+            proc.kill()
+        return None, False, round(time.monotonic() - start, 1), type(exc).__name__, None
+
+
+def scientific_workflow(root: Path, stage_callback=None):
+    """Validate bounded geometry -> mesh -> authentic solver outputs.
+
+    No project read, no install/build, no simulated solver success. A failed
+    prerequisite skips dependent steps; no physical accuracy claim is made.
+    """
+    checks, logs = [], []
+    cases = [('geometry', 35), ('mesh', 180), ('electrostatic', 180),
+             ('capacitance', 30), ('eigenmode', 180), ('driven', 360)]
+    has_gmsh = versions()['gmsh'] is not None
+    try:
+        from .palace_bridge import readiness
+        has_palace = bool(readiness().get('installed'))
+    except (OSError, ValueError):
+        has_palace = False
+    prerequisites = True
+    electrostatic_ok = False
+    with tempfile.TemporaryDirectory(prefix='sqe-scientific-validation-') as tmp:
+        workspace = Path(tmp)
+        for index, (case, deadline) in enumerate(cases):
+            if stage_callback:
+                stage_callback({'current_check':case, 'completed':index, 'total':len(cases),
+                                'message':f'Checking {case} (limit: {deadline} seconds)'})
+            reason = ('Electrostatic output is required for capacitance extraction' if case == 'capacitance' and not electrostatic_ok else
+                      'Gmsh is not installed' if case == 'mesh' and not has_gmsh else
+                      'Palace is not detected' if case in ('electrostatic','eigenmode','driven') and not has_palace else
+                      'A preceding workflow stage failed' if not prerequisites else '')
+            if reason:
+                check(checks, 'workflow.'+case, 'SKIP', 'PREREQUISITE_NOT_MET', reason)
+                logs.append('=== '+case+' ===\nSkipped: '+reason)
+                if case in ('geometry', 'mesh'): prerequisites=False
+                continue
+            rc, timed, seconds, text, result = _isolated_case(root, workspace, case, deadline)
+            ok = rc == 0 and result is not None and not timed
+            check(checks, 'workflow.'+case, 'PASS' if ok else 'FAIL',
+                  'WORKFLOW_OK' if ok else 'WORKFLOW_TIMEOUT' if timed else 'WORKFLOW_FAILED',
+                  f'{case}: {seconds}s; '+('artifacts verified' if ok else 'timed out' if timed else 'see scrubbed log'),
+                  'Review the diagnostic log and inspect the fixed geometry/mesh parameters.' if not ok else '')
+            logs.append('=== '+case+f' ({seconds}s) ===\n'+text)
+            if case == 'electrostatic': electrostatic_ok = ok
+            if not ok and case in ('geometry', 'mesh'):
+                prerequisites=False
+            if stage_callback:
+                stage_callback({'current_check':case, 'completed':index+1, 'total':len(cases),
+                                'message':f'{case}: '+('PASS' if ok else 'FAIL')})
+    return checks, '\n\n'.join(logs)
+
+
+def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: bool = False, scientific: bool = False, stage_callback=None) -> tuple[Path, list]:
     root = root.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     # No network, no recursive project scan. Build a whitelist-only archive.
     with tempfile.TemporaryDirectory(prefix="sqe-diagnostics-") as tmp:
         stage = Path(tmp)
-        env, checks, tests = collect(root, extended=extended, skip_tests=skip_tests)
+        env, checks, tests = collect(root, extended=extended or scientific, skip_tests=skip_tests)
+        if scientific: env['mode'] = 'scientific'
+        if scientific:
+            more_checks, test_log = scientific_workflow(root, stage_callback=stage_callback)
+            checks.extend(more_checks)
+            tests += '\n\n=== SCIENTIFIC WORKFLOW VALIDATION ===\n'+test_log
+            env['scientific_workflow_scope'] = 'isolated fixed 1-transmon prototype; real solver when detected; no physics qualification'
         status = ("FAIL" if any(c["status"] == "FAIL" for c in checks)
                   else "WARN" if any(c["status"] == "WARN" for c in checks) else "PASS")
         totals = {s: sum(x["status"] == s for x in checks) for s in ("PASS", "WARN", "FAIL", "SKIP")}
         (stage / "environment.json").write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         (stage / "checks.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         (stage / "test-results.txt").write_text(tests if tests else "Regression tests skipped.\n", encoding="utf-8")
-        lines = ["SQE Studio v0.10.0 - local diagnostic summary", "Overall: " + status,
+        lines = ["SQE Studio v0.11.0 - local diagnostic summary", "Overall: " + status,
                  "Checks: " + ", ".join(f"{s}={n}" for s, n in totals.items()), ""]
         for c in checks:
             lines.append("[" + c["status"] + "] " + c["id"] + " / " + c["code"] + " - " + c["detail"])
@@ -355,7 +474,7 @@ def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: 
             "The script does not upload data, install software, require administrator rights, "
             "read projects, list arbitrary user files, or collect environment variables.\n"
             "Collected: general OS/Python/tool versions, CPU count, free disk, WSL availability, "
-            "fixed test names and sanitized errors.\n"
+            "fixed test names, sanitized errors and optional isolated scientific run outputs.\n"
             "It does not collect system serial numbers, usernames, machine names, IP addresses, "
             "personal paths, passwords or design files by design.\n"
             "Redaction is best-effort, not a guarantee against all possible text generated by tests.\n"
@@ -365,7 +484,7 @@ def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: 
             encoding="utf-8")
         manifest = {"schema": SCHEMA, "status": status, "release": VERSION,
                     "created_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-                    "mode": "extended" if extended else "standard", "counts": totals,
+                    "mode": "scientific" if scientific else "extended" if extended else "standard", "counts": totals,
                     "contents": list(SAFE_FILE_NAMES) + ["SHA256SUMS.txt"]}
         (stage / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
         checksums = []
@@ -373,7 +492,7 @@ def bundle(root: Path, output_dir: Path, *, extended: bool = False, skip_tests: 
             checksums.append(hashlib.sha256((stage / name).read_bytes()).hexdigest() + "  " + name)
         (stage / "SHA256SUMS.txt").write_text("\n".join(checksums) + "\n", encoding="utf-8")
         timestamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
-        path = output_dir / ("SQE-DIAGNOSTICS-v0.10.0-" + timestamp + ".zip")
+        path = output_dir / ("SQE-DIAGNOSTICS-v0.11.0-" + timestamp + ".zip")
         if path.exists():
             raise FileExistsError("Diagnostic bundle with this timestamp already exists")
         with zipfile.ZipFile(path, "x", compression=zipfile.ZIP_DEFLATED) as z:

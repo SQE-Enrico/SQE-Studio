@@ -80,7 +80,7 @@ function layoutView(){const c=S.design.chip||{};
  <section><div class="card"><h2>Chip and layers</h2><div class="fields">${field('Chip width (µm)','chip.width_um',c.width_um,400)}${field('Chip height (µm)','chip.height_um',c.height_um,400)}${field('Metal layer','chip.metal_layer',c.metal_layer,0)}${field('Layer JJ marker','chip.junction_layer',c.junction_layer,0)}${field('Required minimum gap (µm)','chip.min_gap_um',c.min_gap_um,0)}</div><div class="alert">Candidate GDS, NOT fabrication-ready: no full DRC, no parametrized pad-ring or complete interconnect, and no equivalent EM-qualified layout.</div><button class="primary" data-act="download-gds">Export concept-only GDSII</button></div></section></div>`;}
 function optionFields(analysis){const values=S.options[analysis]||{};
  return Object.entries(values).map(([key,v])=>{
-  if(key==='sequence')return `<label class="field"><span>Esperimento</span><select data-opt="${analysis}:sequence">${['rabi','ramsey','echo','t1'].map(x=>`<option ${v===x?'selected':''} value="${x}">${x.toUpperCase()}</option>`).join('')}</select></label>`;
+  if(key==='sequence')return `<label class="field"><span>Experiment</span><select data-opt="${analysis}:sequence">${['rabi','ramsey','echo','t1'].map(x=>`<option ${v===x?'selected':''} value="${x}">${x.toUpperCase()}</option>`).join('')}</select></label>`;
   return `<label class="field"><span>${esc(key.replaceAll('_',' '))}</span><input data-opt="${analysis}:${key}" type="number" step="any" value="${esc(v)}"></label>`;
  }).join('');}
 function analysisView(a){const info=INFO[a];const labjobs=S.project.jobs.filter(j=>j.target==='lab:'+a);
@@ -97,12 +97,12 @@ function plotSeries(title,x,sets,xLabel='',yLabel=''){if(!x?.length||!sets?.leng
  const paths=sets.map((s,i)=>{const stride=Math.max(1,Math.floor(x.length/700));const path=x.map((v,i)=>({v,i})).filter(p=>p.i%stride===0||p.i===x.length-1).map((p,k)=>{const v=p.v,val=s.data[p.i];return `${k===0?'M':'L'}${sx(Number(v)).toFixed(2)} ${sy(Number(val)).toFixed(2)}`}).join(' ');return `<path d="${path}" fill="none" stroke="${COLORS[i%COLORS.length]}" stroke-width="2"/>`;}).join('');
  return `<svg class="plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(title)}"><text x="18" y="19">${esc(yLabel)}</text>${marks}${paths}<text x="${width/2}" y="${height-5}" text-anchor="middle">${esc(xLabel)}</text></svg><div class="legend" style="margin-top:12px">${sets.map((s,i)=>`<span><i class="dot" style="background:${COLORS[i%COLORS.length]}"></i>${esc(s.name)}</span>`).join('')}</div>`;
 }
-function resultSummary(r){switch(r.analysis){case'modes':return `<div class="grid three">${r.modes.slice(0,3).map(m=>`<div class="metric"><strong>${fmt(m.frequency_ghz,4)} GHz</strong><small>Mode ${m.index} · α ${fmt(m.anharmonicity_mhz,2)} MHz</small></div>`).join('')}</div><div class="card"><h3>Eigenfrequencies and branch participation</h3><div class="scroll"><table><tr><th>Mode</th><th>GHz</th><th>α (MHz)</th><th>JJ participation</th></tr>${r.modes.map(m=>`<tr><td>${m.index}</td><td>${fmt(m.frequency_ghz,5)}</td><td>${fmt(m.anharmonicity_mhz,2)}</td><td>${Object.entries(m.junction_participation).map(([k,v])=>`${esc(k)}: ${fmt(v*100,1)}%`).join(' · ')}</td></tr>`).join('')}</table></div></div><div class="card"><h3>Qubit assignments</h3>${Object.entries(r.qubit_assignments).map(([id,q])=>`<p><b>${esc(id)}</b> → modo ${q.mode_index} · ${fmt(q.frequency_ghz,4)} GHz · α ${fmt(q.anharmonicity_mhz,2)} MHz</p>`).join('')}</div><div class="card"><h3>χ matrix (MHz) · diagonal = α</h3>${matrixHeat(r.chi_mhz)}</div>`;
- case'sparameters':return plotSeries('S-parametri',r.frequency_ghz,r.curves.map(c=>({name:c.name,data:c.db})),'Frequency (GHz)','dB')+ (r.touchstone_file?`<p><button data-act="touchstone">Download ${esc(r.touchstone_file)}</button></p>`:'');
+function resultSummary(r){switch(r.analysis){case'modes':return `<div class="grid three">${r.modes.slice(0,3).map(m=>`<div class="metric"><strong>${fmt(m.frequency_ghz,4)} GHz</strong><small>Mode ${m.index} · α ${fmt(m.anharmonicity_mhz,2)} MHz</small></div>`).join('')}</div><div class="card"><h3>Eigenfrequencies and branch participation</h3><div class="scroll"><table><tr><th>Mode</th><th>GHz</th><th>α (MHz)</th><th>JJ participation</th></tr>${r.modes.map(m=>`<tr><td>${m.index}</td><td>${fmt(m.frequency_ghz,5)}</td><td>${fmt(m.anharmonicity_mhz,2)}</td><td>${Object.entries(m.junction_participation).map(([k,v])=>`${esc(k)}: ${fmt(v*100,1)}%`).join(' · ')}</td></tr>`).join('')}</table></div></div><div class="card"><h3>Qubit assignments</h3>${Object.entries(r.qubit_assignments).map(([id,q])=>`<p><b>${esc(id)}</b> → mode ${q.mode_index} · ${fmt(q.frequency_ghz,4)} GHz · α ${fmt(q.anharmonicity_mhz,2)} MHz</p>`).join('')}</div><div class="card"><h3>χ matrix (MHz) · diagonal = α</h3>${matrixHeat(r.chi_mhz)}</div>`;
+ case'sparameters':return plotSeries('S-parameters',r.frequency_ghz,r.curves.map(c=>({name:c.name,data:c.db})),'Frequency (GHz)','dB')+ (r.touchstone_file?`<p><button data-act="touchstone">Download ${esc(r.touchstone_file)}</button></p>`:'');
  case'flux':return plotSeries('Flux',r.flux_phi0,r.frequency_ghz[0].map((_,i)=>({name:`Mode ${i}`,data:r.frequency_ghz.map(row=>row[i])})).slice(0,8),'Flux Φ / Φ₀','GHz');
  case'dynamics':return plotSeries('Dynamics',r.time_us,[{name:`P(e) ${r.qubit} · ${r.sequence}`,data:r.p_excited}],'Time (µs)','P(e)');
  case'duffing':return plotSeries('Duffing',r.frequency_ghz,[{name:'photons · low branch',data:r.photon_number_low_branch}],'Frequency (GHz)','n')+`<p class="hint">${r.real_root_count.filter(x=>x>1).length} points with multiple real roots; stability not verified.</p>`;
- case'yield':return `<div class="metric"><strong>${fmt(r.yield_fraction*100,2)}%</strong><small>Yield di frequenze: ${r.samples} campioni, seed ${r.seed}</small></div><div class="card"><h3>Distribution by qubit</h3><div class="scroll"><table><tr><th>Qubit</th><th>Mean GHz</th><th>σ MHz</th><th>P05</th><th>P95</th></tr>${Object.entries(r.qubit_statistics).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v.mean_ghz,4)}</td><td>${fmt(v.sigma_mhz,2)}</td><td>${fmt(v.p05_ghz,4)}</td><td>${fmt(v.p95_ghz,4)}</td></tr>`).join('')}</table></div></div>`;
+ case'yield':return `<div class="metric"><strong>${fmt(r.yield_fraction*100,2)}%</strong><small>Frequency yield: ${r.samples} samples, seed ${r.seed}</small></div><div class="card"><h3>Distribution by qubit</h3><div class="scroll"><table><tr><th>Qubit</th><th>Mean GHz</th><th>σ MHz</th><th>P05</th><th>P95</th></tr>${Object.entries(r.qubit_statistics).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v.mean_ghz,4)}</td><td>${fmt(v.sigma_mhz,2)}</td><td>${fmt(v.p05_ghz,4)}</td><td>${fmt(v.p95_ghz,4)}</td></tr>`).join('')}</table></div></div>`;
  case'optimize':return `<div class="grid three"><div class="metric"><strong>${fmt(r.original_ej_ghz,3)} GHz</strong><small>Initial EJ</small></div><div class="metric"><strong>${fmt(r.proposed_ej_ghz,3)} GHz</strong><small>Proposed EJ</small></div><div class="metric"><strong>${fmt(r.after_error_mhz,3)} MHz</strong><small>Residual error</small></div></div><p>Qubit ${esc(r.qubit)}: f target ${fmt(r.target_ghz,4)} GHz, prediction ${fmt(r.predicted_ghz,4)} GHz.</p><button data-act="apply-proposal" class="primary">Apply proposal to draft (not layout)</button>`;
  case'loss_budget':return `<div class="scroll"><table><tr><th>Mode</th><th>GHz</th><th>Assumed Q</th><th>Estimated T1 (µs)</th></tr>${r.modes.map(m=>`<tr><td>${m.mode_index}</td><td>${fmt(m.frequency_ghz,4)}</td><td>${fmt(m.assumed_loaded_q,0)}</td><td>${fmt(m.estimated_t1_us,3)}</td></tr>`).join('')}</table></div>`;
  case'design_checks':return `<h3>${r.pass?'Checks completed':'Checks reported issues'}</h3>${r.issues.length?r.issues.map(x=>`<p class="alert"><b>${esc(x.severity)}</b> · ${esc(x.item)}: ${esc(x.message)}</p>`).join(''):'<div class="alert info">No warnings detected in the simplified electrical model.</div>'}`;
@@ -111,7 +111,7 @@ function matrixHeat(matrix){if(!matrix||!matrix.length)return '';
  const max=Math.max(1,...matrix.flat().map(x=>Math.abs(x))),n=matrix.length;
  return `<div class="heatmap" style="--count:${n}"><div class="head">χ</div>${matrix.map((_,j)=>`<div class="head">${j}</div>`).join('')}${matrix.map((row,i)=>`<div class="head">${i}</div>${row.map((v,j)=>`<div style="background:rgba(96,222,208,${(Math.abs(v)/max*.65+.06).toFixed(3)})" title="χ ${i},${j}"><b>${fmt(v,2)}</b></div>`).join('')}`).join('')}</div>`;}
 function renderResult(a){if(!S.result||S.result.analysis!==a){const active=S.project.jobs.find(j=>j.target==='lab:'+a&&['queued','running','cancel_requested'].includes(j.state));return `<div class="card"><h2>Results</h2>${active?`<div class="pill wait">${esc(active.state)}</div> <button data-act="view-job" data-id="${esc(active.id)}">Open job</button>`:'<p class="muted">Run an analysis or open an earlier job.</p>'}</div>`;}
- const r=S.result;return `<div class="card"><div class="row" style="justify-content:space-between"><h2>Results · ${esc(r.fidelity)}</h2><button data-act="download-result">↓ JSON</button></div><p class="hint">Job ${esc(S.resultJobId||'')} · dati scientifici con modello dichiarato</p>${resultSummary(r)}<details style="margin-top:20px"><summary>Model assumptions and limitations</summary><ul>${(r.assumptions||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details></div>`;}
+ const r=S.result;return `<div class="card"><div class="row" style="justify-content:space-between"><h2>Results · ${esc(r.fidelity)}</h2><button data-act="download-result">↓ JSON</button></div><p class="hint">Job ${esc(S.resultJobId||'')} · Scientific data with explicitly declared model</p>${resultSummary(r)}<details style="margin-top:20px"><summary>Model assumptions and limitations</summary><ul>${(r.assumptions||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details></div>`;}
 async function refreshUnified(){
  if(!S.project)return;
  const id=S.project.id;
@@ -120,14 +120,14 @@ async function refreshUnified(){
  catch(e){S.unifiedError=e.message;S.unifiedPreview=null;}
  if(S.view==='unified')render();
 }
-function unifiedSvg(){const g=S.unifiedPreview?.geometry;if(!g)return `<div class="alert">${esc(S.unifiedError||'Carica l’anteprima del physical model.')}</div>`;
+function unifiedSvg(){const g=S.unifiedPreview?.geometry;if(!g)return `<div class="alert">${esc(S.unifiedError||'Load the physical model preview.')}</div>`;
  const c=g.chip,w=c.x1-c.x0,h=c.y1-c.y0;
  let rects='';for(const [name,list] of Object.entries(g.metal)){
   const color=name==='ground'?'#98acc1':name.endsWith('.pad_a')?'#15b6ab':name.endsWith('.pad_b')?'#5489e8':name.endsWith('.resonator')?'#efb568':'#ab80ed';
   for(const r of list)rects+=`<rect x="${r.x0}" y="${-r.y1}" width="${r.x1-r.x0}" height="${r.y1-r.y0}" fill="${color}"/>`;
  }
  for(const [name,r] of Object.entries(g.ports))rects+=`<rect x="${r.x0}" y="${-r.y1}" width="${r.x1-r.x0}" height="${r.y1-r.y0}" fill="none" stroke="${name.endsWith('junction')?'#ff475f':'#f4d575'}" stroke-width="15"/>`;
- return `<svg viewBox="${c.x0} ${-c.y1} ${w} ${h}" role="img" aria-label="Geometria QPU parametrica unificata" style="width:100%;max-height:580px;background:#0e1c2d;border:1px solid #34516d;border-radius:10px">${rects}</svg><p class="hint">GND grigio, isole verde/blu, risonatori oro, linee viola; porte e JJ marcate. SHA ${esc(g.geometry_sha256.slice(0,16))}…</p>`;
+ return `<svg viewBox="${c.x0} ${-c.y1} ${w} ${h}" role="img" aria-label="Unified parametric QPU geometry" style="width:100%;max-height:580px;background:#0e1c2d;border:1px solid #34516d;border-radius:10px">${rects}</svg><p class="hint">Gray ground, green/blue islands, gold resonators, purple lines; ports and junctions marked. SHA ${esc(g.geometry_sha256.slice(0,16))}…</p>`;
 }
 // Parametric physical design controls: all fields stay inside the versioned document.
 const pJSON = path => esc(JSON.stringify(path));
@@ -159,13 +159,13 @@ function parametricView(){
  <div class="card"><h2>Stack-up multilayer</h2><div class="actions"><button data-act="param-add" data-kind="layer">+ Layer</button></div>${s.stack.map((l,i)=>pRow(l.id,i,pField('Ruolo',['stack',i,'role'],l.role,'text',['dielectric','conductor','junction_mask'])+pField('Materiale',['stack',i,'material'],l.material,'text',materials)+pField('z0 µm',['stack',i,'z0_um'],l.z0_um)+pField('Spessore µm',['stack',i,'thickness_um'],l.thickness_um)+(['conductor','junction_mask'].includes(l.role)?pField('GDS layer',['stack',i,'gds_layer'],l.gds_layer):''),'layer')).join('')}${notes}</div>
  <div class="card"><h2>Josephson process</h2><div class="fields">${pField('Method',['junction_process','method'],s.junction_process.method,'text',['dolan','manhattan','generic'])}${pField('JJ layer',['junction_process','junction_layer_id'],s.junction_process.junction_layer_id,'text',s.stack.filter(l=>l.role==='junction_mask').map(l=>l.id))}${['orientation_deg','linewidth_um','overlap_um','undercut_um','lead_extension_um'].map(k=>pField(k,['junction_process',k],s.junction_process[k])).join('')}</div><p class="hint">The junction mask is a CAD process-intent marker. Evaporation angles, shadow overlap and contact resistance must be calibrated to the actual fabrication process.</p></div>
  </section><section>
- <div class="card"><h2>Componenti qubit</h2><div class="actions"><button data-act="param-add" data-kind="qubit">+ Qubit</button></div>${s.qubits.map((q,i)=>pRow(q.id,i,pField('Topologia',['qubits',i,'family'],q.family,'text',['floating','cross','pocket',...Object.keys(s.libraries?.qubit_shapes||{})])+['x_um','y_um','width_um','height_um','rotation_deg','ej_ghz','cj_ff'].map(k=>pField(k,['qubits',i,k],q[k])).join(''),'qubit')).join('')}</div>
- <div class="card"><h2>Couplers / interqubit graph</h2><div class="actions"><button data-act="param-add" data-kind="coupler">+ Coupler</button></div>${s.couplers.map((c,i)=>pRow(c.id,i,pField('Type',['couplers',i,'kind'],c.kind,'text',['capacitive_pad','interdigitated','bus_cpw','tunable_squid','custom_rects'])+pField('Terminal A',['couplers',i,'a'],c.a,'text',qubitNames.flatMap(x=>['east','west','north','south'].map(y=>x+'.'+y)))+pField('Terminal B',['couplers',i,'b'],c.b,'text',qubitNames.flatMap(x=>['east','west','north','south'].map(y=>x+'.'+y)))+['gap_um','finger_width_um','nominal_c_ff'].map(k=>pField(k,['couplers',i,k],c[k])).join('')+(c.kind==='tunable_squid'?pField('EJ GHz',['couplers',i,'ej_ghz'],c.ej_ghz||8):''),'coupler')).join('')}<p class="hint">Capacitive coupling is geometric; bus_cpw crea un conduttore separato e isolato. Per le altre linee usa il routing CPW. Un tunable SQUID genera un marker/ramo lineare, non un loop di fabbricazione qualificato. Custom coupler e librerie di forme si definiscono nell’Editor JSON avanzato.</p></div>
- <div class="card"><h2>Routing CPW</h2><div class="actions"><button data-act="param-add" data-kind="route">+ CPW</button></div>${s.routes.map((r,i)=>pRow(r.id,i,pField('Net',['routes',i,'net'],r.net,'text')+pField('Layer',['routes',i,'layer'],r.layer,'text',layerNames)+pField('Stile',['routes',i,'style'],r.style,'text',['straight','manhattan','waypoints','meander'])+pField('Start [x,y]',['routes',i,'start_um'],r.start_um,'textarea')+pField('End [x,y]',['routes',i,'end_um'],r.end_um,'textarea')+pField('Waypoints [[x,y]]',['routes',i,'waypoints_um'],r.waypoints_um,'textarea')+pField('Preferenza curva',['routes',i,'bend_preference'],r.bend_preference,'text',['horizontal','vertical'])+['width_um','gap_um','meander_pitch_um','meander_depth_um'].map(k=>pField(k,['routes',i,k],r[k])).join(''),'route')).join('')}<p class="hint">Route per net/layer con waypoint e meandri ortogonali, gap ground deterministico e DRC shorts. Non include ancora auto-router A* o bridge/via.</p></div>
+ <div class="card"><h2>Qubit components</h2><div class="actions"><button data-act="param-add" data-kind="qubit">+ Qubit</button></div>${s.qubits.map((q,i)=>pRow(q.id,i,pField('Topology',['qubits',i,'family'],q.family,'text',['floating','cross','pocket',...Object.keys(s.libraries?.qubit_shapes||{})])+['x_um','y_um','width_um','height_um','rotation_deg','ej_ghz','cj_ff'].map(k=>pField(k,['qubits',i,k],q[k])).join(''),'qubit')).join('')}</div>
+ <div class="card"><h2>Couplers / interqubit graph</h2><div class="actions"><button data-act="param-add" data-kind="coupler">+ Coupler</button></div>${s.couplers.map((c,i)=>pRow(c.id,i,pField('Type',['couplers',i,'kind'],c.kind,'text',['capacitive_pad','interdigitated','bus_cpw','tunable_squid','custom_rects'])+pField('Terminal A',['couplers',i,'a'],c.a,'text',qubitNames.flatMap(x=>['east','west','north','south'].map(y=>x+'.'+y)))+pField('Terminal B',['couplers',i,'b'],c.b,'text',qubitNames.flatMap(x=>['east','west','north','south'].map(y=>x+'.'+y)))+['gap_um','finger_width_um','nominal_c_ff'].map(k=>pField(k,['couplers',i,k],c[k])).join('')+(c.kind==='tunable_squid'?pField('EJ GHz',['couplers',i,'ej_ghz'],c.ej_ghz||8):''),'coupler')).join('')}<p class="hint">Capacitive coupling is geometric; bus_cpw creates a separate isolated conductor. Use CPW routing for other lines. A tunable SQUID is represented by a linear branch/marker, not a fabrication-qualified loop. Custom couplers and shape libraries can be defined in the advanced JSON editor.</p></div>
+ <div class="card"><h2>Routing CPW</h2><div class="actions"><button data-act="param-add" data-kind="route">+ CPW</button></div>${s.routes.map((r,i)=>pRow(r.id,i,pField('Net',['routes',i,'net'],r.net,'text')+pField('Layer',['routes',i,'layer'],r.layer,'text',layerNames)+pField('Style',['routes',i,'style'],r.style,'text',['straight','manhattan','waypoints','meander'])+pField('Start [x,y]',['routes',i,'start_um'],r.start_um,'textarea')+pField('End [x,y]',['routes',i,'end_um'],r.end_um,'textarea')+pField('Waypoints [[x,y]]',['routes',i,'waypoints_um'],r.waypoints_um,'textarea')+pField('Bend preference',['routes',i,'bend_preference'],r.bend_preference,'text',['horizontal','vertical'])+['width_um','gap_um','meander_pitch_um','meander_depth_um'].map(k=>pField(k,['routes',i,k],r[k])).join(''),'route')).join('')}<p class="hint">Routes are defined per net and layer, with waypoints, orthogonal meanders, ground gaps and short-circuit DRC. Automatic A* routing and bridge/via routing are not yet supported.</p></div>
  <div class="card"><h2>Nominal circuit model</h2><p class="hint">Nominal values, not FEM-extracted. The graph includes explicitly declared coupler branches.</p><div class="fields">${Object.entries(s.nominal).map(([k,v])=>pField(k,['nominal',k],v)).join('')}</div><button data-act="adopt-physical" ${!g?'disabled':''}>Importa netlist nominale</button></div>
  <div class="card"><h2>Gmsh → Palace</h2><p class="hint">Gmsh ${status.gmsh_available?'available':'missing'} · Palace ${status.installed?'detected':'not detected'}. Unsupported stack-ups stop with explicit errors; no synthetic FEM results are substituted.</p>
  ${[['package','Parametric exports'],['mesh','Planar 3D mesh'],['electrostatic','Palace capacitance'],['capacitance','C-matrix CSV + checks'],['eigenmode','Eigenmodes'],['driven','S-parameters per port'],['convergence-eigenmode','FEM mode convergence (3 levels; intensive)'],['convergence-electrostatic','FEM capacitance convergence (3 levels; intensive)']].map(([stage,label])=>`<div class="row" style="justify-content:space-between;margin:9px 0"><span>${label}</span><button class="mini-btn" data-act="run-physical" data-stage="${stage}" ${S.busy||isViewer()||(stage!=='package'&&!status.gmsh_available)||(!['package','mesh'].includes(stage)&&!status.installed)?'disabled':''}>Job</button></div>`).join('')}
- </div><div class="card"><h2>Storico job</h2>${jobs||'Nessun job'}${S.job?.mode==='physical'?`<div class="metric">${esc(S.job.state)} · ${esc(S.job.target)}${S.physicalResult?`${convergenceNotice(S.physicalResult)}<pre>${esc(JSON.stringify(S.physicalResult,null,2))}</pre>`:''}</div>`:''}</div>
+ </div><div class="card"><h2>Job history</h2>${jobs||'No jobs yet'}${S.job?.mode==='physical'?`<div class="metric">${esc(S.job.state)} · ${esc(S.job.target)}${S.physicalResult?`${convergenceNotice(S.physicalResult)}<pre>${esc(JSON.stringify(S.physicalResult,null,2))}</pre>`:''}</div>`:''}</div>
  </section></div><div id="param-json-editor" class="card" style="display:none"><h2>Specifica completa modificabile</h2><textarea id="param-json-source" rows="24" style="width:100%;font-family:monospace">${esc(JSON.stringify(s,null,2))}</textarea><div class="actions"><button data-act="param-json-apply">Applica JSON</button></div></div>`;
 }
 function unifiedView(){const g=S.unifiedPreview?.geometry,s=S.doc.physical_qpu||S.unifiedPreview?.spec,physicalJobs=S.project.jobs.filter(j=>j.mode==='physical');
@@ -181,8 +181,8 @@ function unifiedView(){const g=S.unifiedPreview?.geometry,s=S.doc.physical_qpu||
  const files=S.unifiedJobFiles||[];
  const links=files.filter(f=>f.startsWith('physical/')&&!f.includes('..')).slice(0,50).map(f=>`<a href="/api/projects/${encodeURIComponent(S.project.id)}/jobs/${encodeURIComponent(S.job?.id||'')}/files/${f.split('/').map(encodeURIComponent).join('/')}?download=1">${esc(f)}</a>`).join(' · ');
  return `<div class="alert info"><b>Unified physical source v0.6:</b> component parameters → positive metal geometry → annotated GDS → QGeometry → Gmsh/Palace groups → nominal circuit <b>with documented limitations</b>. The FEM model cannot infer C, g or losses without solver data: capacitance extraction requires a verified Palace job. The legacy 2/4-cell prototypes do not contain designed physical interqubit couplers.</div>
- <div class="actions"><button data-act="param-create">New modello parametrico v0.7 (materiali, stack, coupler e CPW)</button></div><div class="grid"><section><div class="card"><h2>Layout parametrico dalla stessa specifica</h2>${unifiedSvg()}
- <div class="actions"><button data-act="refresh-unified">Ricalcola e verifica modello</button><button data-act="physical-manifest" ${!g?'disabled':''}>QGeometry JSON</button><button data-act="physical-gds" ${!g?'disabled':''}>GDS prototipo HOLD</button></div>
+ <div class="actions"><button data-act="param-create">New parametric model v0.7 (materials, stack, couplers and CPW)</button></div><div class="grid"><section><div class="card"><h2>Parametric layout from a single specification</h2>${unifiedSvg()}
+ <div class="actions"><button data-act="refresh-unified">Rebuild and validate model</button><button data-act="physical-manifest" ${!g?'disabled':''}>QGeometry JSON</button><button data-act="physical-gds" ${!g?'disabled':''}>Prototype GDS (HOLD)</button></div>
  <p class="hint">One geometry hash identifies GDS, net names, ports and physical groups. GDS does not include a qualified junction process geometry.</p></div>
  <div class="card"><h2>Reduced circuit from physical source</h2><p>Differential Q nodes and resonators correspond to geometry elements. The initial C/L values below are <b>user-declared, not FEM-extracted</b>.</p>
  ${nominal?`<p class="metric">${nominal.qubits.length} giunzioni · ${nominal.elements.length} elements · ${nominal.ports.length} RF ports</p>`:''}
@@ -194,7 +194,7 @@ function unifiedView(){const g=S.unifiedPreview?.geometry,s=S.doc.physical_qpu||
  </div><div class="card"><h2>Palace · pipeline da singola sorgente</h2>
  <p class="hint">Gmsh Python: ${status.gmsh_available?'available':'not installed'} · Palace: ${status.installed?'detected, not qualified':'not installed'} · backend ${esc(status.backend||'…')}. On Windows the setup is <code>WINDOWS-PALACE-SETUP.cmd</code>.</p>
  ${[['package','GDS + QGeometry + circuit + Palace JSON'],['mesh','Generate 3D FEM mesh'],['electrostatic','Palace: Maxwell Cij'],['capacitance','Palace: Cij + differential projection'],['eigenmode','Palace: linearized JJ modes + raw EPR'],['driven','Palace: one solve per RF excitation'],['convergence-eigenmode','FEM eigenmode convergence · 3 levels'],['convergence-electrostatic','FEM capacitance convergence · 3 levels']].map(([stage,label])=>`<div class="row" style="justify-content:space-between;gap:8px;margin-top:12px"><span>${esc(label)}</span><button class="mini-btn" data-act="run-physical" data-stage="${stage}" ${S.busy||!initiated||isViewer()||(stage!=='package'&&!status.gmsh_available)||( !['package','mesh'].includes(stage)&&!status.installed)?'disabled':''}>▶ Job</button></div>`).join('')}
- <p class="hint">Le simulazioni multi-cella full-wave possono essere molto costose. None simulazione viene lanciata implicitamente dal Web.</p></div>
+ <p class="hint">Full-wave multi-cell simulations may be resource-intensive. No simulation is launched automatically by the Web UI.</p></div>
  <div class="card"><h2>Persistent results</h2>${physicalJobs.length?physicalJobs.slice(0,7).map(j=>`<div class="row" style="justify-content:space-between;gap:10px;margin:7px 0"><span>${esc(j.target)} · ${esc(j.state)}</span><button class="mini-btn" data-act="view-job" data-id="${esc(j.id)}">Open</button></div>`).join(''):'<p>No physical-model jobs have been run yet.</p>'}
  ${S.job?.mode==='physical'?`<div class="metric"><b>${esc(S.job.state)}</b> · ${esc(S.job.target)} · ${esc(S.job.error||'')}</div>${S.physicalResult?`${convergenceNotice(S.physicalResult)}<pre style="white-space:pre-wrap;max-height:300px;overflow:auto">${esc(JSON.stringify(S.physicalResult,null,2))}</pre>`:''}${links?`<div class="scroll" style="max-height:140px;overflow:auto">${links}</div>`:''}`:''}</div></section></div>`;
 }
@@ -217,11 +217,11 @@ async function refreshPalace(){if(!S.project)return;
  S.femError=requests[1].status==='rejected'?requests[1].reason.message:null;
  if(S.view==='palace')render();
 }
-function physicalSvg(){const g=S.femPreview?.geometry;if(!g)return `<div class="alert">${esc(S.femError||'Premi Aggiorna anteprima per verificare la geometria.')}</div>`;
+function physicalSvg(){const g=S.femPreview?.geometry;if(!g)return `<div class="alert">${esc(S.femError||'Select Refresh preview and checks to verify the geometry.')}</div>`;
  const c=g.chip,w=c.x1-c.x0,h=c.y1-c.y0;const fill={ground:'#a7b8ce',pad_a:'#36c8b6',pad_b:'#668fea',resonator:'#ecb35c',feedline:'#c99fe8'};
  let rects='';for(const [net,boxes] of Object.entries(g.metal))for(const r of boxes){rects+=`<rect x="${r.x0}" y="${-r.y1}" width="${r.x1-r.x0}" height="${r.y1-r.y0}" fill="${fill[net]||'#fff'}"/>`;}
  for(const [name,r] of Object.entries(g.ports)){rects+=`<rect x="${r.x0}" y="${-r.y1}" width="${r.x1-r.x0}" height="${r.y1-r.y0}" fill="none" stroke="#ff4654" stroke-width="9"/>`;}
- return `<svg role="img" aria-label="Maschera metallica fisica parametricamente generata per FEM" viewBox="${c.x0} ${-c.y1} ${w} ${h}" style="width:100%;max-height:460px;background:#0c1d30;border-radius:12px;border:1px solid #34516d">${rects}</svg><div class="row" style="flex-wrap:wrap;gap:11px"><small>■ GND · ■ Q pads · ■ resonator · ■ feedline · rosso = ports</small><small>SHA ${esc(g.geometry_sha256.slice(0,13))}...</small></div>`;
+ return `<svg role="img" aria-label="Parametric physical metal geometry for FEM" viewBox="${c.x0} ${-c.y1} ${w} ${h}" style="width:100%;max-height:460px;background:#0c1d30;border-radius:12px;border:1px solid #34516d">${rects}</svg><div class="row" style="flex-wrap:wrap;gap:11px"><small>■ GND · ■ Q pads · ■ resonator · ■ feedline · red = ports</small><small>SHA ${esc(g.geometry_sha256.slice(0,13))}...</small></div>`;
 }
 function palaceCsvView(){const input=S.femCsv;
  if(!input||!input.rows?.length)return '';
@@ -261,36 +261,36 @@ async function loadFemCsv(job){S.femCsv=null;
  }catch(err){console.warn('Palace CSV preview:',err.message);}
 }
 function palaceView(){const status=S.palaceStatus||{};const cfg=S.doc.config||{};
- const femjobs=S.project.jobs.filter(j=>j.mode==='fem');const loading=!S.palaceStatus?'Backend non ancora interrogato':status.message||'Stato sconosciuto';
+ const femjobs=S.project.jobs.filter(j=>j.mode==='fem');const loading=!S.palaceStatus?'Backend status not yet queried':status.message||'Unknown status';
  const editable=!isViewer();let form=FEM_FIELDS.map(([section,key,label])=>`<label class="field"><span>${esc(label)}</span><input data-fem="${section}.${key}" type="number" step="any" ${editable?'':'disabled'} value="${esc(cfg[section]?.[key]??'')}"></label>`).join('');
  const files=S.femJobFiles.filter(x=>x.startsWith('run/em/')||x.startsWith('run/layout/')).slice(0,80);
- return `<div class="alert"><b>MODEL LIMITATION:</b> the multi-qubit Quantum Lab circuit and this single-transmon FEM geometry are <b>distinct models</b>. They are not automatically synchronized. The mask remains in fabrication HOLD fino a DRC, correlazione EM e qualificazione del processo.</div>
+ return `<div class="alert"><b>MODEL LIMITATION:</b> the multi-qubit Quantum Lab circuit and this single-transmon FEM geometry are <b>distinct models</b>. They are not automatically synchronized. The mask remains in fabrication HOLD pending DRC, EM correlation and process qualification.</div>
  <div class="grid"><section><div class="card"><h2>Shared parametric geometry · QComponent-style</h2>${physicalSvg()}<p class="hint">FEM and physical GDS share the layout generator and net labels. This geometry represents the original SQE single-transmon prototype.</p><button data-act="refresh-palace">Refresh preview and checks</button></div>
  <div class="card"><h2>Dimensions and stack-up · source of truth</h2><p class="muted">These parameters update the versioned physical specification, not the nominal multi-QPU schematic values.</p><div class="fields">${form}</div><p class="hint">Edit substrate, materials and process settings in Studio. Palace configurations are regenerated per job from immutable revisions.</p><button data-act="refresh-palace">Verify after saving</button></div></section>
  <section><div class="card"><h2>Runtime Palace</h2><span class="pill ${status.installed?'':'wait'}">${status.installed?'DETECTED · UNQUALIFIED':'NOT DETECTED'}</span><p>${esc(loading)}</p><div class="metric">Backend: <b>${esc(status.backend||'...')}</b> · distro: <b>${esc(status.configured_distro||'...')}</b><br>Gmsh Python: <b>${status.gmsh_available?'available':'missing'}</b> · Quantum Metal: <b>${status.quantum_metal_available?'in Web environment':'separate optional environment'}</b></div><p class="hint">On Windows: run <code>WINDOWS-PALACE-SETUP.cmd</code> from the extracted folder. Web controls do not install software or run privileged commands.</p><div class="actions"><button data-act="refresh-palace">Recheck</button><a href="https://awslabs.github.io/palace/stable/install/" target="_blank" rel="noopener">Official Palace manual</a></div></div>
- <div class="card"><h2>EM workflow · persistent jobs</h2><div class="fields"><label class="field"><span>MPI ranks (1–16)</span><input data-palace-ranks="1" type="number" min="1" max="16" value="${S.palaceRanks}"></label></div>${FEM_ACTIONS.map(([a,label])=>`<div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><span>${esc(label)}</span><button class="mini-btn" data-act="run-fem" data-stage="${esc(a)}" ${S.busy||!editable||(!status.gmsh_available)|| (a!=='mesh'&&!status.installed)?'disabled':''}>▶ Start</button></div>`).join('')}<p class="hint">Dependent stages automatically generate layout, mesh and JSON inputs. Physical meshing can be resource-intensive. Eigenmode and driven analyses require functioning Gmsh and Palace installations.</p></div>
- <div class="card"><h2>Job FEM e file risultati</h2>${femjobs.slice(0,9).map(j=>`<div class="row" style="justify-content:space-between;margin:9px 0"><span>${esc(j.target)} · <span class="pill ${j.state==='succeeded'?'':'wait'}">${esc(j.state)}</span></span><button class="mini-btn" data-act="view-job" data-id="${esc(j.id)}">Open</button></div>`).join('')||'<p class="hint">Nessun job FEM avviato.</p>'}${S.job?.mode==='fem'?`<p class="hint">Job ${esc(S.job.id.slice(0,12))}: ${esc(S.job.state)} ${esc(S.job.error||'')}</p>`:''}${files.length?`<div class="scroll"><table>${files.map(f=>`<tr><td><code>${esc(f)}</code></td><td><a href="/api/projects/${encodeURIComponent(S.project.id)}/jobs/${encodeURIComponent(S.job.id)}/files/${f.split('/').map(encodeURIComponent).join('/')}?download=1">Download</a></td></tr>`).join('')}</table></div>`:''}</div>
+ <div class="card"><h2>EM workflow · persistent jobs</h2><div class="fields"><label class="field"><span>MPI ranks (1–16)</span><input data-palace-ranks="1" type="number" min="1" max="16" value="${S.palaceRanks}"></label></div>${FEM_ACTIONS.map(([a,label])=>`<div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><span>${esc(label)}</span><button class="mini-btn" data-act="run-fem" data-stage="${esc(a)}" ${S.busy||!editable||(!status.gmsh_available)|| (a!=='mesh'&&!status.installed)?'disabled':''}>▶ Start</button></div>`).join('')}<p class="hint">Dependent stages automatically generate layout, mesh and JSON inputs. Queued jobs need a running worker; mesh generation can be resource-intensive. If a job stays queued, open System & Diagnostics to inspect queue health. Eigenmode and driven analyses require functioning Gmsh and Palace installations.</p></div>
+ <div class="card"><h2>FEM jobs and result files</h2>${femjobs.slice(0,9).map(j=>`<div class="row" style="justify-content:space-between;margin:9px 0"><span>${esc(j.target)} · ${Math.round(Math.max(0,Date.now()/1000-j.created))}s elapsed · <span class="pill ${j.state==='succeeded'?'':'wait'}">${esc(j.state)}</span></span><button class="mini-btn" data-act="view-job" data-id="${esc(j.id)}">Open</button></div>`).join('')||'<p class="hint">No jobs yet FEM avviato.</p>'}${S.job?.mode==='fem'?`<p class="hint">Job ${esc(S.job.id.slice(0,12))}: ${esc(S.job.state)} · stage ${esc(S.job.stage||'not started')} · ${esc(S.job.error||'')}</p><button class="mini-btn" data-act="fem-logs">View worker / solver log</button>${['queued','running','cancel_requested'].includes(S.job.state)?`<button class="mini-btn" data-act="cancel-fem">Cancel job</button>`:''}${S.femLog?`<pre style="max-height:230px;overflow:auto">${esc(S.femLog)}</pre>`:''}`:''}${files.length?`<div class="scroll"><table>${files.map(f=>`<tr><td><code>${esc(f)}</code></td><td><a href="/api/projects/${encodeURIComponent(S.project.id)}/jobs/${encodeURIComponent(S.job.id)}/files/${f.split('/').map(encodeURIComponent).join('/')}?download=1">Download</a></td></tr>`).join('')}</table></div>`:''}</div>
  ${palaceCsvView()}
  <div class="card"><h2>Quantum Metal interoperability</h2><p>Workflow compatible in concept with <b>QDesign / QComponent</b>: named components, shared geometry, layers, ports, parameters and GDS. Quantum Metal is optional in <code>.venv-metal</code>, installed using <code>WINDOWS-QUANTUM-METAL-SETUP.cmd</code>. This is not a native Quantum Metal-to-Palace renderer.</p><div class="actions"><button data-act="download-metal-manifest">Export QGeometry JSON</button><a href="https://qiskit-community.github.io/qiskit-metal/installation.html" target="_blank" rel="noopener">Quantum Metal · installation</a></div><p class="hint">Run <code>.venv-metal\Scripts\python.exe scripts\quantum_metal_bridge.py sqe-qmetal-qgeometry.json</code>. Exports named positive-metal polygons, not fully routed pins or Palace meshes.</p></div></section></div>`;
 }
 function historyView(){const jobs=S.project.jobs.filter(j=>j.mode==='lab');return `<div class="card"><h2>Revisions and persistent jobs</h2><p class="muted">Jobs are linked to immutable revisions. Files remain available after closing the browser. The job queue moves with the compute installation.</p><div class="scroll"><table><tr><th>Date</th><th>Job</th><th>Analysis</th><th>Status</th><th>Revision</th><th>Details</th></tr>${jobs.map(j=>`<tr><td>${new Date(j.created*1000).toLocaleString('en-US')}</td><td><code>${j.id.slice(0,9)}</code></td><td>${esc(j.target.replace('lab:',''))}</td><td><span class="pill ${j.state==='succeeded'?'':'wait'}">${esc(j.state)}</span></td><td><code>${esc(j.revision_id.slice(0,9))}</code></td><td><button class="mini-btn" data-act="view-job" data-id="${esc(j.id)}">Open</button></td></tr>`).join('')}</table></div>${S.job&&S.job.state!=='succeeded'?`<h3>Job status</h3><pre>${esc(JSON.stringify({id:S.job.id,state:S.job.state,stage:S.job.stage,error:S.job.error},null,2))}</pre>`:''}</div>`;}
-function roadmapView(){return `<div class="grid"><div><div class="card"><h2>Available components</h2><ul><li>SPICE-like netlist of C, L, R, JJ, SQUID and capacitive ports.</li><li>Reduced-order electromagnetic analysis, eigenvalues, JJ branch participation, χ and Kerr.</li><li>S-parameter scattering, Touchstone export, flux sweep, Bloch Rabi/Ramsey/echo/T1.</li><li>One-mode Duffing, Q budget, yield and EJ optimization.</li><li>Revisions, audit, users, persistent jobs, project capsules and GDSII <em>concept-only</em>.</li><li>Original workflow: Gmsh → external Palace FEM, electrostatics/eigenmodes in a separate pipeline.</li></ul></div><div class="card"><h2>Planned advanced integrations</h2><ul><li>Connected QPDK/Quantum Metal geometries and verified CPW routing.</li><li>Package-aware 3D mesh with multilayer stack-up and flip-chip, bumps e vias.</li><li>Solver FEM/PBC/S-params, MoM open-source qualificato e openEMS FDTD adapter.</li><li>Black-box quantization reale da Y/Z EM e participation EPR distribuita dalle energie di campo.</li><li>HB multiarmonica Newton per reti Josephson e JTWPA/SNAIL/Snake.</li><li>Calibrazione materiali, Lk(T), losses TLS/Purcell, variabilità correlata, DRC e rule decks di foundry.</li><li>Worker remoto multi-nodo, SLURM/PBS, storage condiviso/object store e PostgreSQL.</li></ul></div></div><section><div class="card"><h2>Modello di deployment</h2><pre>Browser Windows → SQE Studio API / SQLite WAL / job queue
+function roadmapView(){return `<div class="grid"><div><div class="card"><h2>Available components</h2><ul><li>SPICE-like netlist of C, L, R, JJ, SQUID and capacitive ports.</li><li>Reduced-order electromagnetic analysis, eigenvalues, JJ branch participation, χ and Kerr.</li><li>S-parameter scattering, Touchstone export, flux sweep, Bloch Rabi/Ramsey/echo/T1.</li><li>One-mode Duffing, Q budget, yield and EJ optimization.</li><li>Revisions, audit, users, persistent jobs, project capsules and GDSII <em>concept-only</em>.</li><li>Original workflow: Gmsh → external Palace FEM, electrostatics/eigenmodes in a separate pipeline.</li></ul></div><div class="card"><h2>Planned advanced integrations</h2><ul><li>Connected QPDK/Quantum Metal geometries and verified CPW routing.</li><li>Package-aware 3D mesh with multilayer stack-up and flip-chip, bumps e vias.</li><li>FEM/PBC/S-parameters solver, qualified open-source MoM and openEMS FDTD adapter.</li><li>Black-box quantization from EM Y/Z and EPR participation extracted from field energy.</li><li>Multi-harmonic-balance Newton solver for Josephson networks, JTWPA, SNAIL and snake circuits.</li><li>Material calibration, Lk(T), TLS/Purcell losses, correlated variation, DRC and foundry rule decks.</li><li>Remote multi-node workers, SLURM/PBS, shared/object storage and PostgreSQL.</li></ul></div></div><section><div class="card"><h2>Deployment model</h2><pre>Browser Windows → SQE Studio API / SQLite WAL / job queue
        │                              │
-       ├── Anteprima su PC ───────────┴── SciPy / NumPy
+       ├── Local preview ───────────┴── SciPy / NumPy
        │
-       └── Worker locale → futuro worker Linux HPC
+       └── Worker locale → future Linux HPC worker
                                 ├── Gmsh / Palace FEM
                                 ├── Quantum Metal / QPDK
                                 └── QuTiP / scqubits
 </pre><p>The current queue is single-host. Moving the whole service to a server preserves the UI; dispatching work across hosts requires an additional scheduler/database adapter.</p></div></section></div>`;}
-async function run(analysis){if(isViewer())throw Error('Accesso di sola lettura');await save();const revision=await api(`/projects/${S.project.id}/revisions`,'POST',{
+async function run(analysis){if(isViewer())throw Error('Read-only access');await save();const revision=await api(`/projects/${S.project.id}/revisions`,'POST',{
  note:'Quantum Lab / '+analysis,draft_version:S.project.draft_version});
  S.project.revisions.unshift({id:revision.id});
  const created=await api(`/projects/${S.project.id}/jobs`,'POST',{revision_id:revision.id,target:'lab:'+analysis,
  mode:'lab',cpus:1,memory_gb:2,options:{analysis_options:S.options[analysis]||{}}});
  S.result=null;S.resultJobId=null;S.job={id:created.id,state:'queued',target:'lab:'+analysis};S.busy=true;
  S.project.jobs.unshift({id:created.id,target:'lab:'+analysis,mode:'lab',state:'queued',created:Date.now()/1000,revision_id:revision.id});
- render();notify('Job '+created.id.slice(0,8)+' in coda. I risultati saranno persistenti.');}
+ render();notify('Job '+created.id.slice(0,8)+' queued. Results will remain available in the project.');}
 async function loadJob(id,shouldRender=true){const job=await api(`/projects/${S.project.id}/jobs/${id}`);S.job=job.job;
  if(S.job.mode==='physical'){S.view='unified';S.unifiedJobFiles=job.files||[];S.physicalResult=null;
   if(S.job.state==='succeeded'){const f=await fetch(`/api/projects/${S.project.id}/jobs/${id}/files/physical/result.json`,{credentials:'same-origin'});if(f.ok)S.physicalResult=await f.json();}
@@ -299,14 +299,14 @@ async function loadJob(id,shouldRender=true){const job=await api(`/projects/${S.
  if(S.job.mode==='lab'){const a=S.job.target.split(':')[1];if(INFO[a])S.view=a;
  if(S.job.state==='succeeded'){
  const r=await fetch(`/api/projects/${S.project.id}/jobs/${id}/files/lab/result.json`,{credentials:'same-origin'});
- if(!r.ok)throw Error('Risultato non ancora leggibile: HTTP '+r.status);S.result=await r.json();S.resultJobId=id;
+ if(!r.ok)throw Error('Result is not available yet: HTTP '+r.status);S.result=await r.json();S.resultJobId=id;
  }else{S.result=null;S.resultJobId=null;}}
  if(shouldRender)render();}
 async function poll(){if(!S.project||!S.user)return;
  const live=S.project.jobs.filter(j=>['queued','running','cancel_requested'].includes(j.state));
  if(!live.length){if(S.busy){S.busy=false;render();}return;}
  try{const detail=await api('/projects/'+S.project.id);S.project.jobs=detail.jobs;S.project.revisions=detail.revisions;
- if(S.job){const updated=S.project.jobs.find(j=>j.id===S.job.id);if(updated){S.job=updated;if(['succeeded','failed','cancellsd','interrupted'].includes(updated.state))await loadJob(updated.id,false);}}
+ if(S.job){const updated=S.project.jobs.find(j=>j.id===S.job.id);if(updated){S.job=updated;if(['succeeded','failed','cancelled','interrupted'].includes(updated.state))await loadJob(updated.id,false);}}
  S.busy=S.project.jobs.some(j=>['lab','fem','physical'].includes(j.mode)&&['running','queued','cancel_requested'].includes(j.state));
  if(document.activeElement?.tagName!=='INPUT'&&document.activeElement?.tagName!=='TEXTAREA'&&document.activeElement?.tagName!=='SELECT')render();
  }catch(e){console.warn('Lab job refresh:',e.message);}}
@@ -319,7 +319,7 @@ function setNested(path,value){const keys=path.split('.');let obj=S.design;
 document.addEventListener('change',async e=>{if(!S.project)return;
  try{const n=e.target;if(n.id==='project-choice'){await save();await loadProject(n.value);return;}
  if(n.dataset.paramField){
-  if(isViewer())throw Error('Sola lettura');
+  if(isViewer())throw Error('Read-only access');
   if(!S.doc.physical_qpu || S.doc.physical_qpu.schema_version!==2)throw Error('Create a parametric model first');
   const path=JSON.parse(n.dataset.paramField),v=n.dataset.paramJson==='1'?JSON.parse(n.value):n.type==='number'?Number(n.value):n.value;
   if(typeof v==='number'&&!Number.isFinite(v))throw Error('Valore numerico non valido');
@@ -347,43 +347,43 @@ document.addEventListener('click',async e=>{const button=e.target.closest('[data
  else if(action==='select-element'){S.selection=Number(button.dataset.index);render();}
  else if(action==='add-element'){const base=S.design.elements[0];const id='Cextra'+Date.now().toString(36).slice(-5);
  S.design.elements.push({id,kind:'C',a:base.a,b:base.b==='0'?(nodelist().find(x=>x!==base.a)||'0'):base.b,value:.5});S.selection=S.design.elements.length-1;setDirty();render();}
- else if(action==='remove-element'){const el=S.design.elements[S.selection];if(S.design.qubits.some(q=>q.junction===el.id))throw Error('A junction assigned to a qubit cannot be deleted');if(S.design.elements.length===1)throw Error('Serve almeno un elemento');S.design.elements.splice(S.selection,1);S.selection=0;setDirty();render();}
+ else if(action==='remove-element'){const el=S.design.elements[S.selection];if(S.design.qubits.some(q=>q.junction===el.id))throw Error('A junction assigned to a qubit cannot be deleted');if(S.design.elements.length===1)throw Error('At least one element is required');S.design.elements.splice(S.selection,1);S.selection=0;setDirty();render();}
  else if(action==='convert-squid'){const el=S.design.elements[S.selection];el.kind='SQUID';el.asymmetry=.10;el.flux_phi0=0;setDirty();render();}
- else if(action==='add-port'){if(S.design.ports.length>=8)throw Error('Massimo 8 porte');S.design.ports.push({id:'P'+(S.design.ports.length+1),node:nodelist()[0],z0_ohm:50,coupling_ff:1.5});setDirty();render();}
+ else if(action==='add-port'){if(S.design.ports.length>=8)throw Error('Maximum of eight ports');S.design.ports.push({id:'P'+(S.design.ports.length+1),node:nodelist()[0],z0_ohm:50,coupling_ff:1.5});setDirty();render();}
  else if(action==='remove-port'){S.design.ports.splice(Number(button.dataset.index),1);setDirty();render();}
  else if(action==='save'){await save();notify('Project draft saved');}
- else if(action==='save-revision'){await save();const rev=await api(`/projects/${S.project.id}/revisions`,'POST',{note:prompt('Nota di revisione','Design QPU')||'Design QPU',draft_version:S.project.draft_version});S.project.revisions.unshift({id:rev.id});notify('Checkpoint creato '+rev.id.slice(0,8));render();}
+ else if(action==='save-revision'){await save();const rev=await api(`/projects/${S.project.id}/revisions`,'POST',{note:prompt('Revision note','Design QPU')||'Design QPU',draft_version:S.project.draft_version});S.project.revisions.unshift({id:rev.id});notify('Checkpoint created: '+rev.id.slice(0,8));render();}
  else if(action==='export'){await save();location.href=`/api/projects/${S.project.id}/export`;}
  else if(action==='run'){await run(button.dataset.analysis);}
  else if(action==='param-create'){
-  if(isViewer())throw Error('Sola lettura');
+  if(isViewer())throw Error('Read-only access');
   if(S.doc.physical_qpu && !confirm('Create a new parametric model? This replaces the current physical model. Save a revision first.'))return;
   S.doc.physical_qpu=await api('/quantumlab/parametric-preset?size=2');setDirty();await save();await refreshUnified();render();
  }
  else if(action==='param-preset'){
-  if(isViewer())throw Error('Sola lettura');
-  if(!confirm('Sostituire la topologia parametrica attuale con un nuovo template?'))return;
+  if(isViewer())throw Error('Read-only access');
+  if(!confirm('Replace the current parametric topology with a new template?'))return;
   const sz=Number(button.dataset.size);S.doc.physical_qpu=await api('/quantumlab/parametric-preset?size='+sz);
   setDirty();await save();await refreshUnified();render();
  }
  else if(action==='param-download-json')downloadText('sqe-physical-v07.json',JSON.stringify(S.doc.physical_qpu,null,2));
  else if(action==='param-raw-toggle'){const el=$('#param-json-editor');el.style.display=el.style.display==='none'?'block':'none';}
  else if(action==='param-json-apply'){
-  if(isViewer())throw Error('Sola lettura');
+  if(isViewer())throw Error('Read-only access');
   const candidate=JSON.parse($('#param-json-source').value);
-  if(candidate.schema_version!==2)throw Error('La specifica JSON richiede schema_version=2');
+  if(candidate.schema_version!==2)throw Error('The JSON specification requires schema_version=2');
   S.doc.physical_qpu=candidate;setDirty();await save();await refreshUnified();render();
  }
  else if(action==='param-add'){
-  if(isViewer())throw Error('Sola lettura');const x=S.doc.physical_qpu,k=button.dataset.kind;
-  const id=prompt('ID del nuovo '+k, k+String(Date.now()).slice(-4));if(!id)return;
+  if(isViewer())throw Error('Read-only access');const x=S.doc.physical_qpu,k=button.dataset.kind;
+  const id=prompt('ID for new '+k, k+String(Date.now()).slice(-4));if(!id)return;
   if(k==='material'){x.materials[id]={kind:'dielectric',epsilon_r:4,loss_tangent:0};}
   else if(k==='layer'){x.stack.push({id,role:'dielectric',material:Object.keys(x.materials).find(k=>x.materials[k].kind==='dielectric'),z0_um:-525,thickness_um:1});}
   else if(k==='qubit'){
    const q=structuredClone(x.qubits[0]);Object.assign(q,{id,junction_id:'J'+id,x_um:q.x_um+1800,y_um:q.y_um});x.qubits.push(q);
   }
   else if(k==='coupler'){
-   if(x.qubits.length<2)throw Error('Inserisci due qubit');
+   if(x.qubits.length<2)throw Error('Add at least two qubits');
    x.couplers.push({id,kind:'capacitive_pad',a:x.qubits[0].id+'.east',b:x.qubits[1].id+'.west',gap_um:20,finger_width_um:38,nominal_c_ff:.35});
   }
   else if(k==='route'){
@@ -393,49 +393,51 @@ document.addEventListener('click',async e=>{const button=e.target.closest('[data
   setDirty();render();
  }
  else if(action==='param-remove'){
-  if(isViewer())throw Error('Sola lettura');const x=S.doc.physical_qpu,k=button.dataset.kind,i=button.dataset.index;
-  if(!confirm('Eliminare '+k+' '+i+'? Eventuali riferimenti dipendenti andranno aggiornati.'))return;
+  if(isViewer())throw Error('Read-only access');const x=S.doc.physical_qpu,k=button.dataset.kind,i=button.dataset.index;
+  if(!confirm('Delete '+k+' '+i+'?? Any dependent references must also be updated.'))return;
   if(k==='material')delete x.materials[i];else x[k==='layer'?'stack':k+'s'].splice(Number(i),1);
   setDirty();render();
  }
  else if(action==='physical-preset'){
   if(isViewer())throw Error('Read-only');
-  const size=Number(button.dataset.size);if(![1,2,4].includes(size))throw Error('Taglia QPU non prevista');
+  const size=Number(button.dataset.size);if(![1,2,4].includes(size))throw Error('Unsupported QPU size');
   const base=structuredClone(S.doc.physical_qpu||S.unifiedPreview?.spec);
-  if(!base)throw Error('Anteprima non ancora available');
+  if(!base)throw Error('Preview is not available yet');
   base.size=size;const ej=base.junction_ej_ghz[0]||14.5,cj=base.junction_cj_ff[0]||2.5;
   base.junction_ej_ghz=Array.from({length:size},(_,i)=>base.junction_ej_ghz[i]||ej+i*0.25);
   base.junction_cj_ff=Array.from({length:size},(_,i)=>base.junction_cj_ff[i]||cj);
-  S.doc.physical_qpu=base;setDirty();await save();await refreshUnified();notify('Specifica fisica '+size+' transmon salvata');
+  S.doc.physical_qpu=base;setDirty();await save();await refreshUnified();notify('Physical specification: '+size+' transmons saved');
  }
  else if(action==='refresh-unified'){await save();await refreshUnified();notify(S.unifiedError||'The physical model was regenerated from the current revision');}
  else if(action==='physical-manifest'){await save();location.href=`/api/projects/${S.project.id}/physical/manifest`;}
  else if(action==='physical-gds'){await save();location.href=`/api/projects/${S.project.id}/physical/gds`;notify('Review-only GDS: not a fabrication-qualified mask set.');}
  else if(action==='adopt-physical'){if(isViewer())throw Error('Read-only');await save();await refreshUnified();S.design=structuredClone(S.unifiedPreview.nominal_circuit);setDirty();await save();notify('NOMINAL circuit derived from geometry/JJ. Capacitances and inductances have not been extracted from FEM.');}
  else if(action==='run-physical'){
-  if(isViewer()||S.busy)throw Error('Progetto occupato o sola lettura');await save();
+  if(isViewer()||S.busy)throw Error('A job is already running or the project is read-only');await save();
   const stage=button.dataset.stage;
-  if(!['package','mesh','electrostatic','capacitance','eigenmode','driven'].includes(stage))throw Error('Stage non ammesso');
+  if(!['package','mesh','electrostatic','capacitance','eigenmode','driven'].includes(stage))throw Error('Unsupported stage');
   const revision=await api(`/projects/${S.project.id}/revisions`,'POST',{note:'Unified physical QPU / '+stage,draft_version:S.project.draft_version});
   S.project.revisions.unshift({id:revision.id});
   const r=await api(`/projects/${S.project.id}/jobs`,'POST',{revision_id:revision.id,target:'physical:'+stage,mode:'physical',cpus:S.palaceRanks,memory_gb:2,options:{ranks:S.palaceRanks}});
   S.job={id:r.id,mode:'physical',target:'physical:'+stage,state:'queued'};S.busy=true;S.unifiedJobFiles=[];S.physicalResult=null;
   S.project.jobs.unshift({id:r.id,target:'physical:'+stage,mode:'physical',state:'queued',created:Date.now()/1000,revision_id:revision.id});
-  render();notify('Job fisico in coda '+r.id.slice(0,8));
+  render();notify('Physical job queued: '+r.id.slice(0,8));
  }
- else if(action==='refresh-palace'){await save();await refreshPalace();notify(S.femError||'Geometria verificata / stato backend aggiornato');}
+ else if(action==='refresh-palace'){await save();await refreshPalace();notify(S.femError||'Geometry validated / backend status updated');}
  else if(action==='run-fem'){
-   if(isViewer())throw Error('Accesso sola lettura');if(S.busy)throw Error('Attendi il job precedente');
+   if(isViewer())throw Error('Read-only access');if(S.busy)throw Error('Wait for the previous job');
    await save();const stage=button.dataset.stage;
-   if(!FEM_ACTIONS.some(x=>x[0]===stage))throw Error('Stage non valido');
+   if(!FEM_ACTIONS.some(x=>x[0]===stage))throw Error('Invalid workflow stage');
    const revision=await api(`/projects/${S.project.id}/revisions`,'POST',{note:'FEM Palace / '+stage,draft_version:S.project.draft_version});
    S.project.revisions.unshift({id:revision.id});
    const r=await api(`/projects/${S.project.id}/jobs`,'POST',{revision_id:revision.id,target:stage,mode:'fem',cpus:S.palaceRanks,memory_gb:2,
     options:{ranks:S.palaceRanks}});
-   S.job={id:r.id,mode:'fem',target:stage,state:'queued'};S.femJobFiles=[];S.femCsv=null;S.busy=true;
+   S.job={id:r.id,mode:'fem',target:stage,state:'queued'};S.femLog=null;S.femJobFiles=[];S.femCsv=null;S.busy=true;
    S.project.jobs.unshift({id:r.id,target:stage,mode:'fem',state:'queued',created:Date.now()/1000,revision_id:revision.id});
-   render();notify('Job FEM Palace '+r.id.slice(0,8)+' in coda; controlla i risultati qui.');
+   render();notify('Palace FEM job '+r.id.slice(0,8)+' queued; monitor the status and results below.');
  }
+ else if(action==='cancel-fem'){if(S.job?.id&&confirm('Request cancellation of this FEM job?')){await api(`/jobs/${S.job.id}/cancel`,'POST',{});notify('Cancellation requested.');}}
+ else if(action==='fem-logs'){if(S.job?.id){const r=await api(`/projects/${S.project.id}/jobs/${S.job.id}/logs`);S.femLog=r.text;render();}}
  else if(action==='view-job'){await loadJob(button.dataset.id);}
  else if(action==='download-result'){if(S.result)downloadText('quantumlab-'+S.result.analysis+'.json',JSON.stringify(S.result,null,2));}
  else if(action==='download-netlist'){downloadText('qpu-netlist.json',JSON.stringify(S.design,null,2));}

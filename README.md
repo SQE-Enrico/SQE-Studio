@@ -1,4 +1,4 @@
-# SQE Studio 0.10.0 — Web-first Quantum EDA Research Workstation
+# SQE Studio 0.11.0 — Web-first Quantum EDA Research Workstation
 
 **An open-source, browser-based environment for superconducting quantum-circuit design, reproducible simulations, and scientific review.**
 
@@ -58,3 +58,9 @@ For the optional production architecture, see [deployment](docs/deployment.md). 
 ## Credits and licensing
 
 SQE Studio was initiated for superconducting quantum electronics research at INRiM. Earlier releases and scientific modules are preserved; original authorship and license notices remain with the source. See `CITATION.cff`, `NOTICE`, `LICENSE`, and `CHANGELOG.md`.
+
+## Scientific workflow diagnostics (v0.11)
+
+The local administrator can run **Scientific workflow validation** from **System & Diagnostics**. This is an opt-in, bounded series of geometry/GDS, Gmsh 3D mesh and authentic Palace capacitance/eigenmode/RF checks on an isolated fixed reference. All stages are reported with PASS/FAIL/SKIP, elapsed time, log excerpts and a downloadable ZIP. No projects, passwords or data folders are copied. See [docs/WORKFLOW-VALIDATION-0.11.0.md](docs/WORKFLOW-VALIDATION-0.11.0.md).
+
+The **Compute queue health** panel helps distinguish a queued job from a running FEM computation. The Palace workbench now exposes worker logs and cancellation. A PASS does not certify EM accuracy or fab readiness.

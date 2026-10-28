@@ -1,3 +1,16 @@
+## [0.11.0] - 2026-10-28
+
+### Windows workstation consolidation and scientific workflow diagnostics
+
+- Localized remaining Quantum Design Lab and Palace workbench UI strings to English, including job notifications, physical editor and roadmap.
+- Integrated the v0.10 Web login hotfix and the Windows first-run Shapely probe correction.
+- Added queue health, elapsed queued time, FEM worker/solver log access and cancellation controls.
+- Added opt-in, isolated, time-bounded scientific validation: physical design/GDS/JSON, real 3D mesh, Palace electrostatic, capacitance extraction, eigenmode, two independent RF excitations.
+- Added per-stage status and progress in the Web control center and a downloadable sanitized diagnostic ZIP with checksums. Missing native solvers produce SKIP, never fabricated PASS results.
+- Unified WSL Palace detection with the working application backend and improved WSL path conversion for the runner.
+- Added tests for geometry reference export, skip handling, queue endpoint authentication and English UI notices.
+- The real Palace FEM solve on Windows/WSL is still pending on-device acceptance testing.
+
 ## [0.10.0] - 2026-10-28
 
 - Consolidated the uploaded workstation source into a clean English-first release, excluding local user databases, setup tokens, diagnostics, hotfix artifacts and caches.

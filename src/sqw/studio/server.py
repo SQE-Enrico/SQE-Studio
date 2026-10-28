@@ -113,8 +113,8 @@ class Application:
                         'native_fem_validated':False}
                     else:
                         need('POST'); args=body()
-                        if set(args)-{'extended','skip_tests'}: raise Problem('Unknown diagnostic option')
-                        result=self.diagnostics.start(extended=args.get('extended',False),skip_tests=args.get('skip_tests',False))
+                        if set(args)-{'extended','skip_tests','scientific'}: raise Problem('Unknown diagnostic option')
+                        result=self.diagnostics.start(extended=args.get('extended',False),skip_tests=args.get('skip_tests',False),scientific=args.get('scientific',False))
                 elif len(parts)==5 and parts[:3]==['api','system','diagnostics']:
                     need('GET')
                     if parts[4]=='bundle':
@@ -125,6 +125,22 @@ class Application:
                     if method=='GET': result=self.diagnostics.detail(parts[3])
                     else: need('DELETE'); result=self.diagnostics.delete(parts[3])
                 else: raise Problem('Unknown diagnostic endpoint',404)
+            elif path=='/api/system/queue':
+                need('GET')
+                if user['role']!='admin': raise Problem('Administrator access required',403)
+                import time
+                now=time.time()
+                records=self.store.rows("SELECT state,created,started,heartbeat,stage FROM jobs WHERE state IN ('queued','running','cancel_requested')")
+                counts={key:sum(j['state']==key for j in records) for key in ('queued','running','cancel_requested')}
+                oldest_queued=max((now-j['created'] for j in records if j['state']=='queued'),default=0)
+                stalled_running=sum(j['state']=='running' and
+                                    (j['heartbeat'] is None or now-j['heartbeat']>35)
+                                    for j in records)
+                result={'counts':counts,'oldest_queued_seconds':round(oldest_queued),
+                        'stale_running_heartbeats':stalled_running,
+                        'queue_warning':('A job has waited in the queue for over 60 seconds. Check the worker service.'
+                          if oldest_queued>60 else 'A running job has stopped sending heartbeats.' if stalled_running else ''),
+                        'note':'Queue metrics are application metadata, not a proof that the solver is progressing.'}
             elif path=='/api/capabilities': result=capabilities(self.settings)
             elif path=='/api/template': result=document()
             elif path=='/api/quantumlab/preset':

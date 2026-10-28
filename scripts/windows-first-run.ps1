@@ -80,7 +80,7 @@ if ((Test-Path $venvPython) -and (Test-Path $environmentStatus)) {
 # Shapely physical-CAD dependency. Requalify it through bootstrap in that case.
 if (-not $needsInstall) {
     try {
-        & $venvPython -c 'import shapely; assert tuple(map(int,shapely.__version__.split(".")[:2])) >= (2,0)'
+        & $venvPython -c 'import shapely; assert tuple(map(int,shapely.__version__.split(chr(46))[:2])) >= (2,0)'
         if ($LASTEXITCODE -ne 0) { $needsInstall=$true }
     } catch { $needsInstall=$true }
 }

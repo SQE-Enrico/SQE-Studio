@@ -134,7 +134,6 @@ class Application:
             elif path=='/api/quantumlab/parametric-preset':
                 need('GET')
                 from ..parametric_qpu import default_spec
-                from .process import document
                 cfg,_=resolve(document())
                 result=default_spec(cfg,int(query.get('size','2')))
             elif path=='/api/palace/status':

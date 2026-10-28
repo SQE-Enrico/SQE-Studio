@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<title>Superconducting qubit workflow report</title><style>
+body{font:16px system-ui,sans-serif;max-width:1100px;margin:40px auto;padding:0 24px;color:#17243b}
+h1{font-size:36px} .status{background:#fff4db;border-left:5px solid #e87722;padding:18px}
+table{border-collapse:collapse;width:100%;margin:25px 0}th,td{text-align:left;padding:9px;border-bottom:1px solid #ddd}
+img{width:100%}a{color:#1d4ed8}small{color:#526078}
+</style><h1>From specifications to expected measurements</h1>
+<p>Aluminum on high-resistivity silicon | 20.0 mK | 4.0-12.0 GHz target band</p>
+<div class="status"><b>Fabrication HOLD.</b> This layout has no qualified Josephson junction mask.
+Source: <b>synthetic_fixture</b>. Intrinsic coherence and readout loss are assumed inputs.
+Synthetic examples are not validation against an experimental chip.</div>
+<table><tr><th>Source</th><td>synthetic_fixture</td></tr><tr><th>f01 (GHz)</th><td>5.007043</td></tr><tr><th>Anharmonicity (MHz)</th><td>-269.411</td></tr><tr><th>Bare readout (GHz)</th><td>7.238406</td></tr><tr><th>g / 2pi (MHz)</th><td>74.630</td></tr><tr><th>chi / 2pi (MHz)</th><td>-0.376</td></tr><tr><th>EJ / h (GHz)</th><td>14.5000</td></tr><tr><th>EC / h (GHz)</th><td>0.2383</td></tr><tr><th>Effective qubit C (fF)</th><td>81.283</td></tr><tr><th>Junction Ic (nA)</th><td>29.194</td></tr><tr><th>Junction LJ (nH)</th><td>11.273</td></tr><tr><th>Conditional T1 (us)</th><td>40.826</td></tr><tr><th>Conditional T2 (us)</th><td>40.409</td></tr></table><h2>Shared mask geometry</h2><img src="layout/layout.png" alt="Mask and qubit detail">
+<h2>Conditional measurement predictions</h2><img src="experiment/measurements.png" alt="Readout and time-domain simulations">
+<p><a href="parameters.json">Circuit and quantum parameters</a> · <a href="layout/device.gds">GDSII</a> ·
+<a href="specification.json">Inverse electrical target</a> · <a href="run.json">Run provenance</a></p>
+<small>The inverse target is separate from the forward geometry prediction. Meander end corrections,
+substrate dispersion, kinetic inductance, interfaces, package and the real process require validation.</small></html>

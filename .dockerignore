@@ -1,0 +1,12 @@
+.git
+.venv*
+.sqw
+build
+dist
+__pycache__
+**/__pycache__
+studio-data
+data/private
+deploy/studio.env
+*.egg-info
+**/*.egg-info

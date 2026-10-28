@@ -1,0 +1,154 @@
+{
+  "Model": {
+    "Mesh": "device.msh",
+    "L0": 1e-06
+  },
+  "Domains": {
+    "Materials": [
+      {
+        "Attributes": [
+          1
+        ],
+        "Permittivity": 1.0
+      },
+      {
+        "Attributes": [
+          2
+        ],
+        "Permittivity": 11.45
+      }
+    ],
+    "Postprocessing": {
+      "Energy": [
+        {
+          "Index": 2,
+          "Attributes": [
+            2
+          ]
+        }
+      ]
+    }
+  },
+  "Problem": {
+    "Type": "Electrostatic",
+    "Output": "electrostatic"
+  },
+  "Boundaries": {
+    "Ground": {
+      "Attributes": [
+        10,
+        99
+      ]
+    },
+    "Terminal": [
+      {
+        "Index": 1,
+        "Attributes": [
+          100
+        ]
+      },
+      {
+        "Index": 2,
+        "Attributes": [
+          101
+        ]
+      },
+      {
+        "Index": 3,
+        "Attributes": [
+          102
+        ]
+      },
+      {
+        "Index": 4,
+        "Attributes": [
+          103
+        ]
+      },
+      {
+        "Index": 5,
+        "Attributes": [
+          104
+        ]
+      },
+      {
+        "Index": 6,
+        "Attributes": [
+          105
+        ]
+      },
+      {
+        "Index": 7,
+        "Attributes": [
+          106
+        ]
+      },
+      {
+        "Index": 8,
+        "Attributes": [
+          107
+        ]
+      },
+      {
+        "Index": 9,
+        "Attributes": [
+          108
+        ]
+      },
+      {
+        "Index": 10,
+        "Attributes": [
+          109
+        ]
+      },
+      {
+        "Index": 11,
+        "Attributes": [
+          110
+        ]
+      },
+      {
+        "Index": 12,
+        "Attributes": [
+          111
+        ]
+      },
+      {
+        "Index": 13,
+        "Attributes": [
+          112
+        ]
+      },
+      {
+        "Index": 14,
+        "Attributes": [
+          113
+        ]
+      },
+      {
+        "Index": 15,
+        "Attributes": [
+          114
+        ]
+      },
+      {
+        "Index": 16,
+        "Attributes": [
+          115
+        ]
+      }
+    ]
+  },
+  "Solver": {
+    "Order": 2,
+    "Electrostatic": {
+      "Save": 0
+    },
+    "Linear": {
+      "Type": "BoomerAMG",
+      "KSPType": "CG",
+      "Tol": 1e-08,
+      "MaxIts": 500
+    }
+  }
+}

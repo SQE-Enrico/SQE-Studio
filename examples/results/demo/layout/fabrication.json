@@ -1,0 +1,14 @@
+{
+  "status": "HOLD",
+  "mask_polarity": "positive metal on layer 1/0",
+  "junction_layer": "91/0 is location only; no evaporation / oxide definition",
+  "checks": [
+    "Shared geometry connectivity and isolation passed"
+  ],
+  "missing": [
+    "Qualified junction mask and evaporation process",
+    "Lab layer map, polarity, bias, fracture and DRC sign-off",
+    "Package/bond wire/ground continuity review",
+    "Converged EM and measured reference-chip validation"
+  ]
+}

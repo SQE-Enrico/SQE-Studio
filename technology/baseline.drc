@@ -1,0 +1,11 @@
+# KLayout batch DRC, geometric smoke checks only. Not a foundry-qualified rule deck.
+# klayout -b -r technology/baseline.drc -rd input=build/demo/layout/device.gds -rd output=build/demo/drc.lyrdb
+source($input)
+report("SQW baseline geometric checks - NOT process qualification", $output)
+metal = input(1, 0)
+outline = input(99, 0)
+metal.width(1.0.um).output("M1_MIN_WIDTH", "Base metal width < 1 um")
+metal.space(1.0.um).output("M1_MIN_SPACE", "Base metal spacing < 1 um")
+# The actual die edge is the outer edge of the annotation frame.
+metal.interacting(outline).output("M1_DIE_EDGE", "Metal intersects chip outline annotation")
+# Layers 90, 91, 99 are annotations; layer 91 contains NO qualified JJ mask.

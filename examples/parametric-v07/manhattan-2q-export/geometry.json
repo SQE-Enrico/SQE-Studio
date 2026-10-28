@@ -1,0 +1,624 @@
+{
+  "schema_version": 3,
+  "units": "um",
+  "topology": "user_defined_graph",
+  "chip": {
+    "x0": -2800.0,
+    "y0": -2100.0,
+    "x1": 2800.0,
+    "y1": 2100.0
+  },
+  "metal": {
+    "ground": [
+      {
+        "x0": -2640.0,
+        "y0": -1940.0,
+        "x1": 2640.0,
+        "y1": -1333.0
+      },
+      {
+        "x0": -2640.0,
+        "y0": -1307.0,
+        "x1": 2640.0,
+        "y1": -158.0
+      },
+      {
+        "x0": -2640.0,
+        "y0": 158.0,
+        "x1": 2640.0,
+        "y1": 1940.0
+      },
+      {
+        "x0": -2640.0,
+        "y0": -1333.0,
+        "x1": -1413.0,
+        "y1": -1307.0
+      },
+      {
+        "x0": 1413.0,
+        "y0": -1333.0,
+        "x1": 2640.0,
+        "y1": -1307.0
+      },
+      {
+        "x0": -2640.0,
+        "y0": -158.0,
+        "x1": -1155.0,
+        "y1": 158.0
+      },
+      {
+        "x0": -909.0,
+        "y0": -158.0,
+        "x1": -891.0,
+        "y1": 158.0
+      },
+      {
+        "x0": -645.0,
+        "y0": -158.0,
+        "x1": 645.0,
+        "y1": -109.0
+      },
+      {
+        "x0": -645.0,
+        "y0": 109.0,
+        "x1": 645.0,
+        "y1": 158.0
+      },
+      {
+        "x0": 891.0,
+        "y0": -158.0,
+        "x1": 909.0,
+        "y1": 158.0
+      },
+      {
+        "x0": 1155.0,
+        "y0": -158.0,
+        "x1": 2640.0,
+        "y1": 158.0
+      },
+      {
+        "x0": -645.0,
+        "y0": -109.0,
+        "x1": -137.0,
+        "y1": -22.0
+      },
+      {
+        "x0": -645.0,
+        "y0": 22.0,
+        "x1": -137.0,
+        "y1": 109.0
+      },
+      {
+        "x0": 79.0,
+        "y0": -109.0,
+        "x1": 93.0,
+        "y1": -65.0
+      },
+      {
+        "x0": 79.0,
+        "y0": 7.0,
+        "x1": 93.0,
+        "y1": 51.0
+      },
+      {
+        "x0": 137.0,
+        "y0": -109.0,
+        "x1": 645.0,
+        "y1": -22.0
+      },
+      {
+        "x0": 137.0,
+        "y0": 22.0,
+        "x1": 645.0,
+        "y1": 109.0
+      },
+      {
+        "x0": -93.0,
+        "y0": -65.0,
+        "x1": 93.0,
+        "y1": -51.0
+      },
+      {
+        "x0": -93.0,
+        "y0": -7.0,
+        "x1": 93.0,
+        "y1": 7.0
+      },
+      {
+        "x0": -93.0,
+        "y0": 51.0,
+        "x1": 93.0,
+        "y1": 65.0
+      },
+      {
+        "x0": -93.0,
+        "y0": -51.0,
+        "x1": -79.0,
+        "y1": -7.0
+      },
+      {
+        "x0": -93.0,
+        "y0": 65.0,
+        "x1": -79.0,
+        "y1": 109.0
+      }
+    ],
+    "Q0.pad_a": [
+      {
+        "x0": -1152.0,
+        "y0": -155.0,
+        "x1": -912.0,
+        "y1": 155.0
+      }
+    ],
+    "Q0.pad_b": [
+      {
+        "x0": -888.0,
+        "y0": -155.0,
+        "x1": -648.0,
+        "y1": -19.0
+      },
+      {
+        "x0": -888.0,
+        "y0": 19.0,
+        "x1": -648.0,
+        "y1": 155.0
+      },
+      {
+        "x0": -134.0,
+        "y0": -106.0,
+        "x1": 76.0,
+        "y1": -68.0
+      },
+      {
+        "x0": -134.0,
+        "y0": 19.0,
+        "x1": 76.0,
+        "y1": 48.0
+      },
+      {
+        "x0": -134.0,
+        "y0": -68.0,
+        "x1": -96.0,
+        "y1": -19.0
+      },
+      {
+        "x0": -134.0,
+        "y0": 48.0,
+        "x1": -96.0,
+        "y1": 106.0
+      },
+      {
+        "x0": -888.0,
+        "y0": -19.0,
+        "x1": -96.0,
+        "y1": 10.0
+      },
+      {
+        "x0": -888.0,
+        "y0": 10.0,
+        "x1": 76.0,
+        "y1": 19.0
+      }
+    ],
+    "Q1.pad_a": [
+      {
+        "x0": 648.0,
+        "y0": -155.0,
+        "x1": 888.0,
+        "y1": -19.0
+      },
+      {
+        "x0": 648.0,
+        "y0": 19.0,
+        "x1": 888.0,
+        "y1": 155.0
+      },
+      {
+        "x0": 96.0,
+        "y0": -106.0,
+        "x1": 134.0,
+        "y1": -48.0
+      },
+      {
+        "x0": 96.0,
+        "y0": 19.0,
+        "x1": 134.0,
+        "y1": 68.0
+      },
+      {
+        "x0": -76.0,
+        "y0": -48.0,
+        "x1": 134.0,
+        "y1": -19.0
+      },
+      {
+        "x0": -76.0,
+        "y0": 68.0,
+        "x1": 134.0,
+        "y1": 106.0
+      },
+      {
+        "x0": -76.0,
+        "y0": -19.0,
+        "x1": 888.0,
+        "y1": -10.0
+      },
+      {
+        "x0": 96.0,
+        "y0": -10.0,
+        "x1": 888.0,
+        "y1": 19.0
+      }
+    ],
+    "Q1.pad_b": [
+      {
+        "x0": 912.0,
+        "y0": -155.0,
+        "x1": 1152.0,
+        "y1": 155.0
+      }
+    ],
+    "readout_bus": [
+      {
+        "x0": -1406.0,
+        "y0": -1326.0,
+        "x1": 1406.0,
+        "y1": -1314.0
+      }
+    ]
+  },
+  "metal_layers": {
+    "Q0.pad_a": "base",
+    "Q0.pad_b": "base",
+    "Q1.pad_a": "base",
+    "Q1.pad_b": "base",
+    "readout_bus": "base",
+    "ground": "base"
+  },
+  "ports": {
+    "J0": {
+      "x0": -901.0,
+      "y0": -1.0,
+      "x1": -899.0,
+      "y1": 1.0
+    },
+    "J1": {
+      "x0": 899.0,
+      "y0": -1.0,
+      "x1": 901.0,
+      "y1": 1.0
+    },
+    "readout_bus.start": {
+      "x0": -1406.0,
+      "y0": -1326.0,
+      "x1": -1394.0,
+      "y1": -1314.0
+    },
+    "readout_bus.end": {
+      "x0": 1394.0,
+      "y0": -1326.0,
+      "x1": 1406.0,
+      "y1": -1314.0
+    }
+  },
+  "components": [
+    {
+      "id": "Q0",
+      "family": "floating",
+      "pins": {
+        "east": [
+          -720.0,
+          0.0
+        ],
+        "west": [
+          -1080.0,
+          0.0
+        ],
+        "north": [
+          -900.0,
+          155.0
+        ],
+        "south": [
+          -900.0,
+          -155.0
+        ]
+      },
+      "junction_id": "J0",
+      "islands": [
+        "Q0.pad_a",
+        "Q0.pad_b"
+      ]
+    },
+    {
+      "id": "Q1",
+      "family": "floating",
+      "pins": {
+        "east": [
+          1080.0,
+          0.0
+        ],
+        "west": [
+          720.0,
+          0.0
+        ],
+        "north": [
+          900.0,
+          155.0
+        ],
+        "south": [
+          900.0,
+          -155.0
+        ]
+      },
+      "junction_id": "J1",
+      "islands": [
+        "Q1.pad_a",
+        "Q1.pad_b"
+      ]
+    }
+  ],
+  "junctions": [
+    {
+      "id": "J0",
+      "port": "J0",
+      "islands": [
+        "Q0.pad_a",
+        "Q0.pad_b"
+      ],
+      "ej_ghz": 14.3045,
+      "cj_ff": 2.5,
+      "process": "manhattan"
+    },
+    {
+      "id": "J1",
+      "port": "J1",
+      "islands": [
+        "Q1.pad_a",
+        "Q1.pad_b"
+      ],
+      "ej_ghz": 14.5045,
+      "cj_ff": 2.5,
+      "process": "manhattan"
+    }
+  ],
+  "feed_ports": [
+    {
+      "id": "readout_bus.start",
+      "surface": "readout_bus.start",
+      "net": "readout_bus",
+      "impedance_ohm": 50.0
+    },
+    {
+      "id": "readout_bus.end",
+      "surface": "readout_bus.end",
+      "net": "readout_bus",
+      "impedance_ohm": 50.0
+    }
+  ],
+  "terminals": [
+    "Q0.pad_a",
+    "Q0.pad_b",
+    "Q1.pad_a",
+    "Q1.pad_b",
+    "readout_bus"
+  ],
+  "physical_tags": {
+    "air": 1,
+    "outer": 99,
+    "substrate": 2,
+    "ground": 100,
+    "Q0.pad_a": 101,
+    "Q0.pad_b": 102,
+    "Q1.pad_a": 103,
+    "Q1.pad_b": 104,
+    "readout_bus": 105,
+    "J0": 1000,
+    "J1": 1001,
+    "readout_bus.start": 1002,
+    "readout_bus.end": 1003
+  },
+  "stack": [
+    {
+      "id": "substrate",
+      "role": "dielectric",
+      "material": "silicon",
+      "z0_um": -525.0,
+      "thickness_um": 525.0
+    },
+    {
+      "id": "base",
+      "role": "conductor",
+      "material": "aluminum",
+      "z0_um": 0.0,
+      "thickness_um": 0.1,
+      "gds_layer": 1,
+      "gds_datatype": 0
+    },
+    {
+      "id": "junction",
+      "role": "junction_mask",
+      "material": "aluminum",
+      "z0_um": 0.1,
+      "thickness_um": 0.05,
+      "gds_layer": 91,
+      "gds_datatype": 0
+    }
+  ],
+  "materials": {
+    "vacuum": {
+      "kind": "dielectric",
+      "epsilon_r": 1.0,
+      "loss_tangent": 0.0
+    },
+    "silicon": {
+      "kind": "dielectric",
+      "epsilon_r": 11.7,
+      "loss_tangent": 1e-06
+    },
+    "aluminum": {
+      "kind": "superconductor",
+      "london_depth_nm": 50.0,
+      "sheet_inductance_ph_sq": 0.0
+    }
+  },
+  "junction_process": {
+    "method": "manhattan",
+    "junction_layer_id": "junction",
+    "orientation_deg": 0.0,
+    "linewidth_um": 0.18,
+    "overlap_um": 0.14,
+    "undercut_um": 0.25,
+    "lead_extension_um": 0.5,
+    "note": "Lithography intent only: no calibrated angle/shadow process simulation"
+  },
+  "process_features": [
+    {
+      "junction_id": "J0",
+      "feature": "first_evaporation_intent",
+      "points_um": [
+        [
+          -899.0,
+          -0.09
+        ],
+        [
+          -899.0,
+          0.09
+        ],
+        [
+          -901.0,
+          0.09
+        ],
+        [
+          -901.0,
+          -0.09
+        ]
+      ],
+      "gds_datatype_offset": 0
+    },
+    {
+      "junction_id": "J0",
+      "feature": "second_evaporation_intent",
+      "points_um": [
+        [
+          -899.91,
+          -1.0
+        ],
+        [
+          -899.91,
+          1.0
+        ],
+        [
+          -900.09,
+          1.0
+        ],
+        [
+          -900.09,
+          -1.0
+        ]
+      ],
+      "gds_datatype_offset": 1
+    },
+    {
+      "junction_id": "J1",
+      "feature": "first_evaporation_intent",
+      "points_um": [
+        [
+          901.0,
+          -0.09
+        ],
+        [
+          901.0,
+          0.09
+        ],
+        [
+          899.0,
+          0.09
+        ],
+        [
+          899.0,
+          -0.09
+        ]
+      ],
+      "gds_datatype_offset": 0
+    },
+    {
+      "junction_id": "J1",
+      "feature": "second_evaporation_intent",
+      "points_um": [
+        [
+          900.09,
+          -1.0
+        ],
+        [
+          900.09,
+          1.0
+        ],
+        [
+          899.91,
+          1.0
+        ],
+        [
+          899.91,
+          -1.0
+        ]
+      ],
+      "gds_datatype_offset": 1
+    }
+  ],
+  "couplers": [
+    {
+      "id": "K0_1",
+      "kind": "interdigitated",
+      "islands": [
+        "Q0.pad_b",
+        "Q1.pad_a"
+      ],
+      "gap_um": 20.0,
+      "nominal_c_ff": 0.35,
+      "electrical_assumption": "user-declared nominal; not FEM extracted",
+      "design_verified": "interdigitated comb electrodes"
+    }
+  ],
+  "connections": [
+    {
+      "kind": "interdigitated",
+      "id": "K0_1",
+      "from": "Q0.pad_b",
+      "to": "Q1.pad_a",
+      "galvanic": false
+    }
+  ],
+  "routes": [
+    {
+      "id": "readout_bus",
+      "net": "readout_bus",
+      "layer": "base",
+      "style": "manhattan",
+      "points_um": [
+        [
+          -1400.0,
+          -1320.0
+        ],
+        [
+          1400.0,
+          -1320.0
+        ]
+      ],
+      "length_um": 2800.0,
+      "width_um": 12.0,
+      "gap_um": 7.0
+    }
+  ],
+  "design_spec_sha256": "cf94cc4870a3441963e8cc63500842c41ec3cf0c75a92d5df06e84f7b07983c7",
+  "fabrication_status": "HOLD",
+  "designed_interqubit_couplers": 1,
+  "limitations": [
+    "Planar axis-aligned geometries; no via/airbridge connectivity",
+    "Dolan and Manhattan mask parameters are process intent, not calibrated evaporation masks",
+    "Bus CPW / tunable couplers are not fully resolved 3D circuit models",
+    "Conductor thickness and surface oxides not yet represented as meshed finite-thickness solids",
+    "Routes are waypoints/manhattan/meanders, not a general obstacle-avoiding autorouter"
+  ],
+  "geometry_sha256": "e9f3b283d84b6a01434c44338eb159f667b585980aa428191fdd1a81870ac5ce"
+}

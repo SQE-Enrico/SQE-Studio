@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "name": "SQE physical source / 4 tiled transmons",
+  "model": "differential_island_reduction__user_declared_nominal_C_and_L",
+  "elements": [
+    {
+      "id": "Cq0",
+      "kind": "C",
+      "a": "q0",
+      "b": "0",
+      "value": 78.0
+    },
+    {
+      "id": "J0",
+      "kind": "JJ",
+      "a": "q0",
+      "b": "0",
+      "ej_ghz": 14.304485
+    },
+    {
+      "id": "Cr0",
+      "kind": "C",
+      "a": "r0",
+      "b": "0",
+      "value": 70.0
+    },
+    {
+      "id": "Lr0",
+      "kind": "L",
+      "a": "r0",
+      "b": "0",
+      "value": 8.0
+    },
+    {
+      "id": "Cqr0",
+      "kind": "C",
+      "a": "q0",
+      "b": "r0",
+      "value": 3.5
+    },
+    {
+      "id": "Cq1",
+      "kind": "C",
+      "a": "q1",
+      "b": "0",
+      "value": 78.0
+    },
+    {
+      "id": "J1",
+      "kind": "JJ",
+      "a": "q1",
+      "b": "0",
+      "ej_ghz": 14.554485
+    },
+    {
+      "id": "Cr1",
+      "kind": "C",
+      "a": "r1",
+      "b": "0",
+      "value": 70.0
+    },
+    {
+      "id": "Lr1",
+      "kind": "L",
+      "a": "r1",
+      "b": "0",
+      "value": 8.0
+    },
+    {
+      "id": "Cqr1",
+      "kind": "C",
+      "a": "q1",
+      "b": "r1",
+      "value": 3.5
+    },
+    {
+      "id": "Cq2",
+      "kind": "C",
+      "a": "q2",
+      "b": "0",
+      "value": 78.0
+    },
+    {
+      "id": "J2",
+      "kind": "JJ",
+      "a": "q2",
+      "b": "0",
+      "ej_ghz": 14.804485
+    },
+    {
+      "id": "Cr2",
+      "kind": "C",
+      "a": "r2",
+      "b": "0",
+      "value": 70.0
+    },
+    {
+      "id": "Lr2",
+      "kind": "L",
+      "a": "r2",
+      "b": "0",
+      "value": 8.0
+    },
+    {
+      "id": "Cqr2",
+      "kind": "C",
+      "a": "q2",
+      "b": "r2",
+      "value": 3.5
+    },
+    {
+      "id": "Cq3",
+      "kind": "C",
+      "a": "q3",
+      "b": "0",
+      "value": 78.0
+    },
+    {
+      "id": "J3",
+      "kind": "JJ",
+      "a": "q3",
+      "b": "0",
+      "ej_ghz": 15.054485
+    },
+    {
+      "id": "Cr3",
+      "kind": "C",
+      "a": "r3",
+      "b": "0",
+      "value": 70.0
+    },
+    {
+      "id": "Lr3",
+      "kind": "L",
+      "a": "r3",
+      "b": "0",
+      "value": 8.0
+    },
+    {
+      "id": "Cqr3",
+      "kind": "C",
+      "a": "q3",
+      "b": "r3",
+      "value": 3.5
+    }
+  ],
+  "qubits": [
+    {
+      "id": "Q0",
+      "junction": "J0",
+      "node": "q0",
+      "target_ghz": 5.0,
+      "tolerance_mhz": 500.0
+    },
+    {
+      "id": "Q1",
+      "junction": "J1",
+      "node": "q1",
+      "target_ghz": 5.07,
+      "tolerance_mhz": 500.0
+    },
+    {
+      "id": "Q2",
+      "junction": "J2",
+      "node": "q2",
+      "target_ghz": 5.14,
+      "tolerance_mhz": 500.0
+    },
+    {
+      "id": "Q3",
+      "junction": "J3",
+      "node": "q3",
+      "target_ghz": 5.21,
+      "tolerance_mhz": 500.0
+    }
+  ],
+  "positions": {
+    "q0": [
+      100,
+      100
+    ],
+    "r0": [
+      100,
+      170
+    ],
+    "q1": [
+      300,
+      100
+    ],
+    "r1": [
+      300,
+      170
+    ],
+    "q2": [
+      100,
+      350
+    ],
+    "r2": [
+      100,
+      420
+    ],
+    "q3": [
+      300,
+      350
+    ],
+    "r3": [
+      300,
+      420
+    ]
+  },
+  "ports": [
+    {
+      "id": "P1",
+      "node": "r0",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P2",
+      "node": "r0",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P3",
+      "node": "r1",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P4",
+      "node": "r1",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P5",
+      "node": "r2",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P6",
+      "node": "r2",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P7",
+      "node": "r3",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P8",
+      "node": "r3",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    }
+  ],
+  "chip": {
+    "width_um": 1500,
+    "height_um": 1500,
+    "metal_layer": 1,
+    "junction_layer": 91,
+    "min_gap_um": 2
+  },
+  "notes": "Derived topology and EJ from physical_qpu, but C and resonator L are user-declared seeds, NOT geometric extraction; no Q-Q coupling."
+}

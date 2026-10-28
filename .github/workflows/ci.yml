@@ -1,0 +1,41 @@
+name: Validate workflow
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python scripts/bootstrap.py --profile core
+      - run: .venv/bin/python -m sqw run --mode imported --extraction examples/data/synthetic_extraction.json --out build/imported
+      - run: .venv/bin/python -m sqw verify --run build/first-run
+      - run: .venv/bin/python -m sqw verify --run build/imported
+      - run: .venv/bin/python -m sqw qualify --out build/qualification
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-${{ matrix.python }}
+          path: build/
+  reference-adapters:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update && sudo apt-get install -y libglu1-mesa libgl1 libegl1
+      - run: python scripts/bootstrap.py --profile full --skip-demo
+      - run: .venv/bin/python -m sqw run --cad-backend qpdk --quantum-backend scqubits --dynamics-backend qutip --out build/reference
+      - uses: actions/upload-artifact@v4
+        with:
+          name: candidate-reference-qualification
+          path: |
+            .sqw/full-resolved.txt
+            build/reference/

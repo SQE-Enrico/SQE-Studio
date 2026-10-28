@@ -1,0 +1,25 @@
+{
+  "geometry_sha256": "1fb92242648e0f580c3695e99001d416b1d59683c76ef07fa52ff28dcfcd0965",
+  "terminal_order": [
+    "pad_a",
+    "pad_b",
+    "resonator",
+    "feedline"
+  ],
+  "physical_tags": {
+    "ground": 10,
+    "pad_a": 11,
+    "pad_b": 12,
+    "resonator": 13,
+    "feedline": 14,
+    "air": 1,
+    "silicon": 2,
+    "junction": 21,
+    "input": 31,
+    "output": 32,
+    "outer": 99
+  },
+  "capacitance_convention": "Maxwell; JJ C excluded",
+  "bare_eigenmode": "Open JJ port; identify readout from fields before import",
+  "linearized_eigenmode": "Includes LJ and Cj; cross-check only; do not re-quantize as bare"
+}

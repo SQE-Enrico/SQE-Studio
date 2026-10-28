@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-properties>
+ <properties><frame-color>#718096</frame-color><fill-color>#cbd5e1</fill-color><dither-pattern>I0</dither-pattern><visible>true</visible><name>Al positive metal</name><source>1/0@1</source></properties>
+ <properties><frame-color>#3989b8</frame-color><fill-color>#3989b8</fill-color><visible>true</visible><name>Junction electrode A candidate</name><source>2/0@1</source></properties>
+ <properties><frame-color>#2a9c80</frame-color><fill-color>#2a9c80</fill-color><visible>true</visible><name>Junction electrode B candidate</name><source>3/0@1</source></properties>
+ <properties><frame-color>#94a3b8</frame-color><fill-color>#94a3b8</fill-color><visible>true</visible><name>Wafer boundary annotation</name><source>97/0@1</source></properties>
+ <properties><frame-color>#16a394</frame-color><fill-color>#16a394</fill-color><visible>true</visible><name>Alignment annotations</name><source>90/0@1</source></properties>
+ <properties><frame-color>#dc2626</frame-color><fill-color>#dc2626</fill-color><visible>true</visible><name>JJ LOCATION ONLY - fabrication HOLD</name><source>91/0@1</source></properties>
+ <properties><frame-color>#9333ea</frame-color><fill-color>#9333ea</fill-color><visible>true</visible><name>Die outline annotation</name><source>99/0@1</source></properties>
+</layer-properties>

@@ -1,0 +1,73 @@
+{
+  "analysis": "modes",
+  "fidelity": "reduced_order_weak_anharmonicity",
+  "modes": [
+    {
+      "index": 0,
+      "frequency_ghz": 4.964917783257933,
+      "junction_participation": {
+        "J0": 0.9936633556337483
+      },
+      "node_weights": {
+        "q0": 0.995466046873899,
+        "r0": 0.06021577211371396
+      },
+      "anharmonicity_mhz": -234.0288138307571,
+      "estimated_f01_ghz": 4.728911332775654
+    },
+    {
+      "index": 1,
+      "frequency_ghz": 6.579140673278955,
+      "junction_participation": {
+        "J0": 0.0063366443662517605
+      },
+      "node_weights": {
+        "q0": 0.10534006763393329,
+        "r0": 0.9992113095419899
+      },
+      "anharmonicity_mhz": -0.01671181706827152,
+      "estimated_f01_ghz": 6.577146324810365
+    }
+  ],
+  "qubit_assignments": {
+    "Q0": {
+      "mode_index": 0,
+      "frequency_ghz": 4.728911332775654,
+      "linear_frequency_ghz": 4.964917783257933,
+      "anharmonicity_mhz": -234.0288138307571,
+      "junction_participation": 0.9936633556337483
+    }
+  },
+  "chi_mhz": [
+    [
+      -234.0288138,
+      -3.9552733
+    ],
+    [
+      -3.9552733,
+      -0.0167118
+    ]
+  ],
+  "C_fF": [
+    [
+      81.5,
+      -3.5
+    ],
+    [
+      -3.5,
+      73.5
+    ]
+  ],
+  "nodes": [
+    "q0",
+    "r0"
+  ],
+  "assumptions": [
+    "Ideal lossless lumped capacitors and inductors in eigenanalysis",
+    "JJ/SQUID linearized at a stable phase; fourth-order perturbative RWA",
+    "Qubit f01 includes the first-order vacuum quartic shift; mode frequency is linear LC",
+    "Chi matrix diagonal is self-anharmonicity; off-diagonal is cross-Kerr. Weak quartic approximation only",
+    "Participation refers to circuit branch energy, NOT full-wave electric/magnetic field EPR",
+    "No automatic geometric coupling, packaging, substrate, radiation or conductor-loss calculation"
+  ]
+}

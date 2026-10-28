@@ -1,0 +1,54 @@
+{
+  "schema_version": 3,
+  "geometry_sha256": "e9f3b283d84b6a01434c44338eb159f667b585980aa428191fdd1a81870ac5ce",
+  "design_spec_sha256": "cf94cc4870a3441963e8cc63500842c41ec3cf0c75a92d5df06e84f7b07983c7",
+  "terminal_order": [
+    "Q0.pad_a",
+    "Q0.pad_b",
+    "Q1.pad_a",
+    "Q1.pad_b",
+    "readout_bus"
+  ],
+  "port_order": [
+    "readout_bus.start",
+    "readout_bus.end"
+  ],
+  "junction_order": [
+    "J0",
+    "J1"
+  ],
+  "tag_map": {
+    "air": 1,
+    "outer": 99,
+    "substrate": 2,
+    "ground": 100,
+    "Q0.pad_a": 101,
+    "Q0.pad_b": 102,
+    "Q1.pad_a": 103,
+    "Q1.pad_b": 104,
+    "readout_bus": 105,
+    "J0": 1000,
+    "J1": 1001,
+    "readout_bus.start": 1002,
+    "readout_bus.end": 1003
+  },
+  "stack_sha256": "0fa24d5a5e327b97b2365561e1cfd49bd7f69a4ff4d67d17f32773a763c871ef",
+  "materials_sha256": "983c6d8d86c224eb29ee1cb10a1d8691348f8b1285c642d70506aeef445ac48d",
+  "palace_configs": [
+    "electrostatic",
+    "eigenmode",
+    "driven-1",
+    "driven-2"
+  ],
+  "C_source": "not_extracted",
+  "circuit_source": "user_declared_nominal_parameters",
+  "mask_status": "HOLD",
+  "electromagnetic_status": "NOT_SOLVED",
+  "fem_limitations": [
+    "Planar axis-aligned geometries; no via/airbridge connectivity",
+    "Dolan and Manhattan mask parameters are process intent, not calibrated evaporation masks",
+    "Bus CPW / tunable couplers are not fully resolved 3D circuit models",
+    "Conductor thickness and surface oxides not yet represented as meshed finite-thickness solids",
+    "Routes are waypoints/manhattan/meanders, not a general obstacle-avoiding autorouter"
+  ]
+}

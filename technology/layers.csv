@@ -1,0 +1,8 @@
+layer,datatype,name,polarity,purpose,process_qualified
+1,0,AL_BASE,positive_metal,ground pads resonator feedline and coarse JJ leads,false
+2,0,JJ_ELECTRODE_A,positive_metal,parametric candidate electrode A; requires process mapping,false
+3,0,JJ_ELECTRODE_B,positive_metal,parametric candidate electrode B; requires process mapping,false
+97,0,WAFER_BOUNDARY,annotation,illustrative circular wafer perimeter; exclude from metal write,false
+90,0,ALIGNMENT,annotation,alignment crosses requiring process mapping,false
+91,0,JJ_LOCATION,annotation,electrical junction location only; no tunnel barrier mask,false
+99,0,CHIP_OUTLINE,annotation,die outline frame; exclude from metal write,false

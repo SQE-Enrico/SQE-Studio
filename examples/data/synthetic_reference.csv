@@ -1,0 +1,6 @@
+parameter,value,unit,sigma,kind
+f01_GHz,5.007043006,GHz,0.01,synthetic
+anharmonicity_MHz,-269.410572794,MHz,3,synthetic
+readout_g_GHz,7.240443672,GHz,0.005,synthetic
+g_MHz,74.630439756,MHz,3,synthetic
+chi_exact_MHz,-0.376037188,MHz,0.05,synthetic

@@ -1,0 +1,88 @@
+{
+  "Model": {
+    "Mesh": "device.msh",
+    "L0": 1e-06
+  },
+  "Domains": {
+    "Materials": [
+      {
+        "Attributes": [
+          1
+        ],
+        "Permittivity": 1.0
+      },
+      {
+        "Attributes": [
+          2
+        ],
+        "Permittivity": 11.45
+      }
+    ],
+    "Postprocessing": {
+      "Energy": [
+        {
+          "Index": 2,
+          "Attributes": [
+            2
+          ]
+        }
+      ]
+    }
+  },
+  "Problem": {
+    "Type": "Driven",
+    "Output": "driven"
+  },
+  "Boundaries": {
+    "PEC": {
+      "Attributes": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        99
+      ]
+    },
+    "LumpedPort": [
+      {
+        "Index": 1,
+        "Attributes": [
+          31
+        ],
+        "Direction": "+Y",
+        "R": 50.0,
+        "Excitation": 1
+      },
+      {
+        "Index": 2,
+        "Attributes": [
+          32
+        ],
+        "Direction": "+Y",
+        "R": 50.0,
+        "Excitation": 2
+      }
+    ]
+  },
+  "Solver": {
+    "Order": 2,
+    "Linear": {
+      "Type": "SuperLU",
+      "KSPType": "FGMRES",
+      "Tol": 1e-08,
+      "MaxIts": 500
+    },
+    "Driven": {
+      "Samples": [
+        {
+          "Type": "Linear",
+          "MinFreq": 4.0,
+          "MaxFreq": 12.0,
+          "NSample": 61,
+          "SaveStep": 0
+        }
+      ]
+    }
+  }
+}

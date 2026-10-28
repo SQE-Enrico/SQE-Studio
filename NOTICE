@@ -1,0 +1,10 @@
+Open Superconducting Qubit Workflow
+Original integration code and documentation, 2026.
+
+Third-party tools are not bundled. Their licenses and scientific citations are listed
+in docs/references.md. Generic examples do not imply endorsement or process
+qualification by any institution, foundry or upstream software project.
+
+SQE Studio research workspace
+Maintainer: Emanuele Enrico <e.enrico@inrim.it>
+INRiM, Superconducting Quantum Electronics Group

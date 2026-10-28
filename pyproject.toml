@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-superconducting-qubit-workflow"
+version = "0.10.0"
+description = "SQE Studio: INRiM's open superconducting quantum electronics research workspace"
+authors = [{name = "Emanuele Enrico", email = "e.enrico@inrim.it"}]
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = "Apache-2.0"
+dependencies = ["numpy>=2.1,<3", "scipy>=1.14,<2", "matplotlib>=3.9,<4", "shapely>=2.0,<3"]
+
+[project.optional-dependencies]
+metal = ["quantum-metal>=0.8,<1", "gmsh>=4.14,<5"]
+palace = ["gmsh==4.15.2"]
+reference = ["scqubits==4.3.1", "qpdk==0.4.1", "gmsh==4.15.2", "qutip==5.3.1"]
+dev = ["ruff>=0.11,<1", "build>=1.2,<2"]
+notebooks = ["jupyterlab>=4.4,<5", "ipykernel>=6.29,<8"]
+web = ["gunicorn>=26.2.2,<27"]
+
+[project.scripts]
+sqw = "sqw.cli:main"
+sqe-studio = "sqw.studio.launch:main"
+sqe-worker = "sqw.studio.jobs:main"
+
+[tool.setuptools.package-data]
+"sqw.studio" = ["static/*.html", "static/*.js", "static/*.css", "static/*.svg"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

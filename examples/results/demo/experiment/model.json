@@ -1,0 +1,18 @@
+{
+  "source": "analytic_surrogate",
+  "dynamics_backend": "scipy",
+  "T1_effective_us": 40.82622274687616,
+  "T2_us": 40.40888846158933,
+  "Tphi_assumed_us": 80.0,
+  "thermal_p1_two_level": 6.052650483873492e-06,
+  "rabi_MHz": 5.0,
+  "spectroscopy_drive_MHz": 0.03,
+  "seed": 17,
+  "shots": 2048,
+  "limitations": [
+    "Markovian two-level dynamics with ideal Ramsey pulses",
+    "Intrinsic T1/Tphi and readout Qi/Qc are assumptions, not geometry predictions",
+    "No TLS, quasiparticles, leakage, attenuation chain or amplifier model",
+    "Purcell estimate is single-mode dispersive and unfiltered"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "case": "cavity",
+  "lengths_um": [
+    40000.0,
+    27000.0,
+    19000.0
+  ],
+  "refinement": 1,
+  "mesh_generator": "native structured conformal tetrahedra; not Gmsh",
+  "physical_groups": {
+    "vacuum": 1,
+    "pec": 2
+  },
+  "geometry_sha256": "e42f6a4017b09bef8c022b0708db6d9e7f01469aeb326cbfef545b113065ddb1"
+}

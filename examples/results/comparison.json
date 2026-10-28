@@ -1,0 +1,50 @@
+{
+  "reference_file": "examples/data/synthetic_reference.csv",
+  "reference_sha256": "a03d79a00b132eece433c4af0c8d2d2eff6d0907bd1abf06a190a8dc481e76f8",
+  "reference_kind": "synthetic",
+  "prediction_source": "synthetic_fixture",
+  "comparisons": [
+    {
+      "parameter": "f01_GHz",
+      "unit": "GHz",
+      "predicted": 5.007043006160368,
+      "reference": 5.007043006,
+      "sigma": 0.01,
+      "residual_sigma": 1.603677191042152e-08
+    },
+    {
+      "parameter": "anharmonicity_MHz",
+      "unit": "MHz",
+      "predicted": -269.4105727939018,
+      "reference": -269.410572794,
+      "sigma": 3.0,
+      "residual_sigma": 3.2741809263825417e-11
+    },
+    {
+      "parameter": "readout_g_GHz",
+      "unit": "GHz",
+      "predicted": 7.240443672043956,
+      "reference": 7.240443672,
+      "sigma": 0.005,
+      "residual_sigma": 8.79118999819184e-09
+    },
+    {
+      "parameter": "g_MHz",
+      "unit": "MHz",
+      "predicted": 74.63043975638118,
+      "reference": 74.630439756,
+      "sigma": 3.0,
+      "residual_sigma": 1.2705925200862112e-10
+    },
+    {
+      "parameter": "chi_exact_MHz",
+      "unit": "MHz",
+      "predicted": -0.376037188325018,
+      "reference": -0.376037188,
+      "sigma": 0.05,
+      "residual_sigma": -6.5003591398493654e-09
+    }
+  ],
+  "within_3sigma": true,
+  "note": "Agreement is meaningful only for independent measured data and stated model error"
+}

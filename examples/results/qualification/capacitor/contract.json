@@ -1,0 +1,17 @@
+{
+  "case": "capacitor",
+  "lengths_um": [
+    1000.0,
+    800.0,
+    500.0
+  ],
+  "refinement": 1,
+  "mesh_generator": "native structured conformal tetrahedra; not Gmsh",
+  "physical_groups": {
+    "volume": 1,
+    "ground_or_pec": 2,
+    "terminal": 3,
+    "sides": 4
+  },
+  "geometry_sha256": "e1f61209df3e5a76ffbbf9aba26898c27da256d98546bddc061f5c09965f091e"
+}

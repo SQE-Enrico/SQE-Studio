@@ -1,0 +1,23 @@
+.venv*/
+.sqw/
+studio-data/
+deploy/studio.env
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ruff_cache/
+build/
+dist/
+data/private/
+*.msh
+*.brep
+*.vtu
+*.pvtu
+*.pvd
+!examples/results/**
+
+# Local diagnostic bundles are user generated and should never be committed.
+diagnostics/

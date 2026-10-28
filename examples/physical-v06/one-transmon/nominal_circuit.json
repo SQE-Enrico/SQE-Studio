@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "name": "SQE physical source / 1 tiled transmons",
+  "model": "differential_island_reduction__user_declared_nominal_C_and_L",
+  "elements": [
+    {
+      "id": "Cq0",
+      "kind": "C",
+      "a": "q0",
+      "b": "0",
+      "value": 78.0
+    },
+    {
+      "id": "J0",
+      "kind": "JJ",
+      "a": "q0",
+      "b": "0",
+      "ej_ghz": 14.304485
+    },
+    {
+      "id": "Cr0",
+      "kind": "C",
+      "a": "r0",
+      "b": "0",
+      "value": 70.0
+    },
+    {
+      "id": "Lr0",
+      "kind": "L",
+      "a": "r0",
+      "b": "0",
+      "value": 8.0
+    },
+    {
+      "id": "Cqr0",
+      "kind": "C",
+      "a": "q0",
+      "b": "r0",
+      "value": 3.5
+    }
+  ],
+  "qubits": [
+    {
+      "id": "Q0",
+      "junction": "J0",
+      "node": "q0",
+      "target_ghz": 5.0,
+      "tolerance_mhz": 500.0
+    }
+  ],
+  "positions": {
+    "q0": [
+      100,
+      100
+    ],
+    "r0": [
+      100,
+      170
+    ]
+  },
+  "ports": [
+    {
+      "id": "P1",
+      "node": "r0",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    },
+    {
+      "id": "P2",
+      "node": "r0",
+      "z0_ohm": 50.0,
+      "coupling_ff": 2.0
+    }
+  ],
+  "chip": {
+    "width_um": 1500,
+    "height_um": 1500,
+    "metal_layer": 1,
+    "junction_layer": 91,
+    "min_gap_um": 2
+  },
+  "notes": "Derived topology and EJ from physical_qpu, but C and resonator L are user-declared seeds, NOT geometric extraction; no Q-Q coupling."
+}

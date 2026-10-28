@@ -1,0 +1,3 @@
+f01: 5.007043 -> 4.960222 GHz
+Scientific cells executed: 6
+Optional IPython display import/calls omitted; Jupyter kernel and rich display were not tested.

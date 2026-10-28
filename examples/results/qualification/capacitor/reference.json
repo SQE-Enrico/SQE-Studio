@@ -1,0 +1,9 @@
+{
+  "source": "scipy_p1_fem_reference",
+  "capacitance_F": 1.6220872084041603e-13,
+  "analytic_capacitance_F": 1.6220872084041598e-13,
+  "relative_error": 2.220446049250313e-16,
+  "maximum_potential_error_V": 2.220446049250313e-16,
+  "pass": true,
+  "boundary_model": "Insulated sides; full bottom/top plates; exact linear potential; no fringing"
+}

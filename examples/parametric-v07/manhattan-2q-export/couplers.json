@@ -1,0 +1,14 @@
+[
+  {
+    "id": "K0_1",
+    "kind": "interdigitated",
+    "islands": [
+      "Q0.pad_b",
+      "Q1.pad_a"
+    ],
+    "gap_um": 20.0,
+    "nominal_c_ff": 0.35,
+    "electrical_assumption": "user-declared nominal; not FEM extracted",
+    "design_verified": "interdigitated comb electrodes"
+  }
+]

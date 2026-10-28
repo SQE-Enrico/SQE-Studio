@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "software_version": "0.3.0",
+  "config_sha256": "5cca7d5f91cc894ec17ba653785f8416bc43f2c1be3946a708445e523940d77d",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "matplotlib": "3.10.8",
+      "scqubits": null,
+      "qpdk": null,
+      "gdsfactory": null,
+      "gmsh": null,
+      "qutip": null
+    },
+    "git_commit": null
+  },
+  "stages": {
+    "spec": "completed",
+    "layout": "completed",
+    "em-export": "completed",
+    "quantize": "completed",
+    "experiment": "completed",
+    "report": "completed"
+  },
+  "stage_records": {
+    "spec": {
+      "inputs": {
+        "resolved_config.json": "d006ed5def5cab02365858dafb8c2209439b24d1eda10b6877f57fbf17015a0f"
+      },
+      "outputs": {
+        "specification.json": "b3884f9722e36775aadebe67ce09db73e1d9088321c92510288abff48c5a01ef"
+      },
+      "parents": [],
+      "backends": {
+        "cad": "native",
+        "quantum": "scipy",
+        "dynamics": "scipy"
+      }
+    },
+    "layout": {
+      "inputs": {
+        "resolved_config.json": "d006ed5def5cab02365858dafb8c2209439b24d1eda10b6877f57fbf17015a0f"
+      },
+      "outputs": {
+        "layout/cad_validation.json": "7168742fcaac3ecc804058cb1a03cebbbbe21272d1b25353866dfef85b9a878d",
+        "layout/layout.png": "00976a29d1a4b5cf3ff24153b0bc33e7ba3687364c796a13f4e155279199a4fd",
+        "layout/device.gds": "5a45e1c595a482a67ea955e317a1022a09715ff104d2b5f172d23ce11ec1a9aa",
+        "layout/fabrication.json": "82cfeedd38235a8fccac65dd8eacdaa924c551c412844ec030a8ce0296134e03",
+        "layout/geometry.json": "e6f9001e8b3496424ce0921e221f8adbea56fd71165037bba4dfce59e0c33b31"
+      },
+      "parents": [],
+      "backends": {
+        "cad": "native",
+        "quantum": "scipy",
+        "dynamics": "scipy"
+      }
+    },
+    "em-export": {
+      "inputs": {
+        "resolved_config.json": "d006ed5def5cab02365858dafb8c2209439b24d1eda10b6877f57fbf17015a0f",
+        "layout/geometry.json": "e6f9001e8b3496424ce0921e221f8adbea56fd71165037bba4dfce59e0c33b31"
+      },
+      "outputs": {
+        "em/electrostatic.json": "1f0390365f9311ab15b126d87674f5e580532fd59a9b3c646479c1296ed728e8",
+        "em/eigenmode.json": "ea6d22019a7e8ae4f05c62b45dcd541f5f46f9413cc6024a4e4675e80419903b",
+        "em/linearized.json": "e19b5afe9412876dc5716a7c4da3574b0a2ba33d66f640aabe86b89fa636c955",
+        "em/contract.json": "f9ac1da7ceaeae6b76f7950db3997fa080d99618516e82cf776c502ee3a54a4b"
+      },
+      "parents": [
+        "layout"
+      ],
+      "backends": {
+        "cad": "native",
+        "quantum": "scipy",
+        "dynamics": "scipy"
+      }
+    },
+    "quantize": {
+      "inputs": {
+        "resolved_config.json": "d006ed5def5cab02365858dafb8c2209439b24d1eda10b6877f57fbf17015a0f",
+        "layout/geometry.json": "e6f9001e8b3496424ce0921e221f8adbea56fd71165037bba4dfce59e0c33b31",
+        "../../data/synthetic_extraction.json": "035a850cbf4fdc5d4d5a8cf64524bd54d9f571fd01b2cacdc972e01b4ca1b6cf"
+      },
+      "outputs": {
+        "parameters.json": "1ac8cf02cb341114799c220fd444bdfd1317e15b0d45ef8157cdb80a9288f99c",
+        "extraction.json": "035a850cbf4fdc5d4d5a8cf64524bd54d9f571fd01b2cacdc972e01b4ca1b6cf"
+      },
+      "parents": [
+        "layout"
+      ],
+      "backends": {
+        "cad": "native",
+        "quantum": "scipy",
+        "dynamics": "scipy"
+      }
+    },
+    "experiment": {
+      "inputs": {
+        "resolved_config.json": "d006ed5def5cab02365858dafb8c2209439b24d1eda10b6877f57fbf17015a0f",
+        "layout/geometry.json": "e6f9001e8b3496424ce0921e221f8adbea56fd71165037bba4dfce59e0c33b31",
+        "parameters.json": "1ac8cf02cb341114799c220fd444bdfd1317e15b0d45ef8157cdb80a9288f99c"
+      },
+      "outputs": {
+        "experiment/readout_s21.csv": "951e5897467a22c18d5e48dd2a029c2dbf003815d7fb56a3d25748fa15ca88aa",
+        "experiment/rabi.csv": "221ebfc42bd6e895cdc18ea1607e2338ba94fe7ab792bec249a279a2de478fa8",
+        "experiment/t1.csv": "068a3988e7dd78988004d982b5847a9c75c2a086aed98696f7d9a09f5d3a20f4",
+        "experiment/spectroscopy.csv": "3590fbcb793cd253d63bb70256eeae2ddfe2c683852e7468279bea054c37b777",
+        "experiment/measurements.png": "f6e81cba1a16d8adb7fb177ca0942249fd808c6c9de2191b031fcdd49a740209",
+        "experiment/model.json": "7a744b483e303bd1f3097d86d1843ff06110a032a0a31ac57e48eb66bbb3a8b6",
+        "experiment/ramsey.csv": "3a7464757a9c03387811abb17a47e86450c3203fee5d5edede63781f8acc47a2"
+      },
+      "parents": [
+        "layout",
+        "quantize"
+      ],
+      "backends": {
+        "cad": "native",
+        "quantum": "scipy",
+        "dynamics": "scipy"
+      }
+    },
+    "report": {
+      "inputs": {
+        "resolved_config.json": "d006ed5def5cab02365858dafb8c2209439b24d1eda10b6877f57fbf17015a0f",
+        "layout/geometry.json": "e6f9001e8b3496424ce0921e221f8adbea56fd71165037bba4dfce59e0c33b31",
+        "parameters.json": "1ac8cf02cb341114799c220fd444bdfd1317e15b0d45ef8157cdb80a9288f99c",
+        "experiment/model.json": "7a744b483e303bd1f3097d86d1843ff06110a032a0a31ac57e48eb66bbb3a8b6",
+        "specification.json": "b3884f9722e36775aadebe67ce09db73e1d9088321c92510288abff48c5a01ef"
+      },
+      "outputs": {
+        "report.html": "03790cb416f3cc69ff20656400c5c79af59d84d85831db7ec25d1e15ad9a6486"
+      },
+      "parents": [
+        "spec",
+        "layout",
+        "quantize",
+        "experiment"
+      ],
+      "backends": {
+        "cad": "native",
+        "quantum": "scipy",
+        "dynamics": "scipy"
+      }
+    }
+  },
+  "fabrication_status": "HOLD",
+  "physics_source": "synthetic_fixture"
+}

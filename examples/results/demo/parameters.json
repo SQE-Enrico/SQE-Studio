@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "source": "analytic_surrogate",
+  "synthetic": true,
+  "geometry_sha256": "1fb92242648e0f580c3695e99001d416b1d59683c76ef07fa52ff28dcfcd0965",
+  "quantum_backend": "scipy",
+  "EJ_GHz": 14.5,
+  "EC_GHz": 0.23830516751692674,
+  "EJ_over_EC": 60.846351554546416,
+  "C_qubit_effective_fF": 81.28329539175125,
+  "C_readout_effective_fF": 706.8637299237624,
+  "reduced_capacitance_fF": [
+    [
+      81.33331002405382,
+      -5.947712418300654
+    ],
+    [
+      -5.947712418300654,
+      707.2986720526435
+    ]
+  ],
+  "energies_GHz": [
+    0.0,
+    5.007043006160368,
+    9.744675439526834,
+    14.184311873463447,
+    18.272476955359593,
+    22.031936936289874
+  ],
+  "f01_GHz": 5.007043006160368,
+  "anharmonicity_MHz": -269.4105727939018,
+  "readout_bare_GHz": 7.238405968377313,
+  "g_MHz": 74.63043975638118,
+  "chi_perturbative_MHz": -0.2689069654815296,
+  "dispersive_approximation_valid": true,
+  "n_critical": 223.48503510634086,
+  "n01": 1.1457331792690377,
+  "charge_dispersion_f01_kHz": 1.5614016151133114,
+  "charge_basis_convergence_Hz": 0.00030375701953744283,
+  "thermal_populations": [
+    0.9999939472795859,
+    6.052650483450226e-06,
+    6.992910971274624e-11,
+    1.6516752693375425e-15,
+    9.067227837092546e-20,
+    1.0954231412174178e-23
+  ],
+  "thermal_excited_probability": 6.05272041409588e-06,
+  "readout_n_thermal": 2.861213740484328e-08,
+  "readout_Q_loaded": 11320.754716981133,
+  "kappa_over_2pi_MHz": 0.6393925272066626,
+  "T1_Purcell_us": 222.51588206468656,
+  "junction": {
+    "Ic_nA": 29.19364079014021,
+    "LJ_nH": 11.273207779778016,
+    "area_um2": 0.05838728158028042,
+    "Cj_fF": 2.6274276711126188,
+    "Rn_ohm_AB_zero_T": 9685.100287956357,
+    "provenance": "EJ input; Jc-inferred area; assumed specific capacitance; AB ideal tunnel junction"
+  },
+  "targets": {
+    "f01_GHz": 5.0,
+    "anharmonicity_MHz": -250.0,
+    "readout_GHz": 7.2,
+    "coupling_MHz": 80.0
+  },
+  "target_deviation": {
+    "f01_MHz": 7.043006160367682,
+    "anharmonicity_MHz": -19.410572793901792,
+    "readout_MHz": 38.40596837731258,
+    "g_MHz": -5.369560243618821
+  },
+  "coherence_provenance": "T1 intrinsic, Tphi, Qi and Qc are assumed inputs",
+  "modal_reduction": "Half-wave antinode: distributed readout ground C / 2; localized coupling retained",
+  "f01_dressed_GHz": 5.004123515632213,
+  "readout_g_GHz": 7.240443672043956,
+  "readout_e_GHz": 7.2396915976673055,
+  "chi_exact_MHz": -0.376037188325018,
+  "minimum_label_overlap": 0.9959093598987848
+}

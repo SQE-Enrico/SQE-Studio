@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "geometry_sha256": "5e58d7e9e0ad66ca0adc245a393837cfdb6554e3a7b7df60def2596c14e437b5",
+  "design_spec_sha256": "3326dbc87f97d3f2f8d51a4f4c9536cc53e770228f9888ee9e0b9d52a8affb0c",
+  "terminal_order": [
+    "Q0.pad_a",
+    "Q0.pad_b",
+    "Q0.resonator",
+    "Q0.feedline"
+  ],
+  "port_order": [
+    "Q0.input",
+    "Q0.output"
+  ],
+  "junction_order": [
+    "J0"
+  ],
+  "tag_map": {
+    "air": 1,
+    "silicon": 2,
+    "ground": 10,
+    "outer": 99,
+    "Q0.pad_a": 100,
+    "Q0.pad_b": 101,
+    "Q0.resonator": 102,
+    "Q0.feedline": 103,
+    "Q0.junction": 1000,
+    "Q0.input": 1001,
+    "Q0.output": 1002
+  },
+  "palace_configs": [
+    "electrostatic",
+    "eigenmode",
+    "driven-1",
+    "driven-2"
+  ],
+  "C_source": "not_extracted",
+  "circuit_source": "user_declared_nominal_parameters",
+  "mask_status": "HOLD",
+  "electromagnetic_status": "NOT_SOLVED"
+}

@@ -1,0 +1,6 @@
+# Candidate reference stack; optional integration tests must qualify its resolution.
+# This is NOT a transitive lock. bootstrap records the actual resolved environment.
+scqubits==4.3.1
+qpdk==0.4.1
+gmsh==4.15.2
+qutip==5.3.1

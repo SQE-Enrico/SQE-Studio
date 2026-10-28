@@ -1,0 +1,17 @@
+# Optional full scientific image. Build and qualify on the actual laboratory host.
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 MPLCONFIGDIR=/tmp/matplotlib
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip build-essential cmake gfortran git pkg-config libopenblas-dev liblapack-dev libopenmpi-dev openmpi-bin libglu1-mesa libgl1 libegl1 zlib1g-dev ca-certificates tini && rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/venv
+ENV PATH=/opt/venv/bin:$PATH
+WORKDIR /opt/sqe
+COPY . .
+RUN python -m pip install --no-cache-dir -r requirements/core.lock && python -m pip install --no-cache-dir -c requirements/core.lock -r requirements/reference.in && python -m pip install --no-cache-dir '.[web]'
+ARG SQW_BUILD_JOBS=4
+RUN SQW_BUILD_JOBS=${SQW_BUILD_JOBS} bash scripts/build_palace.sh
+RUN useradd --uid 10001 --create-home studio && mkdir -p /data && chown studio:studio /data
+USER studio
+ENV SQE_DATA=/data SQE_PALACE=/opt/sqe/.sqw/palace-v0.18.1/build/bin/palace
+EXPOSE 8000
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["gunicorn", "--no-control-socket", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "300", "sqw.studio.server:create_app()"]

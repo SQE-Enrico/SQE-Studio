@@ -1,0 +1,114 @@
+EE
+==================================== ERRORS ====================================
+_ ERROR at setup of test_real_browser_local_http_auth_revisions_and_fail_closed_job _
+
+local_server = (<http.server.ThreadingHTTPServer object at 0x7faf911ed160>, 'http://127.0.0.1:33867')
+
+    @pytest.fixture()
+    def page(local_server):
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+            context = browser.new_context(viewport={'width': 1366, 'height': 768}, accept_downloads=True, reduced_motion='reduce')
+            pg = context.new_page()
+            errors = []
+            pg.on('pageerror', lambda err: errors.append(str(err)))
+>           pg.goto(local_server[1], wait_until='networkidle')
+
+tests/ui/test_browser.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/pyvenv/lib/python3.13/site-packages/playwright/sync_api/_generated.py:9050: in goto
+    self._sync(
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_page.py:552: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_frame.py:153: in goto
+    await self._channel.send(
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7faf911ee120>
+cb = <function Channel.send.<locals>.<lambda> at 0x7faf911f3ec0>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.Error: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:33867/
+E           Call log:
+E             - navigating to "http://127.0.0.1:33867/", waiting until "networkidle"
+
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_connection.py:559: Error
+______________ ERROR at setup of test_auth_and_dialog_focus_guard ______________
+
+local_server = (<http.server.ThreadingHTTPServer object at 0x7faf91307890>, 'http://127.0.0.1:38503')
+
+    @pytest.fixture()
+    def page(local_server):
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+            context = browser.new_context(viewport={'width': 1366, 'height': 768}, accept_downloads=True, reduced_motion='reduce')
+            pg = context.new_page()
+            errors = []
+            pg.on('pageerror', lambda err: errors.append(str(err)))
+>           pg.goto(local_server[1], wait_until='networkidle')
+
+tests/ui/test_browser.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/pyvenv/lib/python3.13/site-packages/playwright/sync_api/_generated.py:9050: in goto
+    self._sync(
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_page.py:552: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_frame.py:153: in goto
+    await self._channel.send(
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_connection.py:69: in send
+    return await self._connection.wrap_api_call(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <playwright._impl._connection.Connection object at 0x7faf90764690>
+cb = <function Channel.send.<locals>.<lambda> at 0x7faf906eff60>
+is_internal = False, title = None
+
+    async def wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        if self._api_zone.get():
+            return await cb()
+        task = asyncio.current_task(self._loop)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
+    
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        self._api_zone.set(parsed_st)
+        try:
+            return await cb()
+        except Exception as error:
+>           raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E           playwright._impl._errors.Error: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:38503/
+E           Call log:
+E             - navigating to "http://127.0.0.1:38503/", waiting until "networkidle"
+
+/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_connection.py:559: Error
+=========================== short test summary info ============================
+ERROR tests/ui/test_browser.py::test_real_browser_local_http_auth_revisions_and_fail_closed_job - playwright._impl._errors.Error: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:33867/
+Call log:
+  - navigating to "http://127.0.0.1:33867/", waiting until "networkidle"
+ERROR tests/ui/test_browser.py::test_auth_and_dialog_focus_guard - playwright._impl._errors.Error: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:38503/
+Call log:
+  - navigating to "http://127.0.0.1:38503/", waiting until "networkidle"
+2 errors in 5.61s

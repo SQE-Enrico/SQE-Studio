@@ -1,0 +1,14 @@
+{
+  "schema":"sqe.agent-ownership.v1",
+  "agents":{
+    "A01":{"role":"Typed interoperability and scientific provenance","paths":["src/sqe_studio/interop/","tests/interop/","docs/agents/A01.md","reports/agents/A01/"]},
+    "A02":{"role":"Quantum Metal QDesign, components, routes and native GDS","paths":["src/sqe_studio/adapters/quantum_metal_adapter.py","tests/adapters/test_quantum_metal_","docs/agents/A02.md","reports/agents/A02/"]},
+    "A03":{"role":"SQDMetal, Gmsh, Palace full-wave bridge","paths":["src/sqe_studio/adapters/sqdmetal_palace_adapter.py","tests/adapters/test_sqdmetal_","docs/agents/A03.md","reports/agents/A03/"]},
+    "A04":{"role":"scqubits and extracted Hamiltonian modelling","paths":["src/sqe_studio/adapters/scqubits_adapter.py","tests/adapters/test_scqubits_","docs/agents/A04.md","reports/agents/A04/"]},
+    "A05":{"role":"JosephsonCircuits.jl and RF/native port models","paths":["src/sqe_studio/adapters/josephson_adapter.py","tests/adapters/test_josephson_","docs/agents/A05.md","reports/agents/A05/"]},
+    "A06":{"role":"Artifact DAG, sweep/iteration and job lifecycle","paths":["src/sqe_studio/orchestration/","src/sqe_studio/jobs.py","src/sqe_studio/worker.py","tests/orchestration/","docs/agents/A06.md","reports/agents/A06/"]},
+    "A07":{"role":"Unified industrial design UI / interactive graphs","paths":["src/sqe_studio/web/","tests/ui/","docs/agents/A07.md","reports/agents/A07/"]},
+    "A08":{"role":"Security, packaging, developer operations and install","paths":["src/sqe_studio/server.py","src/sqe_studio/store.py","scripts/","requirements/","tests/security/","docs/agents/A08.md","reports/agents/A08/"]}
+  },
+  "frozen_paths":["contracts/","tools/delta.py","src/sqe_studio/contracts.py","src/sqe_studio/adapters/base.py","src/sqe_studio/adapters/registry.py","pyproject.toml"]
+}

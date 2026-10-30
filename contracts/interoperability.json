@@ -1,0 +1,22 @@
+{
+  "schema":"sqe.interoperability.v1",
+  "principles":[
+    "SQE Studio does not compute science or write GDS. Native engines own numerical and geometric outputs.",
+    "A saved project revision is immutable and the unique origin for any run.",
+    "An engine adapter must declare exactly which inputs it consumes and native output types it produces.",
+    "A derived input requires explicit units, dimensions, transformations, parents and validation evidence.",
+    "No hidden model conversion, undefined port correspondence, or fake engine readiness.",
+    "No automatic promotion of simulation results to qualification or fabrication signoff."
+  ],
+  "artifact_types":["circuit.netlist","quantum_metal.qdesign_recipe","quantum_metal.gdsii","gmsh.mesh","palace.deck","palace.eigenmodes","palace.sparameters","palace.capacitance_matrix","scqubits.spectrum","josephson.sparameters","validation.report","measurement.dataset"],
+  "flows":[
+    {"from":"quantum_metal.qdesign_recipe","to":"quantum_metal.gdsii","owner":"A02","state":"implemented_limited"},
+    {"from":"quantum_metal.qdesign_recipe","to":"gmsh.mesh","owner":"A03","state":"blocked_unverified_stack"},
+    {"from":"gmsh.mesh","to":"palace.deck","owner":"A03","state":"blocked_unverified_boundaries"},
+    {"from":"palace.deck","to":"palace.eigenmodes","owner":"A03","state":"blocked_solver_acceptance"},
+    {"from":"palace.deck","to":"palace.sparameters","owner":"A03","state":"blocked_solver_acceptance"},
+    {"from":"palace.eigenmodes","to":"scqubits.spectrum","owner":"A01+A04","state":"blocked_unverified_quantization"},
+    {"from":"circuit.netlist","to":"josephson.sparameters","owner":"A01+A05","state":"blocked_unverified_port_mapping"}
+  ],
+  "field_contract":{"quantity":{"value":"finite_number","unit":"UCUM_or_documented_unit","origin":"user|engine|measured","evidence":"required_when_engine_derived"},"artifact":{"schema":"sqe.artifact.v1","engine":"allowlisted","version":"native_engine_version","used_revision":"immutable_uuid","digest":"sha256"}}
+}

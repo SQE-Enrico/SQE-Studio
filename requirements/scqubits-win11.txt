@@ -1,0 +1,2 @@
+# OPTIONAL REVIEWED SIDECAR ONLY, no fabricated spectra if not installed.
+scqubits==4.3.1

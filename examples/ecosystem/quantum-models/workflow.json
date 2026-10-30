@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "name": "Independent nonlinear-circuit and exact quantum spectra candidates",
-  "steps": [
-    {"id": "scqubits", "engine": "scqubits", "operation": "spectrum", "source": "transmon.json", "settings": {"levels": 6}},
-    {"id": "julia-export", "engine": "josephsoncircuits", "operation": "export", "source": "circuit.json"}
-  ]
-}

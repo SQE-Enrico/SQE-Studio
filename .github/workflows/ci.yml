@@ -1,47 +1,22 @@
-name: Validate workflow
-on: [push, pull_request, workflow_dispatch]
-permissions:
-  contents: read
+name: SQE Product Foundation CI
+on:
+  push:
+  pull_request:
 jobs:
-  core:
-    runs-on: ubuntu-24.04
+  unit-and-package:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ['3.11', '3.12', '3.13']
+        python-version: ['3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
-      - run: python scripts/bootstrap.py --profile core
-      - run: .venv/bin/python -m unittest -q tests.test_ecosystem_v015
-      - run: .venv/bin/python -m unittest discover -s tests/studio -p 'test_web_experiments_v016.py' -q
-      - run: .venv/bin/python -m unittest discover -s tests/studio -p 'test_unified_workspace_v017.py' -q
-      - run: .venv/bin/python -m unittest discover -s tests/studio -p 'test_diagnostic_control.py' -q
-      - run: .venv/bin/python -m sqw ecosystem run --project examples/ecosystem/native-1q/workflow.json --out build/ecosystem-1q
-      - run: .venv/bin/python -m sqw ecosystem verify --out build/ecosystem-1q
-      - run: .venv/bin/python -m sqw run --mode imported --extraction examples/data/synthetic_extraction.json --out build/imported
-      - run: .venv/bin/python -m sqw verify --run build/first-run
-      - run: .venv/bin/python -m sqw verify --run build/imported
-      - run: .venv/bin/python -m sqw qualify --out build/qualification
-      - uses: actions/upload-artifact@v4
-        with:
-          name: example-${{ matrix.python }}
-          path: build/
-  reference-adapters:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: sudo apt-get update && sudo apt-get install -y libglu1-mesa libgl1 libegl1
-      - run: python scripts/bootstrap.py --profile full --skip-demo
-      - run: .venv/bin/python -m sqw run --cad-backend qpdk --quantum-backend scqubits --dynamics-backend qutip --out build/reference
-      - uses: actions/upload-artifact@v4
-        with:
-          name: candidate-reference-qualification
-          path: |
-            .sqw/full-resolved.txt
-            build/reference/
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e .[dev]
+      - run: python -m pytest -q
+      - run: python -m compileall -q src/sqe_studio tools/delta.py
+      - run: python tools/verify_release_source.py . # extended product inventory; delta.py verify is baseline-only
+      - run: python -m build --wheel
+      - name: Inspect wheel UX assets
+        run: python -c "import zipfile,glob;z=zipfile.ZipFile(glob.glob('dist/*.whl')[0]);assert all(any(n.endswith(x) for n in z.namelist()) for x in ('web/index.html','web/app.js','web/style.css'))"

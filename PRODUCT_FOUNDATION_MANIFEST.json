@@ -1,0 +1,43 @@
+{
+  "schema": "sqe.product-foundation-manifest.v1",
+  "product": "SQE Studio Unified Quantum EDA Workspace",
+  "version": "0.1.0-product-foundation",
+  "date_utc": "2026-10-29",
+  "input_provenance": {
+    "archive": "SQE-Studio-native-engine-orchestrator-preview.zip",
+    "sha256": "1aef707b5ab2f676795a3ef31663687293728116856b6896ba810099960e4796",
+    "transformation": "Clean architecture rewrite, not a migration preserving prior files or project data"
+  },
+  "release_status": "DEVELOPMENT_FOUNDATION_NOT_RC",
+  "source_policy": "Original new product code, no historical Research Workspace or reduced-order SQE solver",
+  "single_workspace": true,
+  "stages": ["intent", "schematic", "layout", "em", "quantum", "results", "fabrication"],
+  "native_engine_policy": "Only installed scientific packages may compute physics and only Quantum Metal may write GDSII",
+  "capabilities": {
+    "project_revision_storage": "implemented_and_unit_tested",
+    "local_http_security": "focused_tests_passed_not_independently_audited",
+    "dark_unified_ui": "chromium_fixture_visual_check_passed",
+    "native_scqubits": "adapter_implemented_unavailable_for_external_run",
+    "native_quantum_metal_gds": "adapter_implemented_unavailable_for_external_run",
+    "native_sqdmetal_gmsh_palace": "fail_closed_pending_A03_3d_physical_qualification",
+    "native_josephson_circuits": "fail_closed_pending_A05_reviewed_Julia_mapping",
+    "artifact_dag_auto_iteration": "contract_defined_pending_A01_A06",
+    "external_DRC_LVS_PDK_foundry_signoff": "not_established"
+  },
+  "tests": {
+    "unit_and_security": {"status":"PASS", "passed":11,"log":"reports/build/pytest.log"},
+    "javascript_syntax": {"status":"PASS", "command":"node --check src/sqe_studio/web/app.js"},
+    "python_compile": {"status":"PASS", "command":"python -m compileall -q src/sqe_studio tools/delta.py"},
+    "wheel_build": {"status":"PASS", "log":"reports/build/wheel.log", "static_ux_assets":3},
+    "chromium_visual_fixture": {"status":"PASS", "viewports":["1366x768","750x900","390x844"], "javascript_errors":0,"full_document_horizontal_overflow_px":0,"log":"reports/build/browser-fixture.log"},
+    "real_browser_local_http": {"status":"BLOCKED", "cause":"Chromium administrator policy ERR_BLOCKED_BY_ADMINISTRATOR", "log":"reports/build/browser-http.log"},
+    "real_http_security": {"status":"PASS_FOCUSED", "evidence":"tests/security/test_http.py"},
+    "delta_admission_smoke": {"status":"PASS_EXPECTED_REJECTION_OF_INCOMPLETE_MERGE", "log":"reports/build/agent-delta-smoke.log"},
+    "external_scientific_validation": {"status":"NOT_PERFORMED", "reason":"Native optional engine packages not available in build runtime"}
+  },
+  "agent_assignments": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08"],
+  "final_integrator": "A09",
+  "contract_lock": "FOUNDATION_LOCK.json",
+  "known_limitations": "docs/KNOWN_LIMITATIONS.md",
+  "qualification_rule": "No tests, simulated data, S-parameters, convergence, fabrication or signoff may be claimed beyond actual evidence."
+}

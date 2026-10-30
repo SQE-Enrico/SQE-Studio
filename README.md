@@ -1,87 +1,36 @@
-# SQE Studio 0.17.0 — Unified Web Research Workspace
+# SQE Studio — integrated superconducting and microwave EDA
 
-**One user workflow: Project → Setup → Run → Results → Support ZIP.** The redesigned default browser interface combines project selection, optional scientific engine setup, test/experiment execution, results inspection and single-ZIP debugging. All user-facing workflows and new documentation are in English.
+SQE Studio is an **experimental graphical environment for design → native simulation → physical interpretation → design improvement**. Its scope includes superconducting QPUs, resonators, readout components, fluxonium, microwave networks and Josephson RF circuits. **It is not an experiment registry** and examples do not have separate execution paths. The long-term competitive reference is the integrated QuantumPro-class EDA workflow, **not a claim of product parity**.
 
-On Windows, extract the archive and double-click **`WINDOWS-FIRST-START.cmd`**. At first launch, best-effort background provisioning checks optional scqubits, Gmsh, Quantum Metal, SQDMetal and JosephsonCircuits.jl. Scientific and native solvers that need missing runtimes or external dependencies remain flagged as requiring attention. Automatic installation is not a certificate of scientific validation.
+**Release status:** experimental, **not scientifically qualified**, not a standalone signed installer and not foundry approved. Local software tests do not establish solver accuracy or measured-device performance.
 
-Read [Getting Started](GETTING-STARTED.md), [Unified Web Workflow](docs/unified-web-workflow.md), and [Release 0.17.0](RELEASE-0.17.0.md). Detailed design controls remain accessible from **Advanced editor** and existing data remains compatible.
+## Open the application (no command line for normal design work)
 
----
+On Windows with Python and Tkinter already installed, extract the archive and double-click **`Launch SQE Studio.pyw`**. The desktop launcher starts a **localhost-only** authenticated web interface and opens a browser. Use its one-time local setup token to register and then sign in. Close the launcher to stop the service. This is a Python-based desktop launcher, not a compiled Windows application; click **Prepare scientific environment** for an optional, consent-based Python 3.11 sidecar installation (build/test tools, scqubits, Quantum Metal, Gmsh, and browser tests). SQDMetal/Palace and Julia still require separately reviewed native setup; no automatic Windows Palace installation is claimed. No cross-platform installer is qualified.
 
-## Historical capabilities and scientific limitations
+The GUI creates ordinary editable projects, not one-off demonstrations. In **New project**, choose Blank, **CPW resonator**, **Transmon spectrum**, or **Fluxonium flux sweep**. The same dialog shows additional literature-based design cases and the scientific edges that remain blocked. All supported projects use `sqe.project.v1`, revision saving, the same engine studies and the same results views.
 
-**An open-source, browser-based environment for superconducting quantum-circuit design, reproducible simulations, and scientific review.**
+## Automated laptop qualification and report sharing
 
-SQE Studio combines a persistent project workspace with parameterized QPU designs, reduced-order circuit models, GDSII/Quantum Metal interchange, Gmsh meshing, Palace FEM integration, and a JosephsonCircuits.jl export bridge. The project is available under the Apache-2.0 license. Scientific limitations are recorded explicitly: this is **research software, not a validated fabrication-ready EDA product**.
+For a release-candidate evidence run, click **Qualify this laptop** in the same desktop launcher, choose **Comprehensive**, and save the generated `SQE-Studio-qualification-*.zip` to share with developers. No terminal is required. It runs isolated software, installed-package, real browser and available native-engine checks without reading saved design projects. Missing runtimes, unsupported EM/quantum bridges, nonconvergence and incomplete validation are reported as **BLOCKED**, never silently passed. See [Windows workstation setup](docs/WINDOWS_WORKSTATION_SETUP.md), [laptop qualification procedure](docs/LAPTOP_QUALIFICATION.md) and [release quality gates](docs/QUALITY_GATES.md).
 
+## Product workflow
 
-## v0.14 — QPU Mesh Convergence & Field Evidence (Web UI)
+**Specifications → Schematic → Layout → EM analysis → Quantum/circuit models → Results and iteration → Fabrication gate.** Steps may be inapplicable to some device families but share the design environment. The canvas currently shows *symbolic design intent*, **not** native QGeometry, native EM fields or production GDS.
 
-From **System & Diagnostics → Palace scientific diagnostics**, choose **QPU C convergence** to run two real electrostatic Palace refinements (L0 and L1) of the *same fixed one-transmon geometry* and compare verified Maxwell and differential capacitance matrices in fF. **QPU Modes** is an optional, more expensive two-level eigenfrequency comparison; it does **not** track modes by field overlap and reports a `WARN` for the identity check. Both profiles collect stage logs, original CSV hashes, limited field/energy metadata and a downloadable, privacy-minimized `scientific-results.json`. L0 requests one ParaView field frame for inventory, not an in-browser 3D render. **Two-level numerical stability is not physical device qualification.** See [v0.14 validation guide](docs/WORKFLOW-VALIDATION-0.14.0.md).
+- **Geometry:** reviewed Quantum Metal QComponent recipes, physical routing and native renderers when installed.
+- **EM:** SQDMetal/Gmsh/Palace study configuration and verified output inspection; physical material, ground and port correspondence require explicit review.
+- **Quantum:** scqubits on independently entered Hamiltonian inputs. A reviewed EM→Hamiltonian bridge is **not available**.
+- **Nonlinear/RF:** JosephsonCircuits.jl is a target native engine, but its production path is **blocked**.
+- **Design iteration:** revision-based comparison and bounded native-study numeric sweeps exist. Automatic coupled multi-engine optimization of **geometry** is **not** implemented.
+- **Fabrication:** GDS and masks are **HOLD** until independent PDK/DRC/LVS and foundry signoff.
 
-## v0.13 — Analytical FEM benchmark & numerical results (Web UI)
+## Developer entry points
 
-In **System & Diagnostics**, select **Palace scientific diagnostics → Numerical** to solve a parallel-plate capacitor at two independently generated mesh levels and a small PEC cavity. The Web UI displays verified Palace capacitance matrices (in fF), analytical errors, a mesh-level patch-test comparison and a lowest-frequency cavity check. The downloadable report contains `scientific-results.json`, SHA-256 checksums and bounded logs. Existing Quick / Standard / Full profiles are retained. **Numerical reference validation is not QPU mesh-convergence or full scientific qualification.** See [v0.13 validation guide](docs/WORKFLOW-VALIDATION-0.13.0.md).
+Future developers **must** follow [Engineering Principles](docs/DEVELOPER_PRINCIPLES.md), then [EDA extension architecture](docs/EDA_EXTENSION_ARCHITECTURE.md), [published-method design cases](docs/SCIENTIFIC_DESIGN_CASES.md), and [quality/release gates](docs/QUALITY_GATES.md). Source declarations for planned and available cases live in `src/sqe_studio/eda/`; starter inputs are in `design_library.py`. These are **catalogs and gate descriptions**, not alternate simulation engines.
 
-## Start on Windows 11
+Historical agent ownership reports under `agents/`, `docs/agents/`, and `reports/agents/` remain as audit evidence. The original `FOUNDATION_LOCK.json`, frozen contracts and A01–A09 agent protocol are preserved unchanged, and their baseline digest is **not** a digest of this extended source tree. `docs/AGENT_PROTOCOL.md` describes original delta integration, not the current recommended feature workflow.
 
-1. Extract this complete archive into a **new writable folder**, not an elevated/system folder. Keep backups of `studio-data` from any earlier installation.
-2. Double-click **`WINDOWS-FIRST-START.cmd`**. The first launch creates `.venv` and installs Python dependencies. Subsequent launches reuse it. Gmsh installation is optional and does not prevent the Web application from starting.
-3. Your browser opens **http://127.0.0.1:8000/**. Follow the one-time administrator setup link on the first launch.
-4. From the left navigation choose **Quantum Design Lab** for QPU design, **Research Experiments** for multi-engine tests, and **System & Diagnostics** for software regressions and Palace audits.
-5. Run diagnostics from the Web UI and download the resulting ZIP. Open and review the ZIP before sharing. Nothing is automatically uploaded.
+## Local security and scientific limits
 
-**Web endpoints:** `/` (projects), `/quantumlab.html` (QPU design), `/experiments.html` (multi-engine experiments, local administrator only), `/control.html` (regression and Palace diagnostics, local administrator only).
-
-If the Web application cannot start at all, use **`WINDOWS-DIAGNOSTICS.cmd`** as an offline fallback. No command-line work is required for routine design and diagnostic tasks once the application is running. Installing native solvers still requires explicit OS-level approval; no hidden elevation or compilation is initiated by the browser.
-
-Read [Web-first experiments](docs/web-first-experiments.md), [Getting started](GETTING-STARTED.md), [Windows installation](docs/windows.md), [Web diagnostics](docs/diagnostics-windows.md), and [scientific development roadmap](docs/roadmap-quantumpro-open-eda.md).
-
-## Current capabilities
-
-| Area | Available now | Important limitations |
-| --- | --- | --- |
-| Web workspace | Accounts, projects, immutable revisions, worker jobs, artifacts, project export/import | Local SQLite; multi-host distributed scheduler not implemented |
-| Parametric QPU | Configurable materials, stack-up, Dolan/Manhattan JJ process-intent, qubit shapes, physical couplers and CPW routes | Multilayer 3D mesher and foundry DRC/LVS remain incomplete |
-| Circuit studies | Modes, weak-Kerr estimates, RF S-parameters, flux sweeps, Bloch sequences, reduced Duffing, yield and loss assumptions | Reduced models, not general nonlinear circuit or gate simulation |
-| Gmsh / Palace | Gmsh mesh tools; Palace electrostatic, eigenmode, linearized JJ, and driven configurations; convergence job contracts | A real electrostatic QPU solve was reported successful on Windows/WSL2 in v0.12; independent numerical references still require workstation validation |
-| JosephsonCircuits.jl | SI export and experimental opt-in Julia linear S sweep from the Research Experiments browser page | Full pumped harmonic balance and Web worker execution not qualified |
-| Quantum Metal | QGeometry bridge plus trusted QDesign factory/inventory in browser-run experiments | Interchange does not imply a qualified mesh or fabricated device |
-| SQDMetal | Optional API adapter prepares Palace Gmsh meshes/configs from QDesign via browser-run experiments | Actual target-workstation solver execution, extraction mapping and geometry qualification pending |
-| Research Experiments | Browser project catalog, safe workflow ZIP import, step plans, optional adapters, isolated jobs, progress, logs, one-click support ZIPs | External solver validation and separate environment setup required |
-| System & Diagnostics | Web Standard/Extended health tests and opt-in scientific Quick/Standard/Numerical/Full profiles; per-stage logs, bounded jobs and ZIP reports | The new Numerical profile runs independent analytical references; passing it does not prove QPU geometry convergence or fabrication readiness |
-
-## Why Palace and JosephsonCircuits.jl?
-
-**Palace** is the intended primary FEM electromagnetics solver for realistic geometry, fields and S-parameters. **JosephsonCircuits.jl** (Kevin O'Brien and collaborators) is the intended nonlinear Josephson circuit solver. Their scientific outputs must be linked by explicit model contracts and benchmarked before automatic quantum-parameter extraction is claimed.
-
-## Project structure
-
-- `src/sqw/`: scientific engine and Web API.
-- `src/sqw/studio/static/`: English-language browser workspaces (no JavaScript build step).
-- `scripts/`: opt-in installers, diagnostics fallback, bootstrap and export utilities.
-- `requirements/`: pinned core Python dependencies.
-- `tests/`: unit, scientific-contract and authorization tests.
-- `examples/`: fixed reproducible examples; not user projects.
-- `docs/`: operational instructions, physics assumptions, and roadmap.
-- `studio-data/`: **generated locally at runtime** and never included in release ZIPs.
-
-For the optional production architecture, see [deployment](docs/deployment.md). The built-in Python WSGI launcher is for local loopback use, not for direct public exposure.
-
-## Scientific and privacy principles
-
-- The geometric model, nominal circuit, and extracted FEM results are distinct provenance tiers.
-- An installed solver is not a validated solver. A completed job is not an accuracy certificate.
-- No project content, account database, secrets, personal paths or historical diagnostic bundles are distributed with this release.
-- Diagnostic reports use a fixed allowlist of files and best-effort redaction; **review before sharing**.
-- Native solver installations may require Internet, disk space, user consent and elevated OS operations. Those steps are not run from the Web diagnostic endpoint.
-
-## Credits and licensing
-
-SQE Studio was initiated for superconducting quantum electronics research at INRiM. Earlier releases and scientific modules are preserved; original authorship and license notices remain with the source. See `CITATION.cff`, `NOTICE`, `LICENSE`, and `CHANGELOG.md`.
-
-## Scientific workflow diagnostics (v0.11)
-
-The local administrator can run **Scientific workflow validation** from **System & Diagnostics**. This is an opt-in, bounded series of geometry/GDS, Gmsh 3D mesh and authentic Palace capacitance/eigenmode/RF checks on an isolated fixed reference. All stages are reported with PASS/FAIL/SKIP, elapsed time, log excerpts and a downloadable ZIP. No projects, passwords or data folders are copied. See [docs/WORKFLOW-VALIDATION-0.13.0.md](docs/WORKFLOW-VALIDATION-0.13.0.md).
-
-The **Compute queue health** panel helps distinguish a queued job from a running FEM computation. The Palace workbench now exposes worker logs and cancellation. A PASS does not certify EM accuracy or fab readiness.
+The server binds only to `127.0.0.1`, with session authentication, CSRF, project ACL, immutable revisions, controlled job execution and content-verified native outputs. Do not put it behind a public proxy or treat this as a security certification. Fixtures, successful package builds, installed Python modules and solver preparation logs are **not** evidence of native scientific qualification. See [current limitations](docs/KNOWN_LIMITATIONS.md) for the remaining barriers.

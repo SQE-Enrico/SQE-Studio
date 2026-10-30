@@ -1,0 +1,2 @@
+# OPTIONAL REVIEWED SIDECAR ONLY. Official Windows x64 wheel exists, separate from Palace.
+gmsh==4.15.2

@@ -1,3 +1,0 @@
-Evaluated 22 authentication, project and global templates without JavaScript runtime errors.
-Escaped project-name rendering: passed.
-This evaluates templates in a minimal stub; it does not test DOM layout, browser behavior or accessibility.

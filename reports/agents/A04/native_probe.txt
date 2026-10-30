@@ -1,0 +1,15 @@
+A04 environment availability probe (not a native solver execution)
+Platform: Linux-6.18.55-x86_64-with-glibc2.41
+Python: 3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]
+Timestamp UTC: 2026-10-29T21:21:23.757989+00:00
+Archive SHA256: 27fd2ec0cec6c8cbc67e21a180fe90ffa0465532fe7cc534d4a1a09b364b4e07
+find_spec(scqubits): False
+distribution_version(scqubits): NOT INSTALLED
+find_spec(qutip): False
+distribution_version(qutip): NOT INSTALLED
+find_spec(numpy): True
+distribution_version(numpy): 2.3.5
+find_spec(scipy): True
+distribution_version(scipy): 1.17.0
+find_spec(pytest): True
+distribution_version(pytest): 9.0.2

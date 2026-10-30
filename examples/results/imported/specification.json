@@ -1,8 +1,0 @@
-{
-  "EJ_GHz": 15.347562702797548,
-  "EC_GHz": 0.22311024851577954,
-  "C_total_target_fF": 86.81909259443614,
-  "target_f01_GHz": 5.0,
-  "target_anharmonicity_MHz": -250.0,
-  "note": "Electrical target only; geometry must be calibrated or FEM optimized to match"
-}

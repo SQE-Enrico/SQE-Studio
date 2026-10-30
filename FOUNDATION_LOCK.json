@@ -1,0 +1,16 @@
+{
+  "agent_ids": [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08"
+  ],
+  "contract_digest": "6ffd28ebea3dcfa815a61c22598733520055d8e2b902c1e7ec5ffd5255f74171",
+  "file_count": 48,
+  "schema": "sqe.foundation-lock.v1",
+  "tree_digest": "4a3d24b0d43ab5a6bec18f21276db1c21f904fe09a7c6bfc193d870a20998a9c"
+}

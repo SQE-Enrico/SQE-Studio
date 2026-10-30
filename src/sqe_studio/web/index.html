@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a111d">
+  <title>SQE Studio | Quantum EDA</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<a class="skip-link" href="#workspaceBody">Skip to design workspace</a>
+<section id="auth" class="auth-wrap hidden" aria-labelledby="authTitle">
+  <form id="authForm" class="auth-box">
+    <div class="brandmark" aria-hidden="true">◈</div>
+    <div class="overline">SQE STUDIO / PRIVATE LOCAL WORKSPACE</div>
+    <h1 id="authTitle">Quantum design, one workspace.</h1>
+    <p id="authCaption">Sign in to continue to your revisioned project.</p>
+    <label for="email">Email address</label><input id="email" type="email" autocomplete="username" required placeholder="you@laboratory.org">
+    <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="12" required placeholder="At least 12 characters">
+    <div id="setupTokenLabel" class="hidden"><label for="setupToken">One-time setup token</label><input id="setupToken" type="text" autocomplete="off" placeholder="Token from the launch console"></div>
+    <button class="primary full" type="submit" id="authSubmit">Sign in <span aria-hidden="true">→</span></button>
+    <p class="feedback" id="authError" role="alert" aria-live="assertive"></p>
+    <p class="auth-foot">Loopback only <span aria-hidden="true">·</span> Private on-device project storage</p>
+  </form>
+</section>
+<div id="application" class="app hidden">
+  <aside class="icon-rail" aria-label="Quick navigation">
+    <div class="rail-logo" aria-label="SQE Studio">◈</div>
+    <div class="rail-divider"></div>
+    <nav id="railStages" aria-label="Workflow shortcuts"></nav>
+    <div class="rail-spacer"></div>
+    <button id="railEngines" class="rail-button" type="button" aria-label="Engine health" title="Engine health">◎</button>
+    <button id="railHistory" class="rail-button" type="button" aria-label="Revision history" title="Revision history">◷</button>
+  </aside>
+  <aside class="left-sidebar" aria-label="Design workflow">
+    <div class="brand"><div><strong>SQE <span>Studio</span></strong><small>QUANTUM EDA / LOCAL</small></div></div>
+    <div class="section-label">ACTIVE PROJECT</div>
+    <button class="project-chooser" id="projectChooser" type="button" aria-haspopup="dialog"><span class="svg-icon" aria-hidden="true">▧</span><span class="project-chooser-text" id="currentProjectName">No project</span><span aria-hidden="true">⌄</span></button>
+    <div class="section-label spaced">DESIGN FLOW <span class="section-counter">07 STEPS</span></div>
+    <nav id="stages" aria-label="Design stages"></nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-note"><span class="note-pulse"></span> LOCAL WORKSPACE <small>Native jobs require saved revisions.</small></div>
+      <button class="utility" id="enginesButton" type="button">◎ <span>Engine health</span></button>
+      <button class="utility" id="historyButton" type="button">◷ <span>Revision history</span></button>
+      <button class="utility" id="signOutButton" type="button">⇥ <span>Sign out</span></button>
+    </div>
+  </aside>
+  <div class="main-shell">
+    <header class="toolbar">
+      <div class="crumb"><span>DESIGN STUDIO</span><span aria-hidden="true">/</span><b id="crumbProject">Workspace</b><span aria-hidden="true">/</span><span id="crumbStage">Specifications</span></div>
+      <div class="header-actions">
+        <span class="revision-tag" id="revisionLabel">No revision</span>
+        <button class="ghost" id="expertButton" type="button" aria-pressed="false">Expert</button>
+        <button class="ghost" id="inspectorButton" type="button" aria-expanded="false" aria-controls="inspector">Inspector</button>
+        <button class="primary small" id="saveButton" type="button"><span aria-hidden="true">↧</span> Save revision</button>
+      </div>
+    </header>
+    <main class="content-area" id="mainContent">
+      <div class="content-heading"><div><div class="eyebrow" id="pageNumber">01 / 07 · DESIGN FLOW</div><h1 id="pageTitle">Specifications</h1><p id="pageDescription">Define your targets and constraints.</p></div><div class="status" id="stageBadge">Not started</div></div>
+      <div class="workflow-progress" aria-label="Design workflow progress"><span id="progressFill"></span></div>
+      <div class="workspace-body" id="workspaceBody" tabindex="-1"></div>
+      <footer class="flow-nav"><button class="ghost" id="prevButton" type="button">← Previous</button><p class="flow-hint">Draft ≠ verified science <span aria-hidden="true">·</span> Save before native execution</p><button class="primary" id="nextButton" type="button">Next stage →</button></footer>
+    </main>
+  </div>
+  <aside id="inspector" class="inspector hidden" aria-label="Project inspector"><div class="inspector-title"><b>Project inspector</b><button class="icon-button" id="closeInspector" type="button" aria-label="Close inspector">×</button></div><div id="inspectorBody"></div></aside>
+</div>
+<div id="overlay" class="overlay hidden"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle" tabindex="-1"><div class="dialog-head"><h2 id="dialogTitle">Dialog</h2><button id="closeDialog" class="icon-button" type="button" aria-label="Close dialog">×</button></div><div id="dialogBody" class="dialog-body"></div></section></div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<script src="/app.js" defer></script>
+</body>
+</html>

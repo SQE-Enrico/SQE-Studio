@@ -1,6 +1,0 @@
-{
-  "independent_capacitor_fem": "passed",
-  "palace": "not_run",
-  "refinement": 1,
-  "scope": "Reference solver checks; these meshes are not the chip or its fabrication masks"
-}

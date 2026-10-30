@@ -1,0 +1,27 @@
+# Windows 11 runtime inventory (original A08 review, 2026-10-29)
+
+**Current extension (2026-10-30):** `Launch SQE Studio.pyw` now offers **Prepare scientific environment**, a consent-based graphical bootstrap for an isolated Python 3.11 sidecar. It can install reviewed candidates for build/test tools, scqubits, Gmsh, Quantum Metal, and Playwright/Chromium; it does NOT install Palace, Julia/JosephsonCircuits or unchecked SQDMetal source. This does not change the behavior of the original offline scripts below. See `docs/WINDOWS_WORKSTATION_SETUP.md`.
+
+
+The only *automatic* installer dependency is Python 3.11. SQE Studio's core wheel declares no run-time Python dependencies; it must function offline. The frozen `pyproject.toml` cannot be modified by A08. The pinned `build-win11.txt` applies to a **supplied, locally reviewed wheelhouse**; an offline build fails if any wheel is absent. `Build-Windows11Wheel.ps1` sets a fixed `SOURCE_DATE_EPOCH` and writes a SHA-256 companion file; `Install-Windows11.ps1` verifies that hash, installs into a new isolated environment with `--no-index --no-deps`, checks the installed assets, and starts/stops the installed runtime from a different process. Neither script installs third-party engines or runs experimental migrations.
+
+Optional scientific sidecar candidates (install independently, after checking license and platform/native compatibility):
+
+- `quantum-metal-win11.txt`: Quantum Metal 0.9.0 supports Python 3.11 at metadata level and retains `qiskit_metal` import in this foundation. This **does not** prove the native GDS/geometry pathway works on an individual PC.
+- `scqubits-win11.txt`: scqubits 4.3.1 supports the Python 3.11 environment at metadata level. Install its numerical stack in a separately qualified environment; never infer Hamiltonian parameters from CAD.
+- `gmsh-win11.txt`: Gmsh 4.15.2 offers an official `win_amd64` wheel. Meshing still requires verified mappings, ports, materials and boundaries. Do not confuse API importability with SQDMetal/Palace readiness.
+- **SQDMetal**: as of this review the repository requires Python `>=3.11,<3.12`, pins `pandas==2.3.3`, and depends on `quantum-metal[full]`; its source installation must be separately reviewed. Do not auto-install a Git revision or guess a transitive lockfile. The full-stack EM adapter remains fail-closed until scientifically validated by its owner.
+- **Palace**: its maintainers do **not** officially support or routinely test native Windows builds and distribute **no Windows binary**; WSL2 Ubuntu is a best-effort pathway, not a verified SQE transport. No Palace automatic download, binary execution or result representation is provided here.
+- **JosephsonCircuits.jl**: install Julia using an organization-reviewed Juliaup release and add JosephsonCircuits to a manually pinned Julia project/manifest. Upstream warns of breaking changes; no Julia binary or guessed package manifest is embedded. The foundation's Julia adapter remains blocked pending reviewed netlist/port mappings.
+
+Sources checked 2026-10-29: https://pypi.org/project/quantum-metal/0.9.0/ ; https://pypi.org/project/scqubits/4.3.1/ ; https://pypi.org/project/gmsh/ ; https://github.com/sqdlab/SQDMetal/blob/main/pyproject.toml ; https://awslabs.github.io/palace/stable/faq/ ; https://github.com/kpobrien/JosephsonCircuits.jl . The pinned candidates are **not** a resolved, tested native dependency lock, and the build pins alone are not a hash-complete, byte-for-byte reproducibility proof on Windows.
+
+## Upgrade and migration policy
+
+1. Stop SQE Studio, terminate native jobs, and **back up the complete private data folder** (`studio.sqlite3`, `studio.sqlite3-wal`, `studio.sqlite3-shm`, `native-runs`) to an access-restricted destination. Never put private data in an agent delta. Verify backup hashes while the database is quiescent.
+2. Build/verify a new core wheel from the reviewed foundation+admitted deltas. Preserve its wheel and SHA-256 sidecar. Install **into a new venv and directory**, not atop a working install; do not mix the archived legacy workspace or unknown DB copies into the new runtime.
+3. Before enabling the replacement service, perform a **documented, offline, versioned and tested schema migration only if A09 approves one**. A08 has not changed the foundation DB schema or project JSON format. Password hashes are backward-compatible on successful login; password rotation revokes sessions.
+4. Point the replacement service at the original verified private data folder **only after** compatibility review and a full local backup. Run the HTTP health, ACL/CSRF and installed UI smokes, and verify project revision digests and native run manifests. Roll back by stopping the new service and restoring the matched wheel+data backup; never rewrite immutable revisions or fabricate native results.
+5. Loopback HTTP is for the same Windows user session only. Do not bind `0.0.0.0`, add a proxy, share the data folder, or assume cookies are secure over a network. Use OS disk encryption/ACL and lock the Windows account when away. Cross-user shared machines and native worker process sandboxing need separate review.
+
+**Known frozen defect to escalate:** `pyproject.toml` advertises console script `sqe-studio-delta = sqe_studio.agent_delta:main` but that module is absent from the authorized archive. A09 should remove or replace the dead entrypoint via versioned package metadata migration. This A08 delta deliberately does not edit frozen `pyproject.toml`.

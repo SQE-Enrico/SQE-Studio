@@ -1,0 +1,5 @@
+WARNING: The directory '/home/oai/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Looking in links: /mnt/data/sqe-rc12-work/wheels-a
+Processing /mnt/data/sqe-rc12-work/wheels-a/sqe_studio_product_foundation-0.1.1.dev13-py3-none-any.whl
+Installing collected packages: sqe-studio-product-foundation
+Successfully installed sqe-studio-product-foundation-0.1.1.dev13

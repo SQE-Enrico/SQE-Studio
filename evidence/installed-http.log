@@ -1,0 +1,14 @@
+HTTP GET status=401
+HTTP GET status=200
+HTTP GET status=200
+HTTP GET status=200
+HTTP POST status=200
+HTTP POST status=200
+HTTP POST status=201
+HTTP GET status=200
+HTTP POST status=409
+HTTP GET status=200
+HTTP POST status=200
+HTTP GET status=401
+PASS: installed wheel, real local HTTP, auth/CSRF, CPW model, stale revision, UI resources, logout
+No native EM solve or scientific validation was asserted.

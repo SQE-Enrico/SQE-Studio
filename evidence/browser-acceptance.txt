@@ -1,0 +1,6 @@
+sss                                                                      [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/ui/test_browser.py:140: Chromium managed URLBlocklist blocks local HTTP; real browser test cannot run on this host
+SKIPPED [1] tests/ui/test_browser.py:265: Chromium managed URLBlocklist blocks local HTTP; real browser test cannot run on this host
+SKIPPED [1] tests/ui/test_browser.py:287: Chromium managed URLBlocklist blocks local HTTP; real browser test cannot run on this host
+3 skipped in 4.68s

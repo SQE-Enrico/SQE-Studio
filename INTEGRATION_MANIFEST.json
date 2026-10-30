@@ -1,0 +1,74 @@
+{
+  "base_archive": "SQE-Studio-RC11-unified-SQDMetal-setup-EXPERIMENTAL.zip",
+  "base_archive_sha256": "c0047930084e906d2b2d17336ad6ec4d8cb1827fb19fa80e574417f195ca0b20",
+  "changed_features": [
+    "SQDMetal automatic official HTTPS source acquisition from GitHub, optional by checkbox",
+    "Git SHA pin, cached ZIP SHA-256, safe bounded extraction and fail-closed source checks",
+    "explicit opt-in refresh; advanced local offline folder mode remains",
+    "report upstream source pin metadata without exposing private local directories",
+    "version and English installation/documentation update"
+  ],
+  "evidence_sha256": {
+    "installed-http.log": "7369c7c607f940bba9621c4e3e152fee1a501f8ef3bdfff078df3877fe5e8f79",
+    "pytest-verified.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "pytest-verified.log": "efaa8272448219b0730f5fdb84b8559a116a410139bd3757f74576e63f821154",
+    "source-integrity.log": "4f74f9fa576bfe8822de50357fa2f796e1327af3f55a4d5eb9126a4e1b51c772",
+    "wheel-a.log": "daa5f2def43de2893ed9eb5c5338af7aedc34ff40e893b08cbd5c0aadacaf8cb",
+    "wheel-b.log": "50ecd001666fd2bf19b25d6e800c772e5f89aa34ef90d51cb03e3517620e828a",
+    "wheel-install.log": "09c33f6129c550903cf1f2bf1c274ef7a086d298078809a1141211eaeffe9fb8"
+  },
+  "foundation_tree_digest": "4a3d24b0d43ab5a6bec18f21276db1c21f904fe09a7c6bfc193d870a20998a9c",
+  "frozen_contract_digest": "6ffd28ebea3dcfa815a61c22598733520055d8e2b902c1e7ec5ffd5255f74171",
+  "qualification": {
+    "installed_wheel_http": "PASS",
+    "live_github_download": "NOT_RUN_NETWORK_UNAVAILABLE",
+    "native_sqdmetal_palace": "NOT_RUN_ON_BUILD_HOST",
+    "pin_acquisition_and_unsafe_zip_fixture_tests": "PASS",
+    "pytest": {
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 311,
+      "skipped": 14
+    },
+    "release_candidate": "BLOCKED",
+    "source_integrity": "PASS",
+    "wheel_reproducible_binary": "PASS",
+    "windows_tk_setup": "NOT_RUN_ON_WINDOWS"
+  },
+  "schema": "sqe.eda-rc12-delivery.v1",
+  "scientific_boundaries": [
+    "Upstream HEAD resolved only at first approved install, not an independently audited or signed release",
+    "Online official GitHub download and native SQDMetal installation NOT performed on this host (network unavailable)",
+    "SQDMetal API, Gmsh mesh, Palace solve and scientific convergence require Windows/WSL qualification",
+    "EM\u2192Hamiltonian and geometry optimizer remain blocked; fabrication HOLD"
+  ],
+  "source_diff": {
+    "added": [
+      "SQE-Studio/sqdmetal_source.py",
+      "SQE-Studio/tests/test_sqdmetal_official_source.py"
+    ],
+    "modified": [
+      "SQE-Studio/README.md",
+      "SQE-Studio/docs/DEVELOPER_PRINCIPLES.md",
+      "SQE-Studio/docs/NATIVE_EM_FIRST_SOLVE.md",
+      "SQE-Studio/docs/WINDOWS_WORKSTATION_SETUP.md",
+      "SQE-Studio/pyproject.toml",
+      "SQE-Studio/src/sqe_studio/qualification.py",
+      "SQE-Studio/tests/test_sqdmetal_unified_setup.py",
+      "SQE-Studio/workstation_setup.py"
+    ],
+    "removed": []
+  },
+  "source_inventory_sha256": "bcd77846fe81a390f736f86d524934240ecf95fe7924c6b6e195bb39bcf12c44",
+  "status": "EXPERIMENTAL_BLOCKED_NOT_RC",
+  "upstream": {
+    "archive_sha256": "COMPUTED_AND_PINNED_AT_FIRST_INSTALL",
+    "commit": "RESOLVED_AT_USER_APPROVED_FIRST_INSTALL",
+    "repository": "https://github.com/sqdlab/SQDMetal"
+  },
+  "version": "0.1.1.dev13",
+  "wheel": {
+    "filename": "sqe_studio_product_foundation-0.1.1.dev13-py3-none-any.whl",
+    "sha256": "7aa9106684a9c0d5cfa48b0f9f79191c911aefcf8d57336ff9e96d89a1a6f164"
+  }
+}

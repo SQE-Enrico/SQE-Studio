@@ -1,0 +1,10 @@
+WARNING: The directory '/home/oai/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing /mnt/data/sqe-rc11-work/SQE-Studio
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: sqe-studio-product-foundation
+  Building wheel for sqe-studio-product-foundation (pyproject.toml): started
+  Building wheel for sqe-studio-product-foundation (pyproject.toml): finished with status 'done'
+  Created wheel for sqe-studio-product-foundation: filename=sqe_studio_product_foundation-0.1.1.dev12-py3-none-any.whl size=158124 sha256=b9fa93294a07d5ed16dbbcd3714a8e0884aeb4e94867b666c4784f239ae38d0d
+  Stored in directory: /tmp/pip-ephem-wheel-cache-x6civ4mq/wheels/85/2a/70/41d4044e0f38a69b6a375e2ea93267de266c89e0b5d9d9ca90
+Successfully built sqe-studio-product-foundation

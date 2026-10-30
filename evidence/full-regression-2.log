@@ -1,0 +1,12 @@
+..............................ss.sssss...............................sss [ 24%]
+s....................................................................... [ 48%]
+........................................................................ [ 72%]
+........................................................................ [ 96%]
+......sss...                                                             [100%]
+=============================== warnings summary ===============================
+tests/test_delta.py::test_agent_delta_roundtrip_and_owned_paths
+tests/test_delta.py::test_unknown_agents_rejected
+  <frozen importlib._bootstrap>:530: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+286 passed, 14 skipped, 2 warnings in 29.64s

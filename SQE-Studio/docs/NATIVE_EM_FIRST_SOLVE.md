@@ -1,0 +1,27 @@
+# SQE Studio — first reviewed native EM design loop (development qualification)
+
+**Status: experimental / not scientific RC.** This workflow uses the generic SQE project, EM editor, native job runner and results; it is **not** a separate CPW simulation app. No physics is produced by test fixtures.
+
+## Scientific reference
+
+The [SQDMetal side-coupled resonator eigenmode example](https://sqdlab.github.io/SQDMetal/examples/Palace_Eigenmode_Res_Gmsh.html) shows Qiskit/Quantum Metal planar geometry → SQDMetal Gmsh meshing → Palace eigenmodes. Its CPW dimensions include 10 µm trace, 6 µm gap and 3.7 mm resonator meander. SQE's editable CPW starter is an *adaptation*, not identical geometry or validated reproduction. The [official SQDMetal Palace examples](https://sqdlab.github.io/SQDMetal/simulations/simpalace.html) also demonstrate eigenmode, capacitance, driven analysis, and potential EPR extraction. The [Palace documentation](https://awslabs.github.io/palace/stable/guide/problem/) specifies native `eig.csv` and EPR CSV semantics.
+
+## Preparation — GUI only, no solver reinstall needed
+
+1. Start **Launch SQE Studio.pyw**, connect the managed **Python 3.11** that already has Quantum Metal and Gmsh, and keep the previously verified **Palace in WSL2** binary/distro binding. No external network or source installation occurs automatically.
+2. If SQDMetal is missing, open **Prepare scientific environment** and check **SQDMetal**. Keep the default **Automatic official GitHub source** and approve the source/dependency download. SQE resolves an exact Git commit, verifies its official archive, and records the SHA-256 and immutable revision for repeat installations. The **Local source folder (advanced)** option is for offline/developer operation. Do **not** reinstall Palace/Julia. `INSTALLED_UNQUALIFIED` means pip finished; native solver/mesh tests are still required. Before a source upgrade, inspect the upstream dependency requirements and requalify the scientific environment.
+3. Restart SQE. Run **Qualify this laptop → Comprehensive** and inspect `native_sqdmetal_api`. This check imports real third-party Gmsh/Quantum Metal/SQDMetal classes in a child process and checks the expected native bridge methods. A `PASS` establishes **API readiness only**, not mesh/deck validity or a solved physical result.
+
+## Same generic GUI used for any design
+
+1. **New project → CPW resonator / native EM study**, or create another project with compatible QComponents. In **Layout**, edit chip, launchpads, CPW route and terminations, keeping valid pin mapping. The layout canvas is symbolic; inspect native QDesign/GDS independently for geometry.
+2. **EM**: carefully review the film/material stack, actual substrate dimensions, ground layer, periphery, port components/indices and physically appropriate 3D boundaries. Enter reviewer, HTTPS source and rationale. Inspect actual QDesign/Gmsh geometry before asserting ground verification; acknowledgement is not scientific certification.
+3. Start with **Execution: Native mesh + deck**. Save a design revision. Press **Check draft mapping**, then **Run saved EM study** (only if the actual native dependency is available). If this run is blocked, do not set invented material constants or bypass checks. Diagnose the native worker error and exported evidence.
+4. Inspect Gmsh mesh physical groups and Palace deck: material permittivity/loss, PEC, port indexing, actual solver order, frequency and expected output paths. Native artifact SHA-256 and revision links must pass. A generated mesh/deck is **not** a solver result.
+5. After that expert review, change **Execution → Native Palace solve** and save a *new* immutable revision. Run from the same GUI. The reviewed native solve has a **15-minute bounded job budget**; output must contain a Palace-native result table, not test-generated numbers. WSL2 and local Windows filesystems can have performance implications. A timeout is not success. The generic Results page displays verified native eigenfrequencies but not inferred mode labels or convergence.
+6. Produce **at least two separately reviewed mesh refinement runs** (appropriate to the documented design and with consistent physical identity), check that frequencies stabilize within the intended tolerance, and compare the trend to a CPW transmission-line estimate **with explicitly reviewed dielectric effective permittivity**. A simple quarter-wave heuristic is not independent validation or mode assignment.
+7. The expert can then vary layout length, save the next design revision and repeat; **automatic geometry-driven objective optimization** and **EPR → Hamiltonian extraction** remain blocked pending versioned, physically validated mappings. Do not confuse the supported study-input sweep with a full geometry optimizer.
+
+## Evidence needed for the next iteration
+
+Share only the minimized `SQE-Studio-qualification-*.zip` from the launcher and, with permission, an exported *revision-bound native run archive* for mesh/deck or solve. The qualification ZIP contains test logs, not private design data. A genuine native run must contain hashes of the mesh/deck, native solver output (e.g. `eig.csv`), project revision, exact installed engine versions, materials, port map and reviewer assumptions. Preserve `FAIL`, `BLOCKED` and fabrication `HOLD` statuses. Independent physical benchmarking, cross-engine EPR, kinetic inductance and foundry approval **are not claimed**.

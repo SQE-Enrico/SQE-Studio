@@ -1,0 +1,52 @@
+{
+  "base_archive": "SQE-Studio-RC12.1-Windows-qualification-FIX-EXPERIMENTAL.zip",
+  "base_archive_sha256": "17772b5ba53986375954d8af4f8ee949a9245e6e6b7d97461b7c018ce5ca629c",
+  "changes": {
+    "added": [
+      "docs/RC12_2_WINDOWS_ZIP_VALIDATION.md"
+    ],
+    "modified": [
+      "EDA_SOURCE_MANIFEST.json",
+      "sqdmetal_source.py",
+      "tests/test_sqdmetal_official_source.py"
+    ],
+    "removed": []
+  },
+  "delivery_report_sha256": "91d78e3971861b2c64d9dfad017bb244b8350b28eea3fa841b8198aa755142c4",
+  "evidence": {
+    "inventory.log": "8e7501a2fc3e9a7e9604879f4caa20fa2be80f83dfc428329eee2f3c99a60617",
+    "pytest-focused.log": "71f38b7e0cce19477f3556aa3634e39b019cc7afce64e15b1692774ac67353a2",
+    "pytest-full.log": "a983f38d96dcc9265c60376072e85325ba0da7c6330ec81c53694bfe0247792c"
+  },
+  "frozen_contract_digest": "6ffd28ebea3dcfa815a61c22598733520055d8e2b902c1e7ec5ffd5255f74171",
+  "historical_foundation_tree_digest": "4a3d24b0d43ab5a6bec18f21276db1c21f904fe09a7c6bfc193d870a20998a9c",
+  "host_tests": {
+    "focused": {
+      "exit_code": 0,
+      "passed": 35
+    },
+    "full_before_final_test": {
+      "passed": 312,
+      "process_exit": "HOST_TIMEOUT_AFTER_PYTEST_SUMMARY",
+      "skipped": 14
+    }
+  },
+  "native_em_qualification": "NOT_RUN_AND_NOT_QUALIFIED",
+  "schema": "sqe.eda-rc12-2-windows-zip-validation.v1",
+  "source_inventory_sha256": "7946827075e8e035130c72c68a47e5c54133ec9c2a214f9ddf41f1fe5065a795",
+  "status": "EXPERIMENTAL_BLOCKED_NOT_RC",
+  "target_windows_report": {
+    "blocked": 5,
+    "fail": 1,
+    "pass": 13,
+    "pytest_failed": 1,
+    "pytest_passed": 313,
+    "pytest_skipped": 7
+  },
+  "wheel": {
+    "sha256": "7aa9106684a9c0d5cfa48b0f9f79191c911aefcf8d57336ff9e96d89a1a6f164",
+    "status": "IDENTICAL_TO_RC12_1",
+    "version": "0.1.1.dev13"
+  },
+  "windows_retest": "REQUIRED"
+}

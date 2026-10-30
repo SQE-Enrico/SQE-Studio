@@ -1,0 +1,49 @@
+{
+  "case_observations": {
+    "active_python": "3.15.1",
+    "counts": {
+      "BLOCKED": 14,
+      "FAIL": 1,
+      "PASS": 1
+    },
+    "installed_solver_failure_observed": false,
+    "launcher_log_absence": "Possible when no configured environment is selected; not proof of package failure",
+    "managed_python_311": false,
+    "source_integrity": "FAIL"
+  },
+  "case_report": "SQE-Studio-qualification-20261030(2).zip",
+  "case_report_verified": true,
+  "changes": {
+    "added": [
+      "tests/test_environment_reconnection.py"
+    ],
+    "modified": [
+      "EDA_SOURCE_MANIFEST.json",
+      "Launch SQE Studio.pyw",
+      "README.md",
+      "docs/LAPTOP_QUALIFICATION.md",
+      "docs/WINDOWS_WORKSTATION_SETUP.md",
+      "scripts/diagnose_launcher.py",
+      "src/sqe_studio/qualification.py",
+      "tools/verify_release_source.py",
+      "workstation_setup.py"
+    ],
+    "removed": []
+  },
+  "historic_contract_digest": "6ffd28ebea3dcfa815a61c22598733520055d8e2b902c1e7ec5ffd5255f74171",
+  "limitations": [
+    "Windows-specific startup and venv linking not executed on target laptop",
+    "No native solver runs or scientific validation performed",
+    "No scientific RC or foundry approval claimed"
+  ],
+  "release_status": "EXPERIMENTAL_NOT_RELEASE_CANDIDATE",
+  "schema": "sqe.environment-reconnect-delivery.v1",
+  "source_inventory_sha256": "5b6ac9999bd73b44cee006e19980d210446ab3b1c90c20bed22ef941df56c18b",
+  "tests": {
+    "installed_wheel_import": true,
+    "last_complete_run": "257 passed, 11 skipped, 0 failed; browser/native engines not qualified",
+    "transient_harness_observation": "One intermittent HTTP connection shutdown in security test occurred on a separate run; subsequent full suite passed",
+    "wheel_reproducible": true,
+    "wheel_sha256": "40daf44a4a40fefa5e1de0076a316a45f5d64c3dc174d3e139f156c30d1eb7ee"
+  }
+}

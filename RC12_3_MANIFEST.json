@@ -1,0 +1,40 @@
+{
+  "added_files": [
+    "docs/RC12_3_WINDOWS_QUALIFICATION.md"
+  ],
+  "baseline_archive_sha256": "1d1196488aca5715710a0645a5c80c0e5ac26952bc988f7bbd440139b60796ae",
+  "changed_files": [
+    "tests/test_sqdmetal_official_source.py",
+    "tests/security/test_hardening.py",
+    "EDA_SOURCE_MANIFEST.json"
+  ],
+  "frozen_contract_digest": "6ffd28ebea3dcfa815a61c22598733520055d8e2b902c1e7ec5ffd5255f74171",
+  "historical_foundation_tree_digest": "4a3d24b0d43ab5a6bec18f21276db1c21f904fe09a7c6bfc193d870a20998a9c",
+  "host_tests": {
+    "compile": {
+      "result": "PASS"
+    },
+    "focused": {
+      "exit_code": 0,
+      "passed": 24
+    },
+    "full_suite": {
+      "not_claimed_pass": true,
+      "result": "INCOMPLETE_SHUTDOWN_NO_EXIT_CODE"
+    },
+    "source_integrity": {
+      "exit_code": 0,
+      "passed": 1
+    }
+  },
+  "native_scientific_qualification": "NOT_REEXECUTED_IN_THIS_UPDATE",
+  "next_required": "WINDOWS_COMPREHENSIVE_RETEST_AND_REVIEWED_NATIVE_EM_DESIGN_LOOP",
+  "schema": "sqe.eda-rc12-3-qualification-stabilization.v1",
+  "source_inventory_sha256": "be2392b0a0d5ab5edf7c73bf8519d77484606ecb0afda87a4a10b0b0c93fca40",
+  "status": "EXPERIMENTAL_BLOCKED_NOT_RC",
+  "unchanged_release_wheel": {
+    "filename": "sqe_studio_product_foundation-0.1.1.dev13-py3-none-any.whl",
+    "sha256": "7aa9106684a9c0d5cfa48b0f9f79191c911aefcf8d57336ff9e96d89a1a6f164"
+  },
+  "windows_qualification_report_sha256": "47d8bc79116392f2f372899283aeb68a6bc909686d6b08ad9df6fefb0d145565"
+}

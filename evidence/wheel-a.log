@@ -1,0 +1,9 @@
+Processing /mnt/data/sqe-rc12-work/SQE-Studio
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: sqe-studio-product-foundation
+  Building wheel for sqe-studio-product-foundation (pyproject.toml): started
+  Building wheel for sqe-studio-product-foundation (pyproject.toml): finished with status 'done'
+  Created wheel for sqe-studio-product-foundation: filename=sqe_studio_product_foundation-0.1.1.dev13-py3-none-any.whl size=158448 sha256=7aa9106684a9c0d5cfa48b0f9f79191c911aefcf8d57336ff9e96d89a1a6f164
+  Stored in directory: /tmp/pip-ephem-wheel-cache-7h_itcn1/wheels/7b/24/39/2db9ee3ad10b1368b288b1b537aa484f696ec27d628f69c6cb
+Successfully built sqe-studio-product-foundation

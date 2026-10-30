@@ -1,0 +1,54 @@
+{
+  "base_archive": "SQE-Studio-RC12-auto-SQDMetal-EXPERIMENTAL.zip",
+  "base_archive_sha256": "bf0e00f8faa7ca7e52d460a0754986899075fbf477777f155cf593c43b2324d1",
+  "changes": {
+    "added": [
+      "docs/RC12_1_WINDOWS_QUALIFICATION.md"
+    ],
+    "modified": [
+      "tests/adapters/test_sqdmetal_gate.py",
+      "tests/test_sqdmetal_official_source.py",
+      "EDA_SOURCE_MANIFEST.json"
+    ],
+    "production_code_changed": false,
+    "wheel_changed": false
+  },
+  "evidence": {
+    "inventory-check.log": "999ed26355c7efa497357e5e82149c46f99aec8fd77eeb6bba4f93e60425635a",
+    "pytest-final.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "pytest-final.log": "aef5922f8ede306796304832e28e37f1ea586c40940045e5e33d1bf33ac66447"
+  },
+  "external_windows_retest": "REQUIRED",
+  "frozen_contract_digest": "6ffd28ebea3dcfa815a61c22598733520055d8e2b902c1e7ec5ffd5255f74171",
+  "original_foundation_tree_digest": "4a3d24b0d43ab5a6bec18f21276db1c21f904fe09a7c6bfc193d870a20998a9c",
+  "qualification_report_sha256": "1d62112936a04cb4b2cf1cd33c74d5430a1baf5d9c368d94da8896b31e2026ad",
+  "regression_build_host": {
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 311,
+    "skipped": 14
+  },
+  "release_status": "EXPERIMENTAL_BLOCKED_NOT_RC",
+  "schema": "sqe.eda-rc12-1-qualification-portability.v1",
+  "scientific_status": "NOT_QUALIFIED_NO_NATIVE_EM_DECK_SOLVE_CONVERGENCE",
+  "source_inventory_sha256": "7393385249e182552ad737b4740f3ba17da196e6f1d446d2d3003afb553a0ce1",
+  "wheel": {
+    "sha256": "7aa9106684a9c0d5cfa48b0f9f79191c911aefcf8d57336ff9e96d89a1a6f164",
+    "status": "PRESERVED_FROM_RC12_NOT_REBUILT",
+    "version": "0.1.1.dev13"
+  },
+  "windows_rc12_report": {
+    "counts": {
+      "BLOCKED": 5,
+      "FAIL": 1,
+      "PASS": 13
+    },
+    "evidence_items_verified": 28,
+    "regression": {
+      "failed": 2,
+      "passed": 312,
+      "skipped": 7
+    },
+    "sqdmetal_api_probe": "PASS_NATIVE_IMPORTS_NO_EM_SOLVE"
+  }
+}

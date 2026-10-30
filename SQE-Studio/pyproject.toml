@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqe-studio-product-foundation"
+version = "0.1.1.dev13"
+description = "SQE Studio: revisioned quantum EDA orchestration platform (product foundation)"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+dependencies = []
+
+[project.optional-dependencies]
+scqubits = ["scqubits>=4.3,<5"]
+quantum-metal = ["quantum-metal>=0.8,<1"]
+dev = ["pytest>=8,<10", "build>=1.2,<2"]
+
+[project.scripts]
+sqe-studio = "sqe_studio.server:main"
+sqe-studio-delta = "sqe_studio.agent_delta:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sqe_studio = ["web/*.html", "web/*.css", "web/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

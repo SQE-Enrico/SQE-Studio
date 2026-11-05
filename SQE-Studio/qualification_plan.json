@@ -1,0 +1,54 @@
+{
+  "diagnostic_mode": "verbose_sanitized_per_test_windows_isolation_and_regression",
+  "input_data_policy": "temporary reference geometry; never personal projects",
+  "native": {
+    "memory_budget_gb": 8.0,
+    "mpi_ranks": "auto",
+    "refine": false,
+    "solve": true,
+    "third_mesh": false,
+    "time_budget_seconds": 840
+  },
+  "native_execution_purpose": "single_mesh_native_smoke_only_not_convergence_assessment",
+  "prior_report_policy": "verify checksum and compare metadata only; native results never silently reused",
+  "profile": "eda_feedback",
+  "release": "RC14.12",
+  "research_protocol": "fixed_release_exploratory_only_not_human_physics_approval",
+  "research_reference": {
+    "approval": "exploratory fixed QA assumptions only; no fab or physical signoff",
+    "film": "aluminium 100nm, PEC (not kinetic inductance)",
+    "literature_url": "https://sqdlab.github.io/SQDMetal/examples/Palace_Eigenmode_Res_PortFeed_Gmsh.html",
+    "origin": "SQDMetal documented Palace eigenmode CPW adaptation",
+    "ports": "two 50-ohm CPW feed launchers",
+    "substrate": "silicon, 500um, eps_r=11.45, tan_delta=2.7e-6, not measured"
+  },
+  "schema": "sqe.release-qualification-plan.v1",
+  "scientific_case_matrix": {
+    "budget_seconds": 3600,
+    "case_ids": [
+      "B00",
+      "B01",
+      "B02",
+      "B03",
+      "B04",
+      "B05",
+      "B06",
+      "B07",
+      "B08",
+      "B09",
+      "B10",
+      "B11"
+    ],
+    "diagnostic_packaging_reserve_seconds": 300,
+    "path": "agent_cycle/SCIENTIFIC_BENCHMARK_MATRIX.json",
+    "provenance": "fresh native artifacts and version hashes required; no fixture PASS",
+    "registration": "fixed trusted adapter registry only; never user configurable",
+    "unregistered_native_cases": "BLOCKED_NOT_IMPLEMENTED"
+  },
+  "scientific_gates": {
+    "em_to_hamiltonian": "BLOCKED_UNTIL_VALIDATED",
+    "fabrication": "HOLD",
+    "mode_identity": "BLOCKED_UNTIL_COMPLEX_OVERLAP"
+  },
+  "test_duration_soft_ceiling_minutes": 60
+}

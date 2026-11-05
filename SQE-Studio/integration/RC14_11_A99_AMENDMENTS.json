@@ -1,0 +1,150 @@
+{
+  "amendments": [
+    {
+      "after_sha256": "a9225ce01e858961a52d5abca1dea5d487fa5c1c3f4871728cf873c1d2dbd37b",
+      "before_sha256": "f041c5e28546c9ea5bb0cdb5e914873bca13a71ba1200b16853964a5b1cad73e",
+      "path": "README.md",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "aa0a7285cf9f0461d6dd08cdd5f18a73e5e21e43824b113b6566e84759eac898",
+      "before_sha256": "88093385b281040f3be73b1a8618d1ca6c535938ecda04944be61bfcc4287d80",
+      "path": "agent_cycle/CYCLE_STATE.json",
+      "reason": "Distinguish historical Windows report from new Linux evidence, fix current release and next-cycle status."
+    },
+    {
+      "after_sha256": "4840a5b60716793aa756b99268ab3c2a464a95d96c46815e6d4f15cfd2ee73c3",
+      "before_sha256": "29cd2175168cf87bfb1ad0b9dd084076c8f541c5dc75a1a54a0f106488ab17ad",
+      "path": "agent_cycle/SCIENTIFIC_BENCHMARK_MATRIX.json",
+      "reason": "Repin fixed coordination case matrix to RC14.11 without claiming native results."
+    },
+    {
+      "after_sha256": "53c5aed69aae79762c4d2f3cff470879023a633db5615679fe8f5602206b33cb",
+      "before_sha256": "6f47451b1897e919d0c66ab95cc52b4c54f924ca802e23f9218a885a30c91749",
+      "path": "agent_cycle/continuity/A99.md",
+      "reason": "Integrate permanent A99 handoff, blocked cases, next-cycle responsibilities."
+    },
+    {
+      "after_sha256": "fb6e733f5e4953cf6008f389d35149c0dce836f5c4b27bfdd397726211fe6fcf",
+      "before_sha256": "68c3c7ca1065e7ce37fbbf72863cdaef37139a00e6084b7896e5fd186712864a",
+      "path": "agent_cycle/deliveries/A99/DELIVERY.md",
+      "reason": "Document actual evidence, exit codes, integration process and scientific limits."
+    },
+    {
+      "after_sha256": "d52daae71df1afc583753540d1f1ff191f6f7372cc03af9279c7e718c81991a1",
+      "before_sha256": null,
+      "path": "agent_cycle/next_cycle/RC14_12_ASSIGNMENTS.json",
+      "reason": "Prepare next eight specialist assignments, not authorized until new host evidence."
+    },
+    {
+      "after_sha256": "2a1a78bbf96ef7fc237242f230550b8bbc87e00ac7623c5815cabf993677e868",
+      "before_sha256": null,
+      "path": "agent_cycle/next_cycle/RC14_12_COORDINATOR_HANDOFF.md",
+      "reason": "Coordinator-only next-cycle authorization and source identity boundaries."
+    },
+    {
+      "after_sha256": "5673f1fac7b8b45fb74e7e2190dfc8c713433cf21e826edf2b4ce24a93d5c088",
+      "before_sha256": "44da3c992e07d5add7b083a8309a283f86a4f26b76e4073829705f7e7016c75d",
+      "path": "docs/LAPTOP_QUALIFICATION.md",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "c52ccd92ab1156a8aae27d17bce2fab833e7395becf12b984a77609c671bfec8",
+      "before_sha256": null,
+      "path": "docs/RC14_11_SCIENTIFIC_COVERAGE.md",
+      "reason": "Per-case implementation, native registration, actual execution, numerical and physical gate matrix."
+    },
+    {
+      "after_sha256": "b257f2a2c0f9ceac9789ae9f16f21da89f3392932f3497e62c1a4ca20ea3c677",
+      "before_sha256": null,
+      "path": "integration/RC14_11_INTEGRATION_MANIFEST.json",
+      "reason": "Consolidate eight validated provenance and ownership records with genuine test exits."
+    },
+    {
+      "after_sha256": "c5732ee05d63768c965aef23e6723140669039a34f4b2c2cd7cc712e0626e00c",
+      "before_sha256": "155d6c51d3529684311d59a87429eec1ac62afb081ab8ccfd9520496705dda33",
+      "path": "pyproject.toml",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "95f71a9349dff5ecb0da17e0b390220e677d6bf4f53f931927ac010df413c74b",
+      "before_sha256": "722a6eb9e79390b2c9b7857f0d2cc4cdeab303174f499ce37b488f44149503e5",
+      "path": "qualification_plan.json",
+      "reason": "Release-specific one-click qualification identity; retain all scientific physical HOLDs."
+    },
+    {
+      "after_sha256": "c701f784565ecaa22e6a2c926f5f66abc3e8a2e322fedfd4eaea2f2c5924455b",
+      "before_sha256": null,
+      "path": "scripts/rc1411_portable_regression.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "d328bed8eabab57755ab0b74cc65af19137fb85c21060a06eefb96abc09d0db1",
+      "before_sha256": "a528c286635632340b3990fb39aae85a39189361559d29594bce25ffe77ed75f",
+      "path": "src/sqe_studio/__init__.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "4f47ef0dd9e6385deb05f436fe492f5b451d38436feed43682976329117e34a7",
+      "before_sha256": "846a44d49cfebe47f6e40b70b0a72ff2a52897707e6f0047b35f8d3a53e9e2d8",
+      "path": "src/sqe_studio/cycle_qualification.py",
+      "reason": "Fix active report identity and register verified-source native B08 bridge; native unavailable differs from actual native execution."
+    },
+    {
+      "after_sha256": "edcc3c09d1252dff75ae1d6d39303f73293bda2c87e1905d2054058687c94b62",
+      "before_sha256": null,
+      "path": "src/sqe_studio/native_case_bridge.py",
+      "reason": "Register honest B08 scqubits production benchmark in a fixed bounded child, with native-missing NOT_RUN and no physical PASS."
+    },
+    {
+      "after_sha256": "314a87331abbd57690975c181b2a748b63a44fe64632921adabf115abbca1319",
+      "before_sha256": "8c59b0f1017b123f4abd4deb73f6872fbea892f118e5c32c58f6c15850e47bb1",
+      "path": "src/sqe_studio/qualification.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "dc830dbbc2b7b4ec9969566c45c7ce1ba48067f91cd0c6fc15e446d1f3b72be2",
+      "before_sha256": "5dd04b05dcef0a84a3ce1380467996c9888d1013d0dc3a2a4071b5b39e5d6ee5",
+      "path": "tests/integration/test_cycle_qualification.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "c0e8e6a43d73801bc0038d18f65255048f4c8b4a9e28abc48b27c38212521f8d",
+      "before_sha256": "720ade0d179d8b652c8e33465ab54c7e34470d4cd997f5b80122dc86fb7e6411",
+      "path": "tests/integration/test_laptop_qualification.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": null,
+      "before_sha256": "2cf0a5deee42d97b237fd5def15748f46a6c87f60d754f50a2794f8f19c1346e",
+      "path": "tests/integration/test_rc14_10_a99_release.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "bc56ab17e8a57e5ee92ebf3ca0257a0efdb098b227884041366615c9c94478a2",
+      "before_sha256": null,
+      "path": "tests/integration/test_rc14_11_a99_release.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "d6d6fcf85c731c756f6dbfb0cc68d617f9b5962d8eabfa2f369f6344c2dd8725",
+      "before_sha256": null,
+      "path": "tests/integration/test_rc14_11_regression_driver.py",
+      "reason": "RC14.11 release-version/report-number/qualification-plan harmonization, with release-boundary regression coverage."
+    },
+    {
+      "after_sha256": "5ed14a427fe5566a06f001e2cbd98c571f16cc28645e46e5a0870bbb158c5540",
+      "before_sha256": null,
+      "path": "tests/integration/test_rc14_11_science_bridge.py",
+      "reason": "New integration regressions for trusted B08 subprocess, fail-closed B01 and scientific HOLD."
+    }
+  ],
+  "authority": "A99 integration-only amendments after all eight owned deltas admitted",
+  "count": 23,
+  "fabrication": "HOLD",
+  "frozen_contracts": "NOT_CHANGED",
+  "physical_science": "BLOCKED",
+  "release": "RC14.11",
+  "schema": "sqe.a99-amendments.v1",
+  "tests": "Actual exit codes in agent_cycle/deliveries/A99/DELIVERY.md and evidence/rc14_11; full monolithic suite timed out, split group evidence green"
+}

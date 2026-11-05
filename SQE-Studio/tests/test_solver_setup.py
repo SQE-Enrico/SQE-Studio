@@ -98,7 +98,9 @@ def test_wsl_distro_used_for_mesh_path_and_solver(monkeypatch,tmp_path):
     info=em._run_palace(ready,folder,'sqe_em.json',2)
     assert info['exit_code']==0
     assert commands[0][:4]==['wsl.exe','-d','Ubuntu-24.04','--exec']
-    assert commands[1]==['wsl.exe','-d','Ubuntu-24.04','--cd','/mnt/c/mesh','--exec','/usr/local/bin/palace','-np','2','-nt','1','sqe_em.json']
+    assert commands[1]==['wsl.exe','-d','Ubuntu-24.04','--cd','/mnt/c/mesh','--exec',
+                          '/usr/bin/timeout','--signal=TERM','--kill-after=15s','810s',
+                          '/usr/local/bin/palace','-np','2','-nt','1','sqe_em.json']
 
 
 def test_julia_install_is_opt_in_and_isolated(tmp_path):

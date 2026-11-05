@@ -1,0 +1,17 @@
+SQE STUDIO MODULAR - 0.1.1.dev81
+
+1. Estrai in una cartella nuova e scrivibile.
+2. Apri SQE-Studio/Launch SQE Studio.pyw con l'ambiente scientifico configurato.
+3. Lascia Recommended e premi Automatic Test una volta.
+4. Invia lo ZIP originale numerato da SQE-Studio/qualification-reports/.
+
+Il report Windows dev80 era integro: 223 test superati, un errore nel test di
+lettura dei moduli e un test symlink saltato per i permessi del computer.
+La lettura della sorgente ora usa UTF-8 esplicito; i fingerprint dei test usano
+lo stesso ordinamento dei file su Windows e Linux. Due regressioni riproducono
+entrambi i casi e verificano le correzioni. Qui passano227 controlli software.
+Nucleo numerico, UI e moduli HTTP restano preservati. Nessun nuovo solve nativo.
+
+EVIDENCE contiene il report ricevuto e le verifiche di questa consegna.
+Non sono inclusi vecchi pacchetti o sorgenti duplicati.
+Scientific qualification NOT_ESTABLISHED; fabrication HOLD.

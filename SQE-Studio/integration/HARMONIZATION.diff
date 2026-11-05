@@ -1,0 +1,1353 @@
+--- merged/README.md
++++ harmonized/README.md
+@@ -1,6 +1,6 @@
+ # SQE Studio -- integrated superconducting, quantum and RF EDA
+ 
+-**Current baseline: RC14.6 / 0.1.1.dev24 -- EXPERIMENTAL, NOT RELEASE CANDIDATE.**
++**Current baseline: RC14.7 / 0.1.1.dev25 -- EXPERIMENTAL, NOT RELEASE CANDIDATE.**
+ 
+ SQE Studio is a generic graphical EDA environment for specifications, schematic/network intent, parametric design, CAD/layout, *real* native electromagnetic solvers, physics interpretation, circuit and quantum analysis, result comparison, and iterative design optimization. It is **not** an experiment registry or a set of disconnected example tools. Its target includes QPU, resonators, cryogenic microwave components and nonlinear superconducting RF devices. Keysight QuantumPro is a competitive integration benchmark, not an assertion of present feature parity.
+ 
+@@ -10,12 +10,12 @@
+ 
+ All design cases use the **same** revisioned project and GUI workflow. The CAD preview is symbolic until a native engine supplies verified geometry. A successful import, native solver job, or fixture test does **not** establish physical convergence, validated EM->Hamiltonian transfer, PDK/DRC/LVS or foundry signoff. Fabrication remains `HOLD`.
+ 
+-## One-button laptop qualification (RC14.6)
++## One-button laptop qualification (RC14.7)
+ 
+ 1. Double-click `Launch SQE Studio.pyw` and select **Qualify this laptop**.
+ 2. Press the **only test button**, **Run release qualification**. No profiles, resource options, reviewer-ID input or save dialog.
+ 3. Observe the stage label, time elapsed and stage-progress bar. The release-fixed plan runs Comprehensive regression, real browser and installed engine checks, **two exploratory native Palace eigenmode meshes**, and production read-only Results/Compare analyses. Its fixed research material assumptions are **not** a human materials review or a fabrication approval.
+-4. After completion, the file is saved automatically in `SQE-Studio/qualification-reports/SQE-RC14_6-report-0001.zip`. Repeats use `0002`, `0003`, etc.; no existing evidence is overwritten. The report includes `CYCLE.json` with the current release/plan digest and a hash-verified comparison to the previous report's metadata, but **old solver output is not cached or passed off as a fresh result**. For sharing, inspect the minimized/redacted report first, then attach **that single ZIP** to the development chat.
++4. After completion, the file is saved automatically in `SQE-Studio/qualification-reports/SQE-RC14_7-report-0001.zip`. Repeats use `0002`, `0003`, etc.; no existing evidence is overwritten. The report includes `CYCLE.json` with the current release/plan digest and a hash-verified comparison to the previous report's metadata, but **old solver output is not cached or passed off as a fresh result**. For sharing, inspect the minimized/redacted report first, then attach **that single ZIP** to the development chat.
+ 
+ The workload is designed for roughly one hour or less on a configured laptop, but actual duration depends on native solver performance. A noninstalled dependency becomes `BLOCKED`; no mock solver satisfies a scientific gate. Exceptions produce a small integrity-checked failure ZIP whenever the report location remains writable.
+ 
+@@ -23,9 +23,9 @@
+ 
+ ## Parallel agent development loop
+ 
+-This package is also the **single immutable baseline for eight development agents A10..A17 and integrator A99**. Give each worker the **same complete ZIP** and a minimal prompt copied from [agent prompts](agent_cycle/MINIMAL_PROMPTS.md). Detailed owned-path mandates are inside `agent_cycle/A10.md` ... `A17.md`. Each worker returns **only its content-addressed delta ZIP**, produced by `tools/agent_cycle.py`; A99 merges exactly all eight, resolves and records integration inconsistencies, requalifies, packages the new full release and authors next-cycle tasks. No early merge and no editing frozen `contracts/` or `FOUNDATION_LOCK.json`.
++This package is the **single immutable RC14.7 baseline for the next eight development agents A10..A17 and integrator A99**. Give each worker the **same complete ZIP** and a minimal prompt copied from [agent prompts](agent_cycle/MINIMAL_PROMPTS.md). Detailed owned-path mandates are inside `agent_cycle/A10.md` ... `A17.md`. Each worker returns **only its content-addressed delta ZIP**, produced by `tools/agent_cycle.py`; A99 merges exactly all eight, resolves and records integration inconsistencies, requalifies, packages the new full release and authors next-cycle tasks. No early merge and no editing frozen `contracts/` or `FOUNDATION_LOCK.json`.
+ 
+-Mandatory reading: [product north star](agent_cycle/PRODUCT_NORTH_STAR.md), [cycle protocol](agent_cycle/CYCLE_PROTOCOL.md), [RC14.5 field report triage](agent_cycle/RC14_5_FEEDBACK_TRIAGE.md), [developer principles](docs/DEVELOPER_PRINCIPLES.md), [EDA extension architecture](docs/EDA_EXTENSION_ARCHITECTURE.md), [published design cases](docs/SCIENTIFIC_DESIGN_CASES.md) and [known scientific limits](docs/KNOWN_LIMITATIONS.md). Historical A01..A09 docs and prior RC documents remain retained for provenance, **not as instructions for the current QA panel or current cycle ownership**.
++Mandatory reading: [product north star](agent_cycle/PRODUCT_NORTH_STAR.md), [cycle protocol](agent_cycle/CYCLE_PROTOCOL.md), [historical RC14.5 field report triage](agent_cycle/RC14_5_FEEDBACK_TRIAGE.md), [developer principles](docs/DEVELOPER_PRINCIPLES.md), [EDA extension architecture](docs/EDA_EXTENSION_ARCHITECTURE.md), [published design cases](docs/SCIENTIFIC_DESIGN_CASES.md) and [known scientific limits](docs/KNOWN_LIMITATIONS.md). Historical A01..A09 docs and prior RC documents remain retained for provenance, **not as instructions for the current QA panel or current cycle ownership**.
+ 
+ ## Security and provenance
+ 
+--- merged/agent_cycle/A10.md
++++ harmonized/agent_cycle/A10.md
+@@ -1,15 +1,11 @@
+-# A10: Windows, security and reproducible release quality
++# A10 -- Release integrity, UTF-8 portability and HTTP/security reproducibility (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A10.md`.
+ 
+ ## Mission
+-Fix regression and Windows failures from the RC14.5 laptop report, including Unicode encoding, source-vs-build artifacts and HTTP header test behavior. Preserve real HTTP rejection semantics.
++Reproduce any FAIL from RC14.7 one-click report on Windows 11; fix only owned verifier, security and integration tests. Remove dependence on stale manifest hashes; verify file traversal, source symlink and non-UTF8 locale rejection. Preserve real HTTP authentication, CSRF and revisions. Supply raw before/after evidence.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `tools/verify_release_source.py`
+ - `tests/integration/test_rc14_4_native_em_results.py`
+ - `tests/integration/test_eda_release_integrity.py`
+@@ -18,11 +14,12 @@
+ - `agent_cycle/deliveries/A10/`
+ 
+ ## Acceptance gates
+-- No masking or xfail of security defects
+-- Windows UTF-8 fixtures and source inventory tests pass
+-- Provide fail/pass evidence
++- Real Windows Python 3.11 tests and locale outputs
++- No masking of failing tests
++- Inventory check independent of build artifacts
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A10/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A10 A10-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A10-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A10/DELIVERY.md`.
++- Produce only `A10-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A10 A10-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A11.md
++++ harmonized/agent_cycle/A11.md
+@@ -1,15 +1,11 @@
+-# A11: Native Palace complex fields and physical mode identification
++# A11 -- Native field export, mesh registration and complex mode overlap (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A11.md`.
+ 
+ ## Mission
+-Build a real native field-export evidence bridge with mesh/coordinate/phase/unit provenance. Support mode matching only with verified complex overlap; never proxy scalar frequencies for identity.
++Close the BLOCKED Palace/Gmsh native complex-mode evidence boundary only using genuine, versioned field-export samples and verified field orientation, coordinate transform, mesh tags, phase and normalization. Add two-mesh overlap identity calculation only if both compatible native complex fields exist; otherwise explicit BLOCKED. Coordinate an interface proposal with A12/A17 without editing their files.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `src/sqe_studio/adapters/sqdmetal_palace_adapter.py`
+ - `src/sqe_studio/interop/native_field.py`
+ - `src/sqe_studio/interop/scientific_review.py`
+@@ -17,11 +13,12 @@
+ - `agent_cycle/deliveries/A11/`
+ 
+ ## Acceptance gates
+-- No fabricated or assumed field overlap
+-- Verified real export format, coordinates, normalization, mode provenance
+-- Fail closed when missing exports
++- No scalar-frequency proxy for mode identity
++- Native export and frame provenance verified or BLOCKED
++- No synthetic physical overlap accepted
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A11/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A11 A11-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A11-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A11/DELIVERY.md`.
++- Produce only `A11-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A11 A11-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A12.md
++++ harmonized/agent_cycle/A12.md
+@@ -1,15 +1,11 @@
+-# A12: Physics-validated EM to circuit / Hamiltonian
++# A12 -- Reviewed EM/EPR/Hamiltonian interface with typed normalization (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A12.md`.
+ 
+ ## Mission
+-Make typed, versioned, user-reviewable EM -> EPR -> Hamiltonian transition with validated numerical normalizations. Add strict mapping of Josephson junctions and revision-bound provenance; no invented coupling values.
++Advance the review-only EM -> EPR -> circuit mapping toward physically reproducible observables. Require exact revision, junction/interface identity, participation normalization, material approval, and uncertainty; block Hamiltonian transfer if native overlap or calibrated EPR is missing. Work solely in owned interop contracts; coordinate requirements with A11/A16.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `src/sqe_studio/interop/transformations.py`
+ - `src/sqe_studio/interop/models.py`
+ - `src/sqe_studio/interop/quantities.py`
+@@ -17,11 +13,12 @@
+ - `agent_cycle/deliveries/A12/`
+ 
+ ## Acceptance gates
+-- Reject unreviewed EM EPR inputs
+-- Document units and uncertainty
+-- No automatic scientific qualification
++- No invented coupling, EPR or frequency
++- Units, calibration and uncertainty validated
++- Unreviewed EM-to-quantum handoff remains BLOCKED
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A12/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A12 A12-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A12-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A12/DELIVERY.md`.
++- Produce only `A12-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A12 A12-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A13.md
++++ harmonized/agent_cycle/A13.md
+@@ -1,15 +1,11 @@
+-# A13: General EDA design-space optimization
++# A13 -- Revision-safe generic geometry optimization (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A13.md`.
+ 
+ ## Mission
+-Implement objective and constraint representation for geometry-driven design iteration using real native result provenance. Geometry revision -> new solve; no bypass of expert review or fabrication HOLD.
++Integrate new candidate objectives and constraints in generic sweeps, require distinct saved geometry revisions and verified native job provenance per objective; reject stale results, nonfinite optimization metrics, unreviewed fabrication actions, and fabricated solver completions. Exercise generic RF/resonator cases without specialized solver shims.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `src/sqe_studio/orchestration/sweep.py`
+ - `src/sqe_studio/orchestration/optimization.py`
+ - `src/sqe_studio/eda/capabilities.py`
+@@ -17,11 +13,12 @@
+ - `agent_cycle/deliveries/A13/`
+ 
+ ## Acceptance gates
+-- Optimization never reuses stale geometry/results
+-- Native evaluations required for numerical objectives
+-- Usable for RF components beyond QPU
++- No cache/revision misattribution
++- Physical objective requires genuine native artifacts
++- Fabrication and scientific review remain HOLD
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A13/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A13 A13-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A13-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A13/DELIVERY.md`.
++- Produce only `A13-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A13 A13-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A14.md
++++ harmonized/agent_cycle/A14.md
+@@ -1,15 +1,11 @@
+-# A14: Product-grade unified EDA UI
++# A14 -- Unified EDA results and review UX in real browser (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A14.md`.
+ 
+ ## Mission
+-Advance generic schematic, layout, setup, Results and design optimization GUI. Display actual engine capabilities, warnings and provenance. No example-only special screens or fake physical results.
++Complete accessible generic schematic-layout-EM-results/compare loop. Clearly distinguish blocked native solver, unreviewed field exports, and research-only results from verified artifacts. Implement Playwright browser coverage on Windows without weakening authentication or the scientific HOLD. Do not add a second workspace or fixture-only UI.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `src/sqe_studio/web/app.js`
+ - `src/sqe_studio/web/index.html`
+ - `src/sqe_studio/web/style.css`
+@@ -17,11 +13,12 @@
+ - `agent_cycle/deliveries/A14/`
+ 
+ ## Acceptance gates
+-- Native result and scientific review visible generically
+-- Accessible user-centered workflow
+-- No substitute test screens added to design workspace
++- One unified accessible workspace
++- Status display traces real verified artifacts
++- Browser HTTP/auth/revision regression evidence
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A14/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A14 A14-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A14-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A14/DELIVERY.md`.
++- Produce only `A14-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A14 A14-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A15.md
++++ harmonized/agent_cycle/A15.md
+@@ -1,15 +1,11 @@
+-# A15: Single-click qualification, progress and developer feedback
++# A15 -- One-button Windows laptop qualification and resilient evidence reports (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A15.md`.
+ 
+ ## Mission
+-Harden per-release one-click QA with progress heartbeat, automatic numbered ZIP reports and strict evidence reuse, 60-minute total budget target. Probe production GUI paths plus native engines.
++Reproduce RC14.7 laptop qualification, preserve single Run release qualification control and heartbeat, bounded 60-minute plan, numbered integrity-checked ZIPs, and no cached solver claims. Address Windows/browser/progress packaging issues from the first RC14.7 report. Maintain FAILED vs BLOCKED distinctions with real native execution only.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `Launch SQE Studio.pyw`
+ - `src/sqe_studio/cycle_qualification.py`
+ - `src/sqe_studio/qualification.py`
+@@ -22,12 +18,12 @@
+ - `agent_cycle/deliveries/A15/`
+ 
+ ## Acceptance gates
+-- Exactly one test button
+-- No save dialog or manual reviewer fields
+-- Progress with current stage and elapsed time, report retained on failure
+-- No fabricated native results or silent scientific pass
++- Single-button and no save dialog
++- Permanent elapsed heartbeat and failure ZIP
++- No optional engine declared PASS without execution
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A15/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A15 A15-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A15-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A15/DELIVERY.md`.
++- Produce only `A15-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A15 A15-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A16.md
++++ harmonized/agent_cycle/A16.md
+@@ -1,15 +1,11 @@
+-# A16: Superconducting RF and nonlinear circuit engine integration
++# A16 -- JosephsonCircuits and scqubits native RF benchmarks (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A16.md`.
+ 
+ ## Mission
+-Improve native JosephsonCircuits.jl and scqubits adapters and physically typed RF co-simulation, native benchmarks for amplifiers, resonators and flux-dependent circuits.
++On actually installed Julia/JC and scqubits engines, run two-port/passive and nonlinear RF benchmarks and flux-dependent quantum sweeps through production adapters; capture versioned complex S-parameter and basis convergence evidence. Leave cross-engine EM/Hamiltonian calibration BLOCKED absent independently verified mapping. Never fill missing solver outputs with fixtures.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `src/sqe_studio/adapters/josephson_adapter.py`
+ - `src/sqe_studio/adapters/scqubits_adapter.py`
+ - `tests/adapters/test_josephson_adapter.py`
+@@ -18,11 +14,12 @@
+ - `agent_cycle/deliveries/A16/`
+ 
+ ## Acceptance gates
+-- True solver execution results only
+-- Explicit units and engine version
+-- Integration edge remains blocked without physical mapping
++- Actual engine versions, raw data and native traces
++- Finite-unit/port/basis checks
++- Mapping remains blocked without calibrated review
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A16/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A16 A16-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A16-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A16/DELIVERY.md`.
++- Produce only `A16-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A16 A16-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A17.md
++++ harmonized/agent_cycle/A17.md
+@@ -1,15 +1,11 @@
+-# A17: Parametric CAD and material/kinetic-inductance integration
++# A17 -- Quantum Metal GDS, Gmsh topology and material/kinetic model audits (next RC14.7 cycle)
++
++**Baseline:** use the full RC14.7 Experimental SQE Studio ZIP only. Verify with `python tools/verify_release_source.py .` before any edits. Read `agent_cycle/CYCLE_PROTOCOL.md`, `agent_cycle/assignments.json`, `agent_cycle/PRODUCT_NORTH_STAR.md` and `docs/QUALITY_GATES.md`. The original RC14.6 assignment is archived under `agent_cycle/archive/RC14_6/A17.md`.
+ 
+ ## Mission
+-Advance generic Quantum Metal layout/GDS and material model validation including kinetic sheet inductance preparation, with solver-side surface assignment checks, no mock physics.
++Prove GDS-to-mesh topology/revision/layer/surface/port lineage with native QDesign/Gmsh observations, not file-hash equivalence alone. Strengthen material partition and thin-film kinetic inductance reviews, preserving HOLD and refusing automatic GDS fabrication release. Carry independent native evidence or BLOCKED.
+ 
+-## Mandatory baseline and workflow
+-- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
+-- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
+-- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
+-- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
+-
+-## Exclusive edit scope
++## Exclusive ownership
+ - `src/sqe_studio/adapters/quantum_metal_adapter.py`
+ - `src/sqe_studio/interop/laptop_benchmark.py`
+ - `tests/adapters/test_quantum_metal_adapter.py`
+@@ -17,11 +13,12 @@
+ - `agent_cycle/deliveries/A17/`
+ 
+ ## Acceptance gates
+-- GDS-to-mesh traceability, geometry revision
+-- Kinetic material parameters and domains reviewed
+-- Generic CAD components beyond qubits
++- GDS export and layer-to-mesh traceability
++- Explicit metal-surface/material audit
++- No fabricated signoff or silent fabricator release
+ 
+-## Delivery
+-- Write `agent_cycle/deliveries/A17/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
+-- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A17 A17-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
+-- Deliver `A17-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
++## Required evidence and delivery
++- First inspect the latest `qualification-reports/SQE-RC14_7-report-*.zip` if supplied, validate its `INTEGRITY.json` and `CYCLE.json`, and triage FAIL/BLOCKED without equating fixture passes with native evidence. No report is supplied yet; the current integrated host lacks optional scientific engines. Do not invent the report.
++- Preserve auth, CSRF, revision immutability, scientific review, fabrication HOLD, original frozen `contracts/` and `FOUNDATION_LOCK.json`.
++- Record changed source paths, actual commands, exit codes, platforms, native BLOCKED gates, and cross-owner interface proposals in `agent_cycle/deliveries/A17/DELIVERY.md`.
++- Produce only `A17-delta.zip` with `python tools/agent_cycle.py delta BASE WORK A17 A17-delta.zip`, using a byte-identical untouched RC14.7 BASE and your exclusively edited WORK copy. Do not supply a rebuilt full release or installed solver binaries.
+--- merged/agent_cycle/A99.md
++++ harmonized/agent_cycle/A99.md
+@@ -1,15 +1,9 @@
+-# A99 -- Final integrator, release and science gatekeeper
++# A99 -- final integrator for RC14.7 next cycle
+ 
+-You are the **integration** agent, not an independent solver contributor.
++**MANDATORY:** receive original full RC14.7 Experimental baseline and all eight distinct A10..A17 delta ZIPs. Verify the untouched baseline with `python tools/verify_release_source.py .` and inspect identity, exclusive owners, preimages, content hashes and real evidence for each delta. Reject incomplete, duplicate or unsafe input **before merging**. Historical RC14.6 instructions are archived at `agent_cycle/archive/RC14_6/A99.md`.
+ 
+-MANDATORY GATE: accept the ORIGINAL full RC14.6 baseline and every distinct delta A10..A17. Verify the baseline with `python tools/verify_release_source.py .`; verify deltas, owned paths, preimage SHA, contents and evidence. If ANY is missing, reject and STOP BEFORE MERGE. Do not use a preview or previous RC as baseline.
++From outside BASE run `python tools/agent_cycle.py merge BASE OUT A10-delta.zip A11-delta.zip A12-delta.zip A13-delta.zip A14-delta.zip A15-delta.zip A16-delta.zip A17-delta.zip`. This creates a candidate only. Record every integration amendment (original and replacement SHA-256, owner, reason, evidence, integrator) in `AGENT_INTEGRATION_MANIFEST.json`; deliver a separate harmonization patch. Never touch `FOUNDATION_LOCK.json` or frozen `contracts/`.
+ 
+-Run `python tools/agent_cycle.py merge BASE OUT A10-delta.zip A11-delta.zip A12-delta.zip A13-delta.zip A14-delta.zip A15-delta.zip A16-delta.zip A17-delta.zip` from outside BASE, where BASE is SQE-Studio source root and OUT is an empty parent directory. This command refuses incomplete, duplicate or tampered inputs and emits a candidate tree, not RC admission.
++Run full software, security, real HTTP/auth/revision, browser (Playwright), Windows qualification where available, offline reproducible wheel packaging and real native Quantum Metal/GDS, SQDMetal/Gmsh/Palace complex fields, scqubits, JosephsonCircuits.jl and general EDA GUI. Genuine solver absence is BLOCKED, never a fixture PASS. No arbitrary executables or unsafe ZIP extraction. Never waive scientific/fabrication gates. Preserve one-button, heartbeat-visible, numbered, 60-minute-target laptop qualification and no personal-project leakage.
+ 
+-Fix genuine integration inconsistencies in the merged tree. For every amendment to an agent-owned file, record its before/after digest, agent affected, reason, test and integration responsibility in `AGENT_INTEGRATION_MANIFEST.json`. Do not silently change frozen contracts or fabricate solver acceptance. The original deltas must remain immutable; produce harmonization as an explicit separate diff/evidence.
+-
+-Run FULL regression, Windows native tests where available, packaging, Playwright, real HTTP/auth/revision, native Quantum Metal/GDS, SQDMetal/Gmsh/Palace with field capture, scqubits, JosephsonCircuits.jl, and general EDA GUI. Distinguish fixtures and genuine solver output; absence of dependency => BLOCKED. Verify no arbitrary executables/ZIP traversal and no unreviewed automatic fabrication release. Keep an annotated release qualification plan with one button and numbered reports, within 60 minutes when the machine permits, with a visible heartbeat.
+-
+-Only after successful integration, refresh EDA_SOURCE_MANIFEST.json, bump version and qualification plan as appropriate, verify frozen contract digest and source inventory, build reproducible wheel and full packaged ZIP. Include complete merged SQE-Studio plus top-level INTEGRATION_MANIFEST.json including actual tests, unresolved defects, scientific limitations, candidate release status, how to install and exact next one-click test.
+-
+-Never claim release candidate or physical convergence without evidence. If release is blocked, deliver Experimental and list exact blockers. Finally define updated, isolated owned-path tasks for next cycle using the latest one-click report; this is a required handoff.
++Refresh source inventory, bump release/plan as appropriate, verify frozen digest, package wheel + complete ZIP and top-level `INTEGRATION_MANIFEST.json` with actual tests, blockers and next one-click instructions. Default to Experimental unless physical and platform evidence truly qualifies RC. Finally update isolated next-cycle assignments based on the latest hash-checked report, or explicitly mark absent report as pending.
+--- merged/agent_cycle/CYCLE_PROTOCOL.md
++++ harmonized/agent_cycle/CYCLE_PROTOCOL.md
+@@ -1,19 +1,11 @@
+-# Agentic iterative development -- cycle protocol v1
++# RC14.7 parallel cycle -- Experimental, gated
+ 
+-## Input
+-Every development agent receives the **same complete RC14.6 ZIP**, its own short dispatch prompt, and the agent-specific instruction already packaged in `agent_cycle/Axx.md`. The user attaches no other files unless a specifically authorized input is needed. The historical A01..A09 assignments are provenance, NOT ownership for this cycle.
++Each of A10..A17 receives the **identical** full RC14.7 Experimental archive and a single assignment prompt in `agent_cycle/MINIMAL_PROMPTS.md`. Verify the inventory before any modification. The immutable original RC14.6 cycle protocol and agent tasks are in `agent_cycle/archive/RC14_6/`.
+ 
+-## Dispatch
+-Use eight separate sessions with **unchanged** full baseline. Agents A10..A17 may work in parallel because edited paths are exclusive. Agent A99 receives the original full ZIP and **all eight** delta ZIPs, and does NOT start before all eight are present. An agent's delivery is just its delta ZIP. The original full package must not be rebuilt independently by parallel agents.
++`agent_cycle/assignments.json` is the authoritative exclusive ownership map. Workers change only their owned paths, write full tests/evidence under their own `agent_cycle/deliveries/Axx/`, and deliver solely `Axx-delta.zip` via `python tools/agent_cycle.py delta BASE WORK Axx OUTPUT.zip`. Any missing native dependency is BLOCKED; do not simulate native outputs, soften frozen contracts or release fabrication.
+ 
+-## Validated delta envelope
+-`tools/agent_cycle.py delta BASE WORK A10 A10-delta.zip` packages only changed/new/deleted paths authorized by `agent_cycle/assignments.json`, and SHA-256 preimages and new contents. The tool checks source manifest provenance, symlinks, frozen files, duplicate/malicious ZIP names and a 32 MiB delta maximum. Test evidence under `agent_cycle/deliveries/Axx/` is owned by the agent; each source modification must have accompanying evidence, but missing native runtimes are honestly BLOCKED. The integrator must verify hashes and reject invalid inputs, not patch them quietly.
++A99 receives the **full RC14.7 ZIP and all eight independent deltas**, runs source verification, complete `tools/agent_cycle.py verify` and `merge`, records every harmonization with before/after hashes, performs full regression and native/packaging/browser checks and publishes one complete versioned Experimental package (RC only if independently qualified). The next ZIP includes `INTEGRATION_MANIFEST.json`, wheel and updated ownership instructions. Do not overlap work or start early.
+ 
+-## Integration, testing, delivery
+-A99 verifies and merges exactly eight provenance-bound deltas. Integration conflicts and scientific blockers are identified before release qualification. A99 may perform explicitly recorded harmonization, with full regression results, all actual tool versions and limitations. A99 must regenerate current source inventory and wheel, never touch the historical foundation lock or silently change contracts. No unqualified fabrication claim.
++One-click laptop procedure: double-click `Launch SQE Studio.pyw` on Windows, choose **Qualify this laptop** and press **Run release qualification**. It saves `qualification-reports/SQE-RC14_7-report-0001.zip`, later sequentially, without overwriting old reports. Validate hashes before sharing, then attach the latest report to A99 or the next developer cycle. It reports actual PASS, FAIL and BLOCKED independently; previously reported native results are never reused as new execution.
+ 
+-## One-click user feedback
+-Each integrated release ships `qualification_plan.json`. In the desktop launcher, `Qualify this laptop` has **one** action: run fixed release test. It writes `qualification-reports/SQE-RC14_6-report-0001.zip`, 0002, etc, automatically. `CYCLE.json` contains baseline, plan digest, previous hash-verified feedback metadata and future-agent blocker hints. Private user projects are never copied. For subsequent releases the series prefix changes, maintaining prior ZIPs if deliberately retained in the folder. Reports may compare outcomes, but native results must rerun unless a **separately approved exact-cache protocol** establishes identical geometry/solver/tool versions/material boundaries and does not relabel old output as new results.
+-
+-## Next cycle
+-After receiving the user report, classify FAIL, BLOCKED and non-converged native evidence, identify dependencies, update tasks and owners, package full new baseline, repeat parallel delta/one-click loop. Never reinterpret missing tools as PASS.
++**Release blockers:** native complex field/mesh identity, validated EM-EPR-Hamiltonian mapping, independent material and solver convergence, and PDK/DRC/LVS/foundry approval. Review and HOLD remain mandatory.
+--- merged/agent_cycle/MINIMAL_PROMPTS.md
++++ harmonized/agent_cycle/MINIMAL_PROMPTS.md
+@@ -1,12 +1,11 @@
+-# Minimal prompts to copy into agent chats
++# RC14.7 minimal prompts for next parallel cycle
+ 
+-**For agent A10..A17** (replace XX):
++**A10 to A17** (substitute `AXX`):
+ 
+-`Act as SQE Studio AXX. The attached ZIP is the sole full baseline. Follow agent_cycle/AXX.md, agent_cycle/CYCLE_PROTOCOL.md and agent_cycle/assignments.json exactly. Deliver only AXX-delta.zip with verified owned changes and real test evidence. Maintain scientific fail-closed and the integrated EDA product goal.`
++`Act as SQE Studio AXX. The attached complete RC14.7 Experimental ZIP is the only baseline. Follow agent_cycle/AXX.md, agent_cycle/CYCLE_PROTOCOL.md and agent_cycle/assignments.json. Inspect the latest hash-verified SQE-RC14_7 one-click report if supplied; if missing, mark native system evidence BLOCKED. Return only AXX-delta.zip with changes in exclusive owned paths and raw test evidence. Do not relax scientific or fabrication gates.`
+ 
+-**For integrator A99** (after every delta exists):
++**A99 once ALL eight deltas arrive:**
+ 
+-`Act as SQE Studio A99 final integrator. The attached complete RC14.6 ZIP is the only baseline; A10-delta.zip through A17-delta.zip are all attached. Follow agent_cycle/A99.md and tools/agent_cycle.py: verify, admit, merge, harmonize, test and deliver exactly one new full Experimental/RC ZIP with one-click release qualification and updated next-cycle agent instructions. Never claim unsupported scientific qualification.`
++`Act as SQE Studio A99 final integrator. The attached full RC14.7 Experimental ZIP is the only baseline; A10-delta.zip through A17-delta.zip are all attached. Follow agent_cycle/A99.md and tools/agent_cycle.py. Verify, merge, harmonize with digests, test native/software/browser/packaging, deliver one complete versioned Experimental release and updated next-cycle tasks. No unproven scientific or fabrication PASS.`
+ 
+-## File distribution
+-For every agent, attach the SAME complete RC14.6 ZIP and paste only that single prompt. Its detailed instructions are **inside the package**, not pasted into the chat. Integrator receives the full ZIP + eight delta ZIPs. The next cycle will repeat this pattern.
++Provide exactly the same full RC14.7 archive to all agents and integrator; only A99 receives all eight delta ZIPs. `agent_cycle/archive/RC14_6/` preserves the previous mandates for audit, not current ownership.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A10.md
+@@ -0,0 +1,28 @@
++# A10: Windows, security and reproducible release quality
++
++## Mission
++Fix regression and Windows failures from the RC14.5 laptop report, including Unicode encoding, source-vs-build artifacts and HTTP header test behavior. Preserve real HTTP rejection semantics.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `tools/verify_release_source.py`
++- `tests/integration/test_rc14_4_native_em_results.py`
++- `tests/integration/test_eda_release_integrity.py`
++- `tests/security/test_hardening.py`
++- `tests/agent_cycle/A10/`
++- `agent_cycle/deliveries/A10/`
++
++## Acceptance gates
++- No masking or xfail of security defects
++- Windows UTF-8 fixtures and source inventory tests pass
++- Provide fail/pass evidence
++
++## Delivery
++- Write `agent_cycle/deliveries/A10/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A10 A10-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A10-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A11.md
+@@ -0,0 +1,27 @@
++# A11: Native Palace complex fields and physical mode identification
++
++## Mission
++Build a real native field-export evidence bridge with mesh/coordinate/phase/unit provenance. Support mode matching only with verified complex overlap; never proxy scalar frequencies for identity.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `src/sqe_studio/adapters/sqdmetal_palace_adapter.py`
++- `src/sqe_studio/interop/native_field.py`
++- `src/sqe_studio/interop/scientific_review.py`
++- `tests/agent_cycle/A11/`
++- `agent_cycle/deliveries/A11/`
++
++## Acceptance gates
++- No fabricated or assumed field overlap
++- Verified real export format, coordinates, normalization, mode provenance
++- Fail closed when missing exports
++
++## Delivery
++- Write `agent_cycle/deliveries/A11/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A11 A11-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A11-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A12.md
+@@ -0,0 +1,27 @@
++# A12: Physics-validated EM to circuit / Hamiltonian
++
++## Mission
++Make typed, versioned, user-reviewable EM -> EPR -> Hamiltonian transition with validated numerical normalizations. Add strict mapping of Josephson junctions and revision-bound provenance; no invented coupling values.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `src/sqe_studio/interop/transformations.py`
++- `src/sqe_studio/interop/models.py`
++- `src/sqe_studio/interop/quantities.py`
++- `tests/agent_cycle/A12/`
++- `agent_cycle/deliveries/A12/`
++
++## Acceptance gates
++- Reject unreviewed EM EPR inputs
++- Document units and uncertainty
++- No automatic scientific qualification
++
++## Delivery
++- Write `agent_cycle/deliveries/A12/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A12 A12-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A12-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A13.md
+@@ -0,0 +1,27 @@
++# A13: General EDA design-space optimization
++
++## Mission
++Implement objective and constraint representation for geometry-driven design iteration using real native result provenance. Geometry revision -> new solve; no bypass of expert review or fabrication HOLD.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `src/sqe_studio/orchestration/sweep.py`
++- `src/sqe_studio/orchestration/optimization.py`
++- `src/sqe_studio/eda/capabilities.py`
++- `tests/agent_cycle/A13/`
++- `agent_cycle/deliveries/A13/`
++
++## Acceptance gates
++- Optimization never reuses stale geometry/results
++- Native evaluations required for numerical objectives
++- Usable for RF components beyond QPU
++
++## Delivery
++- Write `agent_cycle/deliveries/A13/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A13 A13-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A13-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A14.md
+@@ -0,0 +1,27 @@
++# A14: Product-grade unified EDA UI
++
++## Mission
++Advance generic schematic, layout, setup, Results and design optimization GUI. Display actual engine capabilities, warnings and provenance. No example-only special screens or fake physical results.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `src/sqe_studio/web/app.js`
++- `src/sqe_studio/web/index.html`
++- `src/sqe_studio/web/style.css`
++- `tests/agent_cycle/A14/`
++- `agent_cycle/deliveries/A14/`
++
++## Acceptance gates
++- Native result and scientific review visible generically
++- Accessible user-centered workflow
++- No substitute test screens added to design workspace
++
++## Delivery
++- Write `agent_cycle/deliveries/A14/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A14 A14-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A14-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A15.md
+@@ -0,0 +1,33 @@
++# A15: Single-click qualification, progress and developer feedback
++
++## Mission
++Harden per-release one-click QA with progress heartbeat, automatic numbered ZIP reports and strict evidence reuse, 60-minute total budget target. Probe production GUI paths plus native engines.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `Launch SQE Studio.pyw`
++- `src/sqe_studio/cycle_qualification.py`
++- `src/sqe_studio/qualification.py`
++- `src/sqe_studio/native_em_qualification.py`
++- `src/sqe_studio/feedback_qualification.py`
++- `qualification_plan.json`
++- `tests/integration/test_cycle_qualification.py`
++- `tests/integration/test_rc14_5_feedback.py`
++- `tests/agent_cycle/A15/`
++- `agent_cycle/deliveries/A15/`
++
++## Acceptance gates
++- Exactly one test button
++- No save dialog or manual reviewer fields
++- Progress with current stage and elapsed time, report retained on failure
++- No fabricated native results or silent scientific pass
++
++## Delivery
++- Write `agent_cycle/deliveries/A15/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A15 A15-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A15-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A16.md
+@@ -0,0 +1,28 @@
++# A16: Superconducting RF and nonlinear circuit engine integration
++
++## Mission
++Improve native JosephsonCircuits.jl and scqubits adapters and physically typed RF co-simulation, native benchmarks for amplifiers, resonators and flux-dependent circuits.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `src/sqe_studio/adapters/josephson_adapter.py`
++- `src/sqe_studio/adapters/scqubits_adapter.py`
++- `tests/adapters/test_josephson_adapter.py`
++- `tests/adapters/test_scqubits_validation.py`
++- `tests/agent_cycle/A16/`
++- `agent_cycle/deliveries/A16/`
++
++## Acceptance gates
++- True solver execution results only
++- Explicit units and engine version
++- Integration edge remains blocked without physical mapping
++
++## Delivery
++- Write `agent_cycle/deliveries/A16/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A16 A16-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A16-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A17.md
+@@ -0,0 +1,27 @@
++# A17: Parametric CAD and material/kinetic-inductance integration
++
++## Mission
++Advance generic Quantum Metal layout/GDS and material model validation including kinetic sheet inductance preparation, with solver-side surface assignment checks, no mock physics.
++
++## Mandatory baseline and workflow
++- Use ONLY the provided full **RC14.6** ZIP as baseline. Verify `python tools/verify_release_source.py .` before edits.
++- Read `docs/DEVELOPER_PRINCIPLES.md`, `docs/EDA_EXTENSION_ARCHITECTURE.md`, `docs/AGENT_PROTOCOL.md`, `agent_cycle/PRODUCT_NORTH_STAR.md`, `agent_cycle/CYCLE_PROTOCOL.md`, and `agent_cycle/assignments.json`.
++- Do not edit frozen contracts or files outside this assignment. Depend on other agents via proposed interfaces/evidence in your DELIVERY, never modify their paths.
++- Maintain English source, UI and technical documentation. Avoid code stubs that claim scientific completion. Existing projects, authentication/revisions, and scientific fail-closed rules must work.
++
++## Exclusive edit scope
++- `src/sqe_studio/adapters/quantum_metal_adapter.py`
++- `src/sqe_studio/interop/laptop_benchmark.py`
++- `tests/adapters/test_quantum_metal_adapter.py`
++- `tests/agent_cycle/A17/`
++- `agent_cycle/deliveries/A17/`
++
++## Acceptance gates
++- GDS-to-mesh traceability, geometry revision
++- Kinetic material parameters and domains reviewed
++- Generic CAD components beyond qubits
++
++## Delivery
++- Write `agent_cycle/deliveries/A17/DELIVERY.md`: changed paths, tests with real exit codes, interfaces, known limits, unresolved defects, follow-up for A99.
++- Create **only a delta ZIP**, using `python tools/agent_cycle.py delta BASE RC14_6_WORK A17 A17-delta.zip`, where BASE is the untouched extracted RC14.6 source and RC14_6_WORK is this agent's edited source.
++- Deliver `A17-delta.zip` only (not a second complete source). Include no installed tools, `.venv`, solver binaries or personal designs.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/A99.md
+@@ -0,0 +1,15 @@
++# A99 -- Final integrator, release and science gatekeeper
++
++You are the **integration** agent, not an independent solver contributor.
++
++MANDATORY GATE: accept the ORIGINAL full RC14.6 baseline and every distinct delta A10..A17. Verify the baseline with `python tools/verify_release_source.py .`; verify deltas, owned paths, preimage SHA, contents and evidence. If ANY is missing, reject and STOP BEFORE MERGE. Do not use a preview or previous RC as baseline.
++
++Run `python tools/agent_cycle.py merge BASE OUT A10-delta.zip A11-delta.zip A12-delta.zip A13-delta.zip A14-delta.zip A15-delta.zip A16-delta.zip A17-delta.zip` from outside BASE, where BASE is SQE-Studio source root and OUT is an empty parent directory. This command refuses incomplete, duplicate or tampered inputs and emits a candidate tree, not RC admission.
++
++Fix genuine integration inconsistencies in the merged tree. For every amendment to an agent-owned file, record its before/after digest, agent affected, reason, test and integration responsibility in `AGENT_INTEGRATION_MANIFEST.json`. Do not silently change frozen contracts or fabricate solver acceptance. The original deltas must remain immutable; produce harmonization as an explicit separate diff/evidence.
++
++Run FULL regression, Windows native tests where available, packaging, Playwright, real HTTP/auth/revision, native Quantum Metal/GDS, SQDMetal/Gmsh/Palace with field capture, scqubits, JosephsonCircuits.jl, and general EDA GUI. Distinguish fixtures and genuine solver output; absence of dependency => BLOCKED. Verify no arbitrary executables/ZIP traversal and no unreviewed automatic fabrication release. Keep an annotated release qualification plan with one button and numbered reports, within 60 minutes when the machine permits, with a visible heartbeat.
++
++Only after successful integration, refresh EDA_SOURCE_MANIFEST.json, bump version and qualification plan as appropriate, verify frozen contract digest and source inventory, build reproducible wheel and full packaged ZIP. Include complete merged SQE-Studio plus top-level INTEGRATION_MANIFEST.json including actual tests, unresolved defects, scientific limitations, candidate release status, how to install and exact next one-click test.
++
++Never claim release candidate or physical convergence without evidence. If release is blocked, deliver Experimental and list exact blockers. Finally define updated, isolated owned-path tasks for next cycle using the latest one-click report; this is a required handoff.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/CYCLE_PROTOCOL.md
+@@ -0,0 +1,19 @@
++# Agentic iterative development -- cycle protocol v1
++
++## Input
++Every development agent receives the **same complete RC14.6 ZIP**, its own short dispatch prompt, and the agent-specific instruction already packaged in `agent_cycle/Axx.md`. The user attaches no other files unless a specifically authorized input is needed. The historical A01..A09 assignments are provenance, NOT ownership for this cycle.
++
++## Dispatch
++Use eight separate sessions with **unchanged** full baseline. Agents A10..A17 may work in parallel because edited paths are exclusive. Agent A99 receives the original full ZIP and **all eight** delta ZIPs, and does NOT start before all eight are present. An agent's delivery is just its delta ZIP. The original full package must not be rebuilt independently by parallel agents.
++
++## Validated delta envelope
++`tools/agent_cycle.py delta BASE WORK A10 A10-delta.zip` packages only changed/new/deleted paths authorized by `agent_cycle/assignments.json`, and SHA-256 preimages and new contents. The tool checks source manifest provenance, symlinks, frozen files, duplicate/malicious ZIP names and a 32 MiB delta maximum. Test evidence under `agent_cycle/deliveries/Axx/` is owned by the agent; each source modification must have accompanying evidence, but missing native runtimes are honestly BLOCKED. The integrator must verify hashes and reject invalid inputs, not patch them quietly.
++
++## Integration, testing, delivery
++A99 verifies and merges exactly eight provenance-bound deltas. Integration conflicts and scientific blockers are identified before release qualification. A99 may perform explicitly recorded harmonization, with full regression results, all actual tool versions and limitations. A99 must regenerate current source inventory and wheel, never touch the historical foundation lock or silently change contracts. No unqualified fabrication claim.
++
++## One-click user feedback
++Each integrated release ships `qualification_plan.json`. In the desktop launcher, `Qualify this laptop` has **one** action: run fixed release test. It writes `qualification-reports/SQE-RC14_6-report-0001.zip`, 0002, etc, automatically. `CYCLE.json` contains baseline, plan digest, previous hash-verified feedback metadata and future-agent blocker hints. Private user projects are never copied. For subsequent releases the series prefix changes, maintaining prior ZIPs if deliberately retained in the folder. Reports may compare outcomes, but native results must rerun unless a **separately approved exact-cache protocol** establishes identical geometry/solver/tool versions/material boundaries and does not relabel old output as new results.
++
++## Next cycle
++After receiving the user report, classify FAIL, BLOCKED and non-converged native evidence, identify dependencies, update tasks and owners, package full new baseline, repeat parallel delta/one-click loop. Never reinterpret missing tools as PASS.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/MINIMAL_PROMPTS.md
+@@ -0,0 +1,12 @@
++# Minimal prompts to copy into agent chats
++
++**For agent A10..A17** (replace XX):
++
++`Act as SQE Studio AXX. The attached ZIP is the sole full baseline. Follow agent_cycle/AXX.md, agent_cycle/CYCLE_PROTOCOL.md and agent_cycle/assignments.json exactly. Deliver only AXX-delta.zip with verified owned changes and real test evidence. Maintain scientific fail-closed and the integrated EDA product goal.`
++
++**For integrator A99** (after every delta exists):
++
++`Act as SQE Studio A99 final integrator. The attached complete RC14.6 ZIP is the only baseline; A10-delta.zip through A17-delta.zip are all attached. Follow agent_cycle/A99.md and tools/agent_cycle.py: verify, admit, merge, harmonize, test and deliver exactly one new full Experimental/RC ZIP with one-click release qualification and updated next-cycle agent instructions. Never claim unsupported scientific qualification.`
++
++## File distribution
++For every agent, attach the SAME complete RC14.6 ZIP and paste only that single prompt. Its detailed instructions are **inside the package**, not pasted into the chat. Integrator receives the full ZIP + eight delta ZIPs. The next cycle will repeat this pattern.
+--- /dev/null
++++ harmonized/agent_cycle/archive/RC14_6/assignments.json
+@@ -0,0 +1,191 @@
++{
++  "agents": {
++    "A10": {
++      "dependencies": [],
++      "done": [
++        "No masking or xfail of security defects",
++        "Windows UTF-8 fixtures and source inventory tests pass",
++        "Provide fail/pass evidence"
++      ],
++      "id": "A10",
++      "mission": "Fix regression and Windows failures from the RC14.5 laptop report, including Unicode encoding, source-vs-build artifacts and HTTP header test behavior. Preserve real HTTP rejection semantics.",
++      "owned": [
++        "tools/verify_release_source.py",
++        "tests/integration/test_rc14_4_native_em_results.py",
++        "tests/integration/test_eda_release_integrity.py",
++        "tests/security/test_hardening.py",
++        "tests/agent_cycle/A10/",
++        "agent_cycle/deliveries/A10/"
++      ],
++      "priority": "P0",
++      "title": "Windows, security and reproducible release quality"
++    },
++    "A11": {
++      "dependencies": [],
++      "done": [
++        "No fabricated or assumed field overlap",
++        "Verified real export format, coordinates, normalization, mode provenance",
++        "Fail closed when missing exports"
++      ],
++      "id": "A11",
++      "mission": "Build a real native field-export evidence bridge with mesh/coordinate/phase/unit provenance. Support mode matching only with verified complex overlap; never proxy scalar frequencies for identity.",
++      "owned": [
++        "src/sqe_studio/adapters/sqdmetal_palace_adapter.py",
++        "src/sqe_studio/interop/native_field.py",
++        "src/sqe_studio/interop/scientific_review.py",
++        "tests/agent_cycle/A11/",
++        "agent_cycle/deliveries/A11/"
++      ],
++      "priority": "P0",
++      "title": "Native Palace complex fields and physical mode identification"
++    },
++    "A12": {
++      "dependencies": [],
++      "done": [
++        "Reject unreviewed EM EPR inputs",
++        "Document units and uncertainty",
++        "No automatic scientific qualification"
++      ],
++      "id": "A12",
++      "mission": "Make typed, versioned, user-reviewable EM -> EPR -> Hamiltonian transition with validated numerical normalizations. Add strict mapping of Josephson junctions and revision-bound provenance; no invented coupling values.",
++      "owned": [
++        "src/sqe_studio/interop/transformations.py",
++        "src/sqe_studio/interop/models.py",
++        "src/sqe_studio/interop/quantities.py",
++        "tests/agent_cycle/A12/",
++        "agent_cycle/deliveries/A12/"
++      ],
++      "priority": "P1",
++      "title": "Physics-validated EM to circuit / Hamiltonian"
++    },
++    "A13": {
++      "dependencies": [],
++      "done": [
++        "Optimization never reuses stale geometry/results",
++        "Native evaluations required for numerical objectives",
++        "Usable for RF components beyond QPU"
++      ],
++      "id": "A13",
++      "mission": "Implement objective and constraint representation for geometry-driven design iteration using real native result provenance. Geometry revision -> new solve; no bypass of expert review or fabrication HOLD.",
++      "owned": [
++        "src/sqe_studio/orchestration/sweep.py",
++        "src/sqe_studio/orchestration/optimization.py",
++        "src/sqe_studio/eda/capabilities.py",
++        "tests/agent_cycle/A13/",
++        "agent_cycle/deliveries/A13/"
++      ],
++      "priority": "P1",
++      "title": "General EDA design-space optimization"
++    },
++    "A14": {
++      "dependencies": [],
++      "done": [
++        "Native result and scientific review visible generically",
++        "Accessible user-centered workflow",
++        "No substitute test screens added to design workspace"
++      ],
++      "id": "A14",
++      "mission": "Advance generic schematic, layout, setup, Results and design optimization GUI. Display actual engine capabilities, warnings and provenance. No example-only special screens or fake physical results.",
++      "owned": [
++        "src/sqe_studio/web/app.js",
++        "src/sqe_studio/web/index.html",
++        "src/sqe_studio/web/style.css",
++        "tests/agent_cycle/A14/",
++        "agent_cycle/deliveries/A14/"
++      ],
++      "priority": "P1",
++      "title": "Product-grade unified EDA UI"
++    },
++    "A15": {
++      "dependencies": [],
++      "done": [
++        "Exactly one test button",
++        "No save dialog or manual reviewer fields",
++        "Progress with current stage and elapsed time, report retained on failure",
++        "No fabricated native results or silent scientific pass"
++      ],
++      "id": "A15",
++      "mission": "Harden per-release one-click QA with progress heartbeat, automatic numbered ZIP reports and strict evidence reuse, 60-minute total budget target. Probe production GUI paths plus native engines.",
++      "owned": [
++        "Launch SQE Studio.pyw",
++        "src/sqe_studio/cycle_qualification.py",
++        "src/sqe_studio/qualification.py",
++        "src/sqe_studio/native_em_qualification.py",
++        "src/sqe_studio/feedback_qualification.py",
++        "qualification_plan.json",
++        "tests/integration/test_cycle_qualification.py",
++        "tests/integration/test_rc14_5_feedback.py",
++        "tests/agent_cycle/A15/",
++        "agent_cycle/deliveries/A15/"
++      ],
++      "priority": "P0",
++      "title": "Single-click qualification, progress and developer feedback"
++    },
++    "A16": {
++      "dependencies": [],
++      "done": [
++        "True solver execution results only",
++        "Explicit units and engine version",
++        "Integration edge remains blocked without physical mapping"
++      ],
++      "id": "A16",
++      "mission": "Improve native JosephsonCircuits.jl and scqubits adapters and physically typed RF co-simulation, native benchmarks for amplifiers, resonators and flux-dependent circuits.",
++      "owned": [
++        "src/sqe_studio/adapters/josephson_adapter.py",
++        "src/sqe_studio/adapters/scqubits_adapter.py",
++        "tests/adapters/test_josephson_adapter.py",
++        "tests/adapters/test_scqubits_validation.py",
++        "tests/agent_cycle/A16/",
++        "agent_cycle/deliveries/A16/"
++      ],
++      "priority": "P2",
++      "title": "Superconducting RF and nonlinear circuit engine integration"
++    },
++    "A17": {
++      "dependencies": [],
++      "done": [
++        "GDS-to-mesh traceability, geometry revision",
++        "Kinetic material parameters and domains reviewed",
++        "Generic CAD components beyond qubits"
++      ],
++      "id": "A17",
++      "mission": "Advance generic Quantum Metal layout/GDS and material model validation including kinetic sheet inductance preparation, with solver-side surface assignment checks, no mock physics.",
++      "owned": [
++        "src/sqe_studio/adapters/quantum_metal_adapter.py",
++        "src/sqe_studio/interop/laptop_benchmark.py",
++        "tests/adapters/test_quantum_metal_adapter.py",
++        "tests/agent_cycle/A17/",
++        "agent_cycle/deliveries/A17/"
++      ],
++      "priority": "P2",
++      "title": "Parametric CAD and material/kinetic-inductance integration"
++    }
++  },
++  "blocked_science": [
++    "missing complex field overlap",
++    "material physical approval",
++    "mode identity",
++    "EPR Hamiltonian mapping",
++    "DRC LVS foundry"
++  ],
++  "frozen_paths": [
++    "FOUNDATION_LOCK.json",
++    "contracts/",
++    "PRODUCT_FOUNDATION_MANIFEST.json"
++  ],
++  "input_report": "SQE-Studio-qualification-20261031_3.zip",
++  "integrator": "A99",
++  "release_baseline": "RC14.6",
++  "required_agents": [
++    "A10",
++    "A11",
++    "A12",
++    "A13",
++    "A14",
++    "A15",
++    "A16",
++    "A17"
++  ],
++  "rule": "all deltas from byte-identical RC14.6 source; no early admission; A99 owns source manifest refresh",
++  "schema": "sqe.agent-cycle-assignment.v1"
++}
+--- merged/agent_cycle/assignments.json
++++ harmonized/agent_cycle/assignments.json
+@@ -3,12 +3,12 @@
+     "A10": {
+       "dependencies": [],
+       "done": [
+-        "No masking or xfail of security defects",
+-        "Windows UTF-8 fixtures and source inventory tests pass",
+-        "Provide fail/pass evidence"
++        "Real Windows Python 3.11 tests and locale outputs",
++        "No masking of failing tests",
++        "Inventory check independent of build artifacts"
+       ],
+       "id": "A10",
+-      "mission": "Fix regression and Windows failures from the RC14.5 laptop report, including Unicode encoding, source-vs-build artifacts and HTTP header test behavior. Preserve real HTTP rejection semantics.",
++      "mission": "Reproduce any FAIL from RC14.7 one-click report on Windows 11; fix only owned verifier, security and integration tests. Remove dependence on stale manifest hashes; verify file traversal, source symlink and non-UTF8 locale rejection. Preserve real HTTP authentication, CSRF and revisions. Supply raw before/after evidence.",
+       "owned": [
+         "tools/verify_release_source.py",
+         "tests/integration/test_rc14_4_native_em_results.py",
+@@ -18,17 +18,17 @@
+         "agent_cycle/deliveries/A10/"
+       ],
+       "priority": "P0",
+-      "title": "Windows, security and reproducible release quality"
++      "title": "Release integrity, UTF-8 portability and HTTP/security reproducibility"
+     },
+     "A11": {
+       "dependencies": [],
+       "done": [
+-        "No fabricated or assumed field overlap",
+-        "Verified real export format, coordinates, normalization, mode provenance",
+-        "Fail closed when missing exports"
++        "No scalar-frequency proxy for mode identity",
++        "Native export and frame provenance verified or BLOCKED",
++        "No synthetic physical overlap accepted"
+       ],
+       "id": "A11",
+-      "mission": "Build a real native field-export evidence bridge with mesh/coordinate/phase/unit provenance. Support mode matching only with verified complex overlap; never proxy scalar frequencies for identity.",
++      "mission": "Close the BLOCKED Palace/Gmsh native complex-mode evidence boundary only using genuine, versioned field-export samples and verified field orientation, coordinate transform, mesh tags, phase and normalization. Add two-mesh overlap identity calculation only if both compatible native complex fields exist; otherwise explicit BLOCKED. Coordinate an interface proposal with A12/A17 without editing their files.",
+       "owned": [
+         "src/sqe_studio/adapters/sqdmetal_palace_adapter.py",
+         "src/sqe_studio/interop/native_field.py",
+@@ -37,17 +37,17 @@
+         "agent_cycle/deliveries/A11/"
+       ],
+       "priority": "P0",
+-      "title": "Native Palace complex fields and physical mode identification"
++      "title": "Native field export, mesh registration and complex mode overlap"
+     },
+     "A12": {
+       "dependencies": [],
+       "done": [
+-        "Reject unreviewed EM EPR inputs",
+-        "Document units and uncertainty",
+-        "No automatic scientific qualification"
++        "No invented coupling, EPR or frequency",
++        "Units, calibration and uncertainty validated",
++        "Unreviewed EM-to-quantum handoff remains BLOCKED"
+       ],
+       "id": "A12",
+-      "mission": "Make typed, versioned, user-reviewable EM -> EPR -> Hamiltonian transition with validated numerical normalizations. Add strict mapping of Josephson junctions and revision-bound provenance; no invented coupling values.",
++      "mission": "Advance the review-only EM -> EPR -> circuit mapping toward physically reproducible observables. Require exact revision, junction/interface identity, participation normalization, material approval, and uncertainty; block Hamiltonian transfer if native overlap or calibrated EPR is missing. Work solely in owned interop contracts; coordinate requirements with A11/A16.",
+       "owned": [
+         "src/sqe_studio/interop/transformations.py",
+         "src/sqe_studio/interop/models.py",
+@@ -56,17 +56,17 @@
+         "agent_cycle/deliveries/A12/"
+       ],
+       "priority": "P1",
+-      "title": "Physics-validated EM to circuit / Hamiltonian"
++      "title": "Reviewed EM/EPR/Hamiltonian interface with typed normalization"
+     },
+     "A13": {
+       "dependencies": [],
+       "done": [
+-        "Optimization never reuses stale geometry/results",
+-        "Native evaluations required for numerical objectives",
+-        "Usable for RF components beyond QPU"
++        "No cache/revision misattribution",
++        "Physical objective requires genuine native artifacts",
++        "Fabrication and scientific review remain HOLD"
+       ],
+       "id": "A13",
+-      "mission": "Implement objective and constraint representation for geometry-driven design iteration using real native result provenance. Geometry revision -> new solve; no bypass of expert review or fabrication HOLD.",
++      "mission": "Integrate new candidate objectives and constraints in generic sweeps, require distinct saved geometry revisions and verified native job provenance per objective; reject stale results, nonfinite optimization metrics, unreviewed fabrication actions, and fabricated solver completions. Exercise generic RF/resonator cases without specialized solver shims.",
+       "owned": [
+         "src/sqe_studio/orchestration/sweep.py",
+         "src/sqe_studio/orchestration/optimization.py",
+@@ -75,17 +75,17 @@
+         "agent_cycle/deliveries/A13/"
+       ],
+       "priority": "P1",
+-      "title": "General EDA design-space optimization"
++      "title": "Revision-safe generic geometry optimization"
+     },
+     "A14": {
+       "dependencies": [],
+       "done": [
+-        "Native result and scientific review visible generically",
+-        "Accessible user-centered workflow",
+-        "No substitute test screens added to design workspace"
++        "One unified accessible workspace",
++        "Status display traces real verified artifacts",
++        "Browser HTTP/auth/revision regression evidence"
+       ],
+       "id": "A14",
+-      "mission": "Advance generic schematic, layout, setup, Results and design optimization GUI. Display actual engine capabilities, warnings and provenance. No example-only special screens or fake physical results.",
++      "mission": "Complete accessible generic schematic-layout-EM-results/compare loop. Clearly distinguish blocked native solver, unreviewed field exports, and research-only results from verified artifacts. Implement Playwright browser coverage on Windows without weakening authentication or the scientific HOLD. Do not add a second workspace or fixture-only UI.",
+       "owned": [
+         "src/sqe_studio/web/app.js",
+         "src/sqe_studio/web/index.html",
+@@ -94,18 +94,17 @@
+         "agent_cycle/deliveries/A14/"
+       ],
+       "priority": "P1",
+-      "title": "Product-grade unified EDA UI"
++      "title": "Unified EDA results and review UX in real browser"
+     },
+     "A15": {
+       "dependencies": [],
+       "done": [
+-        "Exactly one test button",
+-        "No save dialog or manual reviewer fields",
+-        "Progress with current stage and elapsed time, report retained on failure",
+-        "No fabricated native results or silent scientific pass"
++        "Single-button and no save dialog",
++        "Permanent elapsed heartbeat and failure ZIP",
++        "No optional engine declared PASS without execution"
+       ],
+       "id": "A15",
+-      "mission": "Harden per-release one-click QA with progress heartbeat, automatic numbered ZIP reports and strict evidence reuse, 60-minute total budget target. Probe production GUI paths plus native engines.",
++      "mission": "Reproduce RC14.7 laptop qualification, preserve single Run release qualification control and heartbeat, bounded 60-minute plan, numbered integrity-checked ZIPs, and no cached solver claims. Address Windows/browser/progress packaging issues from the first RC14.7 report. Maintain FAILED vs BLOCKED distinctions with real native execution only.",
+       "owned": [
+         "Launch SQE Studio.pyw",
+         "src/sqe_studio/cycle_qualification.py",
+@@ -119,17 +118,17 @@
+         "agent_cycle/deliveries/A15/"
+       ],
+       "priority": "P0",
+-      "title": "Single-click qualification, progress and developer feedback"
++      "title": "One-button Windows laptop qualification and resilient evidence reports"
+     },
+     "A16": {
+       "dependencies": [],
+       "done": [
+-        "True solver execution results only",
+-        "Explicit units and engine version",
+-        "Integration edge remains blocked without physical mapping"
++        "Actual engine versions, raw data and native traces",
++        "Finite-unit/port/basis checks",
++        "Mapping remains blocked without calibrated review"
+       ],
+       "id": "A16",
+-      "mission": "Improve native JosephsonCircuits.jl and scqubits adapters and physically typed RF co-simulation, native benchmarks for amplifiers, resonators and flux-dependent circuits.",
++      "mission": "On actually installed Julia/JC and scqubits engines, run two-port/passive and nonlinear RF benchmarks and flux-dependent quantum sweeps through production adapters; capture versioned complex S-parameter and basis convergence evidence. Leave cross-engine EM/Hamiltonian calibration BLOCKED absent independently verified mapping. Never fill missing solver outputs with fixtures.",
+       "owned": [
+         "src/sqe_studio/adapters/josephson_adapter.py",
+         "src/sqe_studio/adapters/scqubits_adapter.py",
+@@ -139,17 +138,17 @@
+         "agent_cycle/deliveries/A16/"
+       ],
+       "priority": "P2",
+-      "title": "Superconducting RF and nonlinear circuit engine integration"
++      "title": "JosephsonCircuits and scqubits native RF benchmarks"
+     },
+     "A17": {
+       "dependencies": [],
+       "done": [
+-        "GDS-to-mesh traceability, geometry revision",
+-        "Kinetic material parameters and domains reviewed",
+-        "Generic CAD components beyond qubits"
++        "GDS export and layer-to-mesh traceability",
++        "Explicit metal-surface/material audit",
++        "No fabricated signoff or silent fabricator release"
+       ],
+       "id": "A17",
+-      "mission": "Advance generic Quantum Metal layout/GDS and material model validation including kinetic sheet inductance preparation, with solver-side surface assignment checks, no mock physics.",
++      "mission": "Prove GDS-to-mesh topology/revision/layer/surface/port lineage with native QDesign/Gmsh observations, not file-hash equivalence alone. Strengthen material partition and thin-film kinetic inductance reviews, preserving HOLD and refusing automatic GDS fabrication release. Carry independent native evidence or BLOCKED.",
+       "owned": [
+         "src/sqe_studio/adapters/quantum_metal_adapter.py",
+         "src/sqe_studio/interop/laptop_benchmark.py",
+@@ -158,24 +157,23 @@
+         "agent_cycle/deliveries/A17/"
+       ],
+       "priority": "P2",
+-      "title": "Parametric CAD and material/kinetic-inductance integration"
++      "title": "Quantum Metal GDS, Gmsh topology and material/kinetic model audits"
+     }
+   },
+   "blocked_science": [
+-    "missing complex field overlap",
+-    "material physical approval",
+-    "mode identity",
+-    "EPR Hamiltonian mapping",
+-    "DRC LVS foundry"
++    "unavailable current-host native Gmsh/Palace, Quantum Metal, scqubits and Julia/JosephsonCircuits",
++    "complex field/mesh overlap and physical mode identity",
++    "EM/EPR/Hamiltonian mapping and material review",
++    "independent DRC/LVS/PDK/foundry signoff"
+   ],
+   "frozen_paths": [
+     "FOUNDATION_LOCK.json",
+     "contracts/",
+     "PRODUCT_FOUNDATION_MANIFEST.json"
+   ],
+-  "input_report": "SQE-Studio-qualification-20261031_3.zip",
++  "input_report": "PENDING_RC14_7_ONE_CLICK_LAPTOP_REPORT",
+   "integrator": "A99",
+-  "release_baseline": "RC14.6",
++  "release_baseline": "RC14.7",
+   "required_agents": [
+     "A10",
+     "A11",
+@@ -186,6 +184,6 @@
+     "A16",
+     "A17"
+   ],
+-  "rule": "all deltas from byte-identical RC14.6 source; no early admission; A99 owns source manifest refresh",
++  "rule": "all next-cycle deltas must share the exact full RC14.7 Experimental ZIP, source identity and exclusive ownership; A99 is sole merger",
+   "schema": "sqe.agent-cycle-assignment.v1"
+ }
+--- merged/docs/LAPTOP_QUALIFICATION.md
++++ harmonized/docs/LAPTOP_QUALIFICATION.md
+@@ -1,13 +1,13 @@
+-# Laptop qualification -- one click and one evidence ZIP per run (RC14.6)
++# Laptop qualification -- one click and one evidence ZIP per run (RC14.7)
+ 
+-**Current procedure**; prior RC-specific docs retained elsewhere describe older UI layouts and no longer define the active RC14.6 interface. This is a release-engineering test harness that uses the same production native adapters and read-only Results/Compare logic; it is **not** the EDA itself and not scientific certification.
++**Current procedure**; prior RC-specific docs retained elsewhere describe older UI layouts and no longer define the active RC14.7 interface. This is a release-engineering test harness that uses the same production native adapters and read-only Results/Compare logic; it is **not** the EDA itself and not scientific certification.
+ 
+ ## What the Windows operator does
+ 
+-1. Extract the complete RC14.6 archive to a writable directory on Windows 11. Keep existing scientific environments installed. Double-click `Launch SQE Studio.pyw`. If an existing Python 3.11 environment is not connected, use the separate launcher setup/reconnect tools, then restart.
++1. Extract the complete RC14.7 archive to a writable directory on Windows 11. Keep existing scientific environments installed. Double-click `Launch SQE Studio.pyw`. If an existing Python 3.11 environment is not connected, use the separate launcher setup/reconnect tools, then restart.
+ 2. Press **Qualify this laptop**, then the **single** button **Run release qualification**. No additional selections or save dialog are necessary. The button authorizes a fixed *exploratory research-only* benchmark, **not** materials, physical-device, or foundry approval.
+ 3. Watch the phase/progress bar and elapsed-time heartbeat while Comprehensive and native work executes. The progress % is a **stage estimate**, not wall-clock completion. The Windows process may spend minutes inside real Palace; monitor the stage name and elapsed time, not instantaneous bar movement.
+-4. After completion, find the report in the extracted release folder under `qualification-reports/SQE-RC14_6-report-0001.zip`, with sequential numbering on subsequent runs. Share that **one ZIP** in the next development conversation after reviewing minimized diagnostic logs for local paths. A test error also attempts to write a small hash-checked diagnostic ZIP.
++4. After completion, find the report in the extracted release folder under `qualification-reports/SQE-RC14_7-report-0001.zip`, with sequential numbering on subsequent runs. Share that **one ZIP** in the next development conversation after reviewing minimized diagnostic logs for local paths. A test error also attempts to write a small hash-checked diagnostic ZIP.
+ 
+ ## Fixed release study
+ 
+@@ -21,4 +21,4 @@
+ 
+ **Decision:** PASS indicates the stated test ran; FAIL indicates a real assertion/execution failure; BLOCKED means missing evidence or unavailable science. The package remains Experimental, NOT release-candidate qualified, until complex field matching, mesh/mode identity, EPR/Hamiltonian physics and independent DRC/LVS/foundry review are established. GUI tests and native solver runs are necessary but not sufficient.
+ 
+-The next cycle is defined by the returned report: A10..A17 independently repair/evolve their exclusively owned modules, A99 verifies/harmonizes all eight deltas, then another full release gets exactly one corresponding release-specific one-button qualification.
++The next cycle will be refined from the first RC14.7 report (not yet supplied): A10..A17 independently repair/evolve their exclusively owned modules, A99 verifies/harmonizes all eight deltas, then another full release gets exactly one corresponding release-specific one-button qualification.
+--- merged/pyproject.toml
++++ harmonized/pyproject.toml
+@@ -4,7 +4,7 @@
+ 
+ [project]
+ name = "sqe-studio-product-foundation"
+-version = "0.1.1.dev24"
++version = "0.1.1.dev25"
+ description = "SQE Studio: revisioned quantum EDA orchestration platform (product foundation)"
+ requires-python = ">=3.11"
+ license = "Apache-2.0"
+--- merged/qualification_plan.json
++++ harmonized/qualification_plan.json
+@@ -10,7 +10,7 @@
+   },
+   "prior_report_policy": "verify checksum and compare metadata only; native results never silently reused",
+   "profile": "eda_feedback",
+-  "release": "RC14.6",
++  "release": "RC14.7",
+   "research_protocol": "fixed_release_exploratory_only_not_human_physics_approval",
+   "research_reference": {
+     "approval": "exploratory fixed QA assumptions only; no fab or physical signoff",
+--- merged/src/sqe_studio/__init__.py
++++ harmonized/src/sqe_studio/__init__.py
+@@ -1,2 +1,2 @@
+ """SQE Studio product foundation. No numerical solver or GDS writer is embedded."""
+-__version__ = "0.1.1.dev24"
++__version__ = "0.1.1.dev25"
+--- merged/src/sqe_studio/cycle_qualification.py
++++ harmonized/src/sqe_studio/cycle_qualification.py
+@@ -13,7 +13,7 @@
+ import tempfile
+ import zipfile
+ 
+-NAME_PATTERN = re.compile(r'^SQE-RC14_6-report-(\d{4})\.zip$')
++NAME_PATTERN = re.compile(r'^SQE-RC14_7-report-(\d{4})\.zip$')
+ REPORT_FOLDER = 'qualification-reports'
+ 
+ 
+@@ -23,7 +23,7 @@
+         raise ValueError('Release qualification plan missing or unsafe')
+     plan = json.loads(path.read_text(encoding='utf-8'))
+     if (plan.get('schema') != 'sqe.release-qualification-plan.v1' or
+-        plan.get('release') != 'RC14.6' or plan.get('profile') != 'eda_feedback' or
++        plan.get('release') != 'RC14.7' or plan.get('profile') != 'eda_feedback' or
+         plan.get('research_protocol') != 'fixed_release_exploratory_only_not_human_physics_approval' or
+         plan.get('input_data_policy') != 'temporary reference geometry; never personal projects' or
+         plan.get('prior_report_policy') != 'verify checksum and compare metadata only; native results never silently reused' or
+@@ -73,7 +73,7 @@
+     following = 1 + max(seen,default=0)
+     if following > 9999:
+         raise ValueError('Maximum release report sequence exhausted')
+-    return folder / f'SQE-RC14_6-report-{following:04d}.zip'
++    return folder / f'SQE-RC14_7-report-{following:04d}.zip'
+ 
+ 
+ def _previous(root: Path, output: Path) -> dict | None:
+@@ -97,7 +97,7 @@
+         doc = json.loads(content['QUALIFICATION.json'])
+         cycle = json.loads(content['CYCLE.json'])
+         if (cycle.get('schema') != 'sqe.agent-cycle-feedback.v1' or
+-            cycle.get('release') != 'RC14.6' or
++            cycle.get('release') != 'RC14.7' or
+             cycle.get('report_sequence') != n or
+             cycle.get('unchanged_native_runs_reused') is not False or
+             cycle.get('plan_sha256') != sha256((root/'qualification_plan.json').read_bytes()).hexdigest() or
+@@ -148,7 +148,7 @@
+               'research_protocol':plan['research_protocol'],
+               'unchanged_native_runs_reused':False,
+               'prior_report':previous,
+-              'agent_feedback':{'baseline_run':'RC14.6',
++              'agent_feedback':{'baseline_run':'RC14.7',
+                                 'analysis_contract':'software PASS/FAIL/BLOCKED separate from native and physical validation',
+                                 'unresolved': ['complex field and mesh identity', 'EM to quantum EPR bridge',
+                                                'physical convergence', 'foundry qualification'],
+--- merged/tests/integration/test_agent_cycle.py
++++ harmonized/tests/integration/test_agent_cycle.py
+@@ -30,7 +30,7 @@
+     path=work/'tests/agent_cycle/A10/test_smoke.py'
+     path.parent.mkdir(parents=True);path.write_text('assert 1 == 1\n',encoding='utf-8')
+     evidence=work/'agent_cycle/deliveries/A10/DELIVERY.md'
+-    evidence.parent.mkdir(parents=True);evidence.write_text('native checks BLOCKED in test env\n',encoding='utf-8')
++    evidence.parent.mkdir(parents=True, exist_ok=True);evidence.write_text('native checks BLOCKED in test env\n',encoding='utf-8')
+     output=tmp_path/'A10-delta.zip'
+     cmd=[sys.executable,str(TOOLS),'delta',str(base),str(work),'A10',str(output)]
+     done=subprocess.run(cmd,text=True,capture_output=True)
+--- merged/tests/integration/test_cycle_qualification.py
++++ harmonized/tests/integration/test_cycle_qualification.py
+@@ -14,10 +14,10 @@
+ def test_local_report_numbers_increment_and_preserve_history(tmp_path):
+     (tmp_path/'qualification_plan.json').write_bytes((ROOT/'qualification_plan.json').read_bytes())
+     first=cycle.next_report_path(tmp_path)
+-    assert first.name == 'SQE-RC14_6-report-0001.zip'
++    assert first.name == 'SQE-RC14_7-report-0001.zip'
+     first.write_bytes(b'previous test data kept in place')
+     next_one=cycle.next_report_path(tmp_path)
+-    assert next_one.name == 'SQE-RC14_6-report-0002.zip'
++    assert next_one.name == 'SQE-RC14_7-report-0002.zip'
+     assert first.read_bytes()==b'previous test data kept in place'
+ 
+ 
+@@ -66,7 +66,7 @@
+     (tmp_path/'qualification_plan.json').write_bytes((ROOT/'qualification_plan.json').read_bytes())
+     path=cycle.next_report_path(tmp_path)
+     path.write_bytes(b'not zip')
+-    result=cycle._previous(tmp_path,tmp_path/'qualification-reports/SQE-RC14_6-report-0002.zip')
++    result=cycle._previous(tmp_path,tmp_path/'qualification-reports/SQE-RC14_7-report-0002.zip')
+     assert result['status']=='REJECTED_INVALID_NO_REUSE'
+ 
+ 
+@@ -91,7 +91,7 @@
+     report=cycle.next_report_path(tmp_path)
+     original={'QUALIFICATION.json':json.dumps({'counts':{'PASS':100,'FAIL':0,'BLOCKED':0}}).encode(),
+               'CYCLE.json':json.dumps({'schema':'sqe.agent-cycle-feedback.v1',
+-                 'release':'RC14.6','report_sequence':1,
++                 'release':'RC14.7','report_sequence':1,
+                  'plan_sha256':'0'*64,'baseline_source_sha256':'0'*64,
+                  'unchanged_native_runs_reused':False}).encode()}
+     original['INTEGRITY.json']=json.dumps({'files':{
+@@ -106,8 +106,8 @@
+     (tmp_path/'qualification_plan.json').write_bytes((ROOT/'qualification_plan.json').read_bytes())
+     folder=tmp_path/'qualification-reports'
+     folder.mkdir()
+-    (folder/'SQE-RC14_6-report-0001.zip').mkdir()
+-    assert cycle.next_report_path(tmp_path).name == 'SQE-RC14_6-report-0002.zip'
++    (folder/'SQE-RC14_7-report-0001.zip').mkdir()
++    assert cycle.next_report_path(tmp_path).name == 'SQE-RC14_7-report-0002.zip'
+ 
+ 
+ def test_current_run_blocker_hints_are_derived_not_passified():
+@@ -141,7 +141,7 @@
+     first=cycle.next_report_path(tmp_path)
+     reserved=first.with_name(first.name+'.running')
+     reserved.write_bytes(b'active other SQE instance')
+-    assert cycle.next_report_path(tmp_path).name=='SQE-RC14_6-report-0002.zip'
++    assert cycle.next_report_path(tmp_path).name=='SQE-RC14_7-report-0002.zip'
+     assert reserved.read_bytes()==b'active other SQE instance'
+ 
+ 
+@@ -176,5 +176,5 @@
+     first=cycle.next_report_path(tmp_path)
+     partial=first.with_name(first.name+'.partial')
+     partial.write_bytes(b'incomplete earlier evidence, retain for examination')
+-    assert cycle.next_report_path(tmp_path).name=='SQE-RC14_6-report-0002.zip'
++    assert cycle.next_report_path(tmp_path).name=='SQE-RC14_7-report-0002.zip'
+     assert partial.is_file()
+--- merged/tools/agent_cycle.py
++++ harmonized/tools/agent_cycle.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""RC14.6 path-owned, content-addressed multi-agent deltas and fail-closed merge.
++"""RC14.7-compatible path-owned, content-addressed multi-agent deltas and fail-closed merge.
+ 
+ Independent of old frozen A01..A09 ownership / foundation lock. Python 3.11+.
+ Commands: delta BASE WORK A10 OUTPUT.zip ; verify BASE A10.zip ... ;

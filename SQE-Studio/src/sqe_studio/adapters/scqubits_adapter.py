@@ -14,7 +14,7 @@ import sys
 import time
 from importlib import metadata
 
-from .base import EngineBlocked, require_module, safe_output
+from .base import EngineBlocked, EngineFailure, require_module, safe_output
 
 # These are parameter names on the scqubits 4.x constructors, not inferred CAD
 # quantities. Energy parameters are frequencies E/h in GHz, never Joules.
@@ -37,6 +37,10 @@ OPERATORS = {'n_operator'}  # hermitian charge-charge interaction, no expression
 MAX_POINTS = 21
 MAX_COMPOSITE_DIM = 144
 MAX_LEVELS = 12
+# Only the version explicitly selected by the reviewed Windows sidecar
+# requirement is admitted. This is a software compatibility pin, *not* a
+# physical benchmark, numerical calibration, or a hash-locked wheel.
+SCQUBITS_NUMERICAL_PIN = '4.3.1'
 
 
 def _blocked(reason):
@@ -73,8 +77,11 @@ def _sha(obj):
 
 
 def _write(path, obj):
-    path.write_text(json.dumps(obj, indent=2, sort_keys=True, allow_nan=False) + '\n',
-                    encoding='utf-8')
+    # Exclusive creation: a previous result or symlink cannot be replaced by a
+    # second job or a concurrent writer. The worker's RESULT_MANIFEST remains
+    # the sole admission gate, not a partially written JSON file.
+    with path.open('x', encoding='utf-8') as stream:
+        stream.write(json.dumps(obj, indent=2, sort_keys=True, allow_nan=False) + '\n')
 
 
 def _unit(field):
@@ -253,23 +260,26 @@ def _spec(inputs, project):
         sweep = {'subsystem': sweep['subsystem'], 'parameter': field,
                  'unit': sweep['unit'], 'values': values}
     conv = inputs.get('convergence', {'enabled': False})
-    if not isinstance(conv, dict) or set(conv) not in ({'enabled'}, {'enabled', 'tolerance_GHz', 'basis_increment'}):
+    if not isinstance(conv, dict) or set(conv) not in ({'enabled'}, {'enabled', 'tolerance_GHz', 'basis_increment'}, {'enabled', 'tolerance_GHz', 'basis_increment', 'steps'}):
         _blocked('convergence requires enabled and, when enabled, tolerance_GHz/basis_increment')
     if type(conv['enabled']) is not bool:
         _blocked('convergence.enabled must be boolean')
     if conv['enabled']:
-        if set(conv) != {'enabled', 'tolerance_GHz', 'basis_increment'}:
+        if set(conv) not in ({'enabled', 'tolerance_GHz', 'basis_increment'}, {'enabled', 'tolerance_GHz', 'basis_increment', 'steps'}):
             _blocked('enabled convergence requires tolerance_GHz and basis_increment')
         tol = _number(conv['tolerance_GHz'], 'convergence tolerance_GHz')
         if not 0 < tol <= .5:
             _blocked('convergence tolerance_GHz must be in (0, 0.5]')
         _integer(conv['basis_increment'], 'basis_increment', 1, 6)
+        steps = _integer(conv.get('steps', 1), 'convergence.steps', 1, 4)
+        if steps > 1 and (model == 'Composite' or sweep is not None):
+            _blocked('multistep basis curves require a standalone unswept model')
         for group in groups:
             basis = group['parameters']
             cutoff = 'cutoff' if group['model'] == 'Fluxonium' else 'ncut'
-            if basis[cutoff] + conv['basis_increment'] > 80:
+            if basis[cutoff] + conv['basis_increment'] * steps > 80:
                 _blocked('convergence expansion exceeds native basis cutoff limit 80')
-            if 'truncated_dim' in basis and basis['truncated_dim'] + conv['basis_increment'] > 16:
+            if steps == 1 and 'truncated_dim' in basis and basis['truncated_dim'] + conv['basis_increment'] > 16:
                 _blocked('convergence expansion exceeds truncated_dim 16')
         if model == 'Composite':
             expanded = math.prod(g['parameters']['truncated_dim'] + conv['basis_increment'] for g in groups)
@@ -336,7 +346,7 @@ def _qobj_compatible_operator(bound_method):
     return operator
 
 
-def _native_system(scq, spec, changed=None, increment=0, coupled=True):
+def _native_system(scq, spec, changed=None, increment=0, coupled=True, basis_only=False):
     """Construct allowlisted native objects; no evaluated code or user import paths."""
     changed = changed or {}
     native = {}
@@ -348,7 +358,7 @@ def _native_system(scq, spec, changed=None, increment=0, coupled=True):
         if increment:
             cutoff = 'cutoff' if group['model'] == 'Fluxonium' else 'ncut'
             args[cutoff] += increment
-            if 'truncated_dim' in args:
+            if 'truncated_dim' in args and not basis_only:
                 args['truncated_dim'] += increment
         native[group['id']] = getattr(scq, group['model'])(**args)
     if spec['model'] != 'Composite':
@@ -383,30 +393,105 @@ def _eigenvalues(system, count):
     return result
 
 
+def _finite_difference(a, b, label):
+    # Two native finite energies can still overflow when differenced. Reject
+    # rather than emitting a non-JSON energy, difference or false tolerance.
+    difference = a - b
+    if not math.isfinite(difference):
+        _blocked('native ' + label + ' is nonfinite')
+    return difference
+
+
+def _native_transitions(row):
+    return [_finite_difference(e, row[0], 'ground-referenced transition')
+            for e in row]
+
+
+def _basis_curve(scq, spec, base_energies):
+    """Repeated upstream eigenvals, not a Hamiltonian or diagonalizer.
+
+    Two final adjacent intervals must meet the saved absolute tolerance. This
+    stopping diagnostic is not an error bound, state matching or physical signoff.
+    """
+    conv = spec['convergence']
+    group = spec['groups'][0]
+    key = 'cutoff' if group['model'] == 'Fluxonium' else 'ncut'
+    base = group['parameters'][key]
+    rows = []
+    previous = None
+    for index in range(conv['steps'] + 1):
+        cutoff = base + index * conv['basis_increment']
+        values = (base_energies if index == 0 else _eigenvalues(
+            _native_system(scq, spec, increment=index * conv['basis_increment'],
+                           basis_only=True), spec['levels']))
+        transitions = _native_transitions(values)[1:]
+        delta = (max(abs(_finite_difference(a, b, 'adjacent basis discrepancy'))
+                     for a, b in zip(transitions, previous)) if previous is not None else None)
+        f01 = _finite_difference(values[1], values[0], 'f01')
+        f12 = (_finite_difference(values[2], values[1], 'f12') if len(values) >= 3 else None)
+        rows.append({'basis_cutoff': cutoff,
+                     'basis_dimension': cutoff if key == 'cutoff' else 2 * cutoff + 1,
+                     'transitions_from_ground_GHz': transitions,
+                     'f01_GHz': f01, 'f12_GHz': f12,
+                     'anharmonicity_GHz': (_finite_difference(f12, f01, 'anharmonicity')
+                                          if f12 is not None else None),
+                     'max_adjacent_delta_GHz': delta})
+        previous = transitions
+    final_delta = max(r['max_adjacent_delta_GHz'] for r in rows[-2:])
+    return {'point_index': 0, 'sweep_value': None,
+            'base_transitions_GHz': rows[0]['transitions_from_ground_GHz'],
+            'expanded_transitions_GHz': rows[-1]['transitions_from_ground_GHz'],
+            'absolute_transition_deltas_GHz': [
+                abs(_finite_difference(a, b, 'base to final basis discrepancy'))
+                for a, b in zip(rows[0]['transitions_from_ground_GHz'],
+                                rows[-1]['transitions_from_ground_GHz'])],
+            'max_delta_GHz': final_delta, 'basis_parameter': key,
+            'status': 'checked_passed' if final_delta <= conv['tolerance_GHz'] else 'checked_failed',
+            'criterion': 'last_two_adjacent_ground_referenced_transition_deltas',
+            'curve': rows}
+
+
 def _execute(scq, spec):
     points = spec['sweep']['values'] if spec['sweep'] else [None]
-    energies, uncoupled, convergence_deltas = [], [], []
-    for val in points:
+    energies, uncoupled, convergence_points = [], [], []
+    for point_index, val in enumerate(points):
         changed = ({spec['sweep']['subsystem']: (spec['sweep']['parameter'], val)}
                    if spec['sweep'] else {})
         system = _native_system(scq, spec, changed=changed)
         row = _eigenvalues(system, spec['levels'])
+        _native_transitions(row)
         energies.append(row)
         if spec['model'] == 'Composite':
             unlinked = _native_system(scq, spec, changed=changed, coupled=False)
-            uncoupled.append(_eigenvalues(unlinked, spec['levels']))
+            uncoupled_row = _eigenvalues(unlinked, spec['levels'])
+            _native_transitions(uncoupled_row)
+            uncoupled.append(uncoupled_row)
         if spec['convergence']['enabled']:
+            if spec['convergence'].get('steps', 1) > 1:
+                convergence_points.append(_basis_curve(scq, spec, row))
+                continue  # Retain valid native output even when the numeric criterion fails.
             larger = _native_system(scq, spec, changed=changed,
                                     increment=spec['convergence']['basis_increment'])
             expanded = _eigenvalues(larger, spec['levels'])
-            delta = max(abs((row[i] - row[0]) - (expanded[i] - expanded[0]))
-                        for i in range(1, spec['levels']))
-            convergence_deltas.append(delta)
+            base_transitions = _native_transitions(row)[1:]
+            expanded_transitions = _native_transitions(expanded)[1:]
+            differences = [abs(_finite_difference(a, b, 'basis transition discrepancy'))
+                           for a, b in zip(base_transitions, expanded_transitions)]
+            delta = max(differences)
+            # These are two independently executed native basis solves, NOT
+            # a claimed mesh convergence, analytical uncertainty or EPR proof.
+            convergence_points.append({
+                'point_index': point_index, 'sweep_value': val,
+                'base_transitions_GHz': base_transitions,
+                'expanded_transitions_GHz': expanded_transitions,
+                'absolute_transition_deltas_GHz': differences,
+                'max_delta_GHz': delta,
+            })
             if delta > spec['convergence']['tolerance_GHz']:
-                _blocked(f'native basis convergence failed at point {len(energies) - 1}: '
+                _blocked(f'native basis convergence failed at point {point_index}: '
                          f'max transition delta {delta:.9g} GHz exceeds '
                          f'{spec["convergence"]["tolerance_GHz"]:.9g} GHz')
-    return energies, uncoupled, convergence_deltas
+    return energies, uncoupled, convergence_points
 
 
 def run(study, project, output_dir):
@@ -414,40 +499,52 @@ def run(study, project, output_dir):
     started = time.perf_counter()
     if not isinstance(study, dict) or not isinstance(project, dict):
         _blocked('requires study and immutable project snapshot objects')
+    # The adapter never interprets a Josephson RF study, arbitrary engine name,
+    # or an unsupported analysis as an equivalent eigenvalue calculation.
+    if study.get('engine') != 'scqubits' or study.get('kind') not in ('spectrum', 'quantum_spectrum'):
+        _blocked('requires scqubits engine and spectrum/quantum_spectrum study kind')
     inputs = study.get('inputs')
     spec = _spec(inputs, project)
+    output = safe_output(output_dir)
+    # Check every possible output, including a dangling symlink, BEFORE the
+    # potentially expensive native solve. Never replay/overwrite a revision's
+    # typed results, even when the native package is unavailable.
+    expected_files = ('input_snapshot.json', 'spectrum.json', 'series.json', 'coupling.json')
+    if any((output / name).exists() or (output / name).is_symlink() for name in expected_files):
+        _blocked('output directory already contains scqubits artifacts; refusing overwrite/replay')
     require_module('scqubits', 'scqubits')
     try:
         import scqubits as scq  # fixed, allowlisted native dependency
     except (ImportError, OSError) as exc:
         raise EngineBlocked('scqubits cannot import its native dependencies: ' + str(exc)) from exc
-    version = metadata.version('scqubits')
     try:
-        major, minor = (int(part) for part in version.split('.')[:2])
-    except (ValueError, TypeError):
-        _blocked('cannot parse native scqubits version ' + repr(version))
-    if major != 4 or minor < 3:
-        _blocked(f'native scqubits version {version} is outside the supported >=4.3,<5 range')
+        version = metadata.version('scqubits')
+    except metadata.PackageNotFoundError as exc:
+        raise EngineBlocked('scqubits native package distribution/version is unavailable') from exc
+    if version != SCQUBITS_NUMERICAL_PIN:
+        _blocked(f'native scqubits version {version!r} is not the pinned '
+                 f'{SCQUBITS_NUMERICAL_PIN} software compatibility target')
     # scqubits uses frequency energies in its globally configured units.
     # Isolated worker process: explicitly force the intended GHz convention.
     scq.set_units('GHz')
     if scq.get_units() != 'GHz':
         _blocked('native scqubits did not accept GHz units')
-    if spec['model'] == 'Composite' and major == 4 and minor == 3:
+    if spec['model'] == 'Composite':
         # Interaction-bound operators are bridged separately above; this covers
         # internal scqubits identity_wrap / diag_hamiltonian sparse arrays.
         from scqubits.utils import spectrum_utils
         with _scqubits_sparse_matrix_boundary(spectrum_utils):
-            energies, uncoupled, deltas = _execute(scq, spec)
+            energies, uncoupled, convergence_points = _execute(scq, spec)
     else:
-        energies, uncoupled, deltas = _execute(scq, spec)
+        energies, uncoupled, convergence_points = _execute(scq, spec)
     elapsed = time.perf_counter() - started
     model = spec['model']
     sweep = spec['sweep']
     axes = {'parameter': sweep['parameter'], 'subsystem': sweep['subsystem'],
             'unit': sweep['unit'], 'values': sweep['values']} if sweep else None
-    transitions = [[e - row[0] for e in row] for row in energies]
-    native_versions = {'scqubits': version, 'python': sys.version.split()[0]}
+    transitions = [_native_transitions(row) for row in energies]
+    native_versions = {'scqubits': version, 'python': sys.version.split()[0],
+                       'scqubits_compatibility_pin': SCQUBITS_NUMERICAL_PIN}
     for package in ('numpy', 'scipy', 'qutip'):
         try:
             native_versions[package] = metadata.version(package)
@@ -460,6 +557,11 @@ def run(study, project, output_dir):
                       'context_sha256': spec['context_sha256'],
                       'input_sha256': _sha(inputs),
                       'source': spec['source'], 'unit_convention': 'E/h in GHz',
+                      'qualification_scope': 'native numeric software only; not calibrated EM/EPR or device physics',
+                      'cross_engine_mapping': {
+                          'status': 'blocked',
+                          'reason': 'Independently specified Hamiltonian energies are not '
+                                    'EM-derived EJ/EC/EL or revision-mapped RF circuit parameters.'},
                       'parameter_units_explicit': ('parameter_units' in inputs if model != 'Composite' else True),
                       'input': inputs,
                       'resolved_basis': [
@@ -480,26 +582,39 @@ def run(study, project, output_dir):
                 'levels': energies[0],  # foundation UI previews point zero only
                 'preview_point_index': 0,
                 'energy_table': energies,
-                'convergence': {'status': 'checked_passed' if deltas else 'not_checked',
-                                'criterion': 'max delta of transitions relative to E0',
-                                'max_delta_GHz': max(deltas) if deltas else None,
+                 'convergence': {'status': ('checked_failed' if any(p.get('status') == 'checked_failed' for p in convergence_points)
+                                           else 'checked_passed' if convergence_points else 'not_checked'),
+                                 'criterion': ('last two adjacent native basis expansions: max ground-referenced transition delta'
+                                               if spec['convergence'].get('steps', 1) > 1 else
+                                               'one native basis expansion: max delta of transitions relative to E0'),
+                                'max_delta_GHz': max((p['max_delta_GHz'] for p in convergence_points), default=None),
                                 'tolerance_GHz': spec['convergence'].get('tolerance_GHz'),
                                 'basis_increment': spec['convergence'].get('basis_increment'),
-                                'checked_points': len(deltas)},
+                                'checked_points': len(convergence_points),
+                                'points': convergence_points,
+                                'scientific_scope': 'single-step sorted-energy-index basis comparison only; '
+                                    'no eigenstate-overlap identity or independent scientific qualification'},
                 'source': 'native scqubits eigenvals',
                 'scientific_status': 'review_required', 'elapsed_seconds': elapsed,
                 'input_sha256': input_snapshot['input_sha256']}
+    if spec['convergence'].get('steps', 1) > 1:
+        spectrum['convergence']['steps'] = spec['convergence']['steps']
+        spectrum['convergence']['numeric_status'] = ('NUMERICAL_PASS' if spectrum['convergence']['status'] == 'checked_passed'
+                                                      else 'NUMERICAL_FAIL')
+        spectrum['convergence']['scientific_scope'] = (
+            'Finite cutoff stability of sorted ground-referenced transitions; no rigorous error bound, '
+            'eigenstate identity, experimental agreement, EM transfer or physical qualification. '
+            'The ordinary spectrum uses the saved base cutoff; the curve records every evaluated cutoff.')
     metadata_series = {'schema': 'sqe.scqubits.series.v1',
                        'artifact_type': 'scqubits.spectrum.series',
                        'axis': axes or {'parameter': 'index', 'unit': '1', 'values': [0]},
                        'series': series, 'source': 'native scqubits eigenvalues',
                        'input_sha256': input_snapshot['input_sha256'],
                        'scientific_status': 'review_required'}
-    output = safe_output(output_dir)
-    _write(output / 'input_snapshot.json', input_snapshot)
-    _write(output / 'spectrum.json', spectrum)
-    _write(output / 'series.json', metadata_series)
-    files = ['input_snapshot.json', 'spectrum.json', 'series.json']
+    # Compute all derived native spectra and finite coupled-minus-uncoupled
+    # differences BEFORE writing *any* result artifact. Previously overflow in
+    # a late coupling difference left plausible spectrum/series files behind.
+    coupling = None
     if model == 'Composite':
         coupling = {'schema': 'sqe.scqubits.coupling.v1',
                     'artifact_type': 'scqubits.coupling',
@@ -508,12 +623,197 @@ def run(study, project, output_dir):
                     'uncoupled_native_energy_table_GHz': uncoupled,
                     'coupled_native_energy_table_GHz': energies,
                     'dressed_minus_uncoupled_energy_GHz': [
-                        [a - b for a, b in zip(row, bare)]
+                        [_finite_difference(a, b, 'dressed-minus-uncoupled energy')
+                         for a, b in zip(row, bare)]
                         for row, bare in zip(energies, uncoupled)],
                     'interpretation': 'Native coupled-vs-uncoupled spectral comparison; '
                                       'not measured coupling, an EPR extraction, or fitted g.',
                     'scientific_status': 'review_required'}
-        _write(output / 'coupling.json', coupling)
-        files.append('coupling.json')
+    # Validate serialization of the complete set before creating any files.
+    # In particular allow_nan=False blocks output of invalid native quantities.
+    artifacts = {'input_snapshot.json': input_snapshot, 'spectrum.json': spectrum,
+                 'series.json': metadata_series}
+    if coupling is not None:
+        artifacts['coupling.json'] = coupling
+    for document in artifacts.values():
+        _canonical(document)
+    for filename, document in artifacts.items():
+        _write(output / filename, document)
+    files = list(artifacts)
     return {'engine_version': version, 'native_files': files,
             'kind': 'quantum_spectrum', 'scientific_status': 'review_required'}
+
+
+# RC14.10 B08: a callable native benchmark for the one-click A15 runner. It
+# uses the same production run() path, never a surrogate eigenvalue solver.
+# The curated studies have independent (not EM-extracted) Hamiltonian inputs.
+def _b08_native_studies():
+    """Bounded exploratory Transmon and Fluxonium sweeps, GHz / Phi0 / 2e."""
+    cases = (
+        ('transmon', 'Transmon', {'EJ': 15., 'EC': .25, 'ng': 0.,
+                                 'ncut': 12, 'truncated_dim': 6},
+         'ng', [0., .5, 1.], '2e', 'ncut'),
+        ('fluxonium', 'Fluxonium', {'EJ': 8., 'EC': 2., 'EL': .5,
+                                   'flux': 0., 'cutoff': 24, 'truncated_dim': 6},
+         'flux', [0., .5, 1.], 'Phi0', 'cutoff'),
+    )
+    for label, model, parameters, field, values, unit, cutoff in cases:
+        for step in (0, 2):
+            params = dict(parameters)
+            params[cutoff] += step
+            inputs = {
+                'model': model, 'source': 'independent', 'levels': 3,
+                'parameters': params,
+                'parameter_units': {key: _unit(key) for key in params},
+                'sweep': {'subsystem': 'primary', 'parameter': field,
+                          'values': values[:], 'unit': unit},
+                'convergence': {'enabled': True, 'basis_increment': 2,
+                                'tolerance_GHz': .5},
+            }
+            yield label + '_cutoff_plus_' + str(step), {
+                'id': 'A16-B08-' + label + '-' + str(step),
+                'engine': 'scqubits', 'kind': 'quantum_spectrum', 'inputs': inputs,
+            }
+
+
+
+def _b08_cutoff_start_comparison(studies, tolerance_GHz=0.5):
+    """Compare independent native transition tables at two initial cutoffs.
+
+    This is a numerical diagnostic, NOT state tracking or convergence proof.
+    Inputs must be native result observations gathered by benchmark_b08; tests
+    of this helper with invented tables are parser fixtures, not native runs.
+    """
+    result = {}
+    for model in ('transmon', 'fluxonium'):
+        base = studies[model + '_cutoff_plus_0']
+        expanded = studies[model + '_cutoff_plus_2']
+        a = base['sweep_transitions_GHz']
+        b = expanded['sweep_transitions_GHz']
+        if (base['units'] != expanded['units'] or
+                base['sweep_values'] != expanded['sweep_values'] or
+                expanded['cutoff'] != base['cutoff'] + 2 or
+                len(a) != 3 or len(b) != 3):
+            raise EngineFailure('B08 independent cutoff runs are not comparable')
+        per_point = []
+        for first, second in zip(a, b):
+            if len(first) != 2 or len(second) != 2:
+                raise EngineFailure('B08 requires exactly two native transitions per sweep point')
+            discrepancies = [abs(_finite_difference(x, y, 'B08 cutoff-start transition'))
+                             for x, y in zip(first, second)]
+            per_point.append(max(discrepancies))
+        worst = max(per_point)
+        result[model] = {
+            'starting_cutoffs': [base['cutoff'], expanded['cutoff']],
+            'per_sweep_max_delta_GHz': per_point,
+            'max_delta_GHz': worst,
+            'diagnostic_tolerance_GHz': tolerance_GHz,
+            'numerical_screen': ('within_diagnostic_tolerance_NOT_PROOF' if worst <= tolerance_GHz
+                                 else 'BLOCKED_CUTOFF_START_DISAGREEMENT'),
+            'qualification': 'BLOCKED_NO_EIGENSTATE_OVERLAP_OR_EM_EPR_REFERENCE',
+        }
+    return result
+
+
+def benchmark_b08(output_dir):
+    """Run real native B08 spectra in a NEW dedicated directory.
+
+    A15 can invoke this function in an isolated worker and map EngineBlocked to
+    BLOCKED, never PASS. A completed benchmark still needs independently
+    qualified Hamiltonian provenance, mode and level identity, and metrology.
+    There are four native production jobs (two cutoff starts per model), each
+    with its own two-basis sorted-transition comparison at three sweep points.
+    """
+    from pathlib import Path
+    from sqe_studio.contracts import fresh_project
+
+    # Probe availability before creating any benchmark artifact.
+    require_module('scqubits', 'scqubits')
+    try:
+        installed = metadata.version('scqubits')
+    except metadata.PackageNotFoundError as exc:
+        raise EngineBlocked('B08: scqubits distribution/version unavailable') from exc
+    if installed != SCQUBITS_NUMERICAL_PIN:
+        _blocked('B08 requires pinned native scqubits ' + SCQUBITS_NUMERICAL_PIN)
+    output = Path(output_dir)
+    if output.exists() or output.is_symlink():
+        _blocked('B08 requires a fresh non-existing case directory; refusing replay')
+    output.mkdir(parents=True, exist_ok=False)
+    observed = {}
+    benchmark_started = time.perf_counter()
+    for label, study in _b08_native_studies():
+        job_started = time.perf_counter()
+        cpu_started = time.process_time()
+        project = fresh_project('A16 exploratory ' + label, 'transmon' if label.startswith('transmon') else 'fluxonium')
+        dest = output / label
+        native = run(study, project, dest)
+        with (dest / 'spectrum.json').open(encoding='utf-8') as stream:
+            spectrum = json.load(stream)
+        with (dest / 'input_snapshot.json').open(encoding='utf-8') as stream:
+            snapshot = json.load(stream)
+        conv = spectrum['convergence']
+        native_wall = time.perf_counter() - job_started
+        native_cpu = time.process_time() - cpu_started
+        if (native['engine_version'] != installed or
+                spectrum['scientific_status'] != 'review_required' or
+                snapshot['cross_engine_mapping']['status'] != 'blocked' or
+                snapshot['input_sha256'] != _sha(study['inputs']) or
+                snapshot['project_sha256'] != _sha(project) or
+                conv['status'] != 'checked_passed' or conv['checked_points'] != 3 or
+                len(spectrum['energy_table']) != 3 or
+                spectrum['engine_version'] != installed or
+                spectrum['energy_unit'] != 'GHz' or
+                spectrum['axis']['values'] != [0., .5, 1.] or
+                spectrum['axis']['unit'] != ('2e' if label.startswith('transmon') else 'Phi0') or
+                spectrum['basis'][0]['model'] != ('Transmon' if label.startswith('transmon') else 'Fluxonium') or
+                spectrum['basis'][0].get('ncut', spectrum['basis'][0].get('cutoff')) !=
+                    study['inputs']['parameters'].get('ncut', study['inputs']['parameters'].get('cutoff')) or
+                spectrum['elapsed_seconds'] < 0 or not math.isfinite(spectrum['elapsed_seconds'])):
+            raise EngineFailure('B08 native result missing required revision/unit/convergence evidence')
+        # Periodicity in transition energies, not absolute gauge-dependent E0.
+        first, last = ([_finite_difference(e, row[0], 'B08 periodicity transition')
+                        for e in row[1:]]
+                       for row in (spectrum['energy_table'][0], spectrum['energy_table'][-1]))
+        periodicity = max(abs(_finite_difference(a, b, 'B08 periodicity delta'))
+                          for a, b in zip(first, last))
+        observed[label] = {
+            'native_engine_version': installed,
+            'study_wall_seconds': native_wall,
+            'study_python_cpu_seconds': native_cpu,
+            'native_adapter_elapsed_seconds': spectrum['elapsed_seconds'],
+            'sweep_values': spectrum['axis']['values'],
+            'sweep_transitions_GHz': [
+                [_finite_difference(v, row[0], 'B08 native transition') for v in row[1:]]
+                for row in spectrum['energy_table']],
+            'input_sha256': snapshot['input_sha256'],
+            'project_sha256': snapshot['project_sha256'],
+            'units': {'energies': 'E/h GHz', 'sweep': spectrum['axis']['unit']},
+            'native_result_sha256': {name: hashlib.sha256((dest / name).read_bytes()).hexdigest()
+                                     for name in native['native_files']},
+            'maximum_basis_delta_GHz': conv['max_delta_GHz'],
+            'basis_increment': conv['basis_increment'],
+            'cutoff': spectrum['basis'][0].get('ncut', spectrum['basis'][0].get('cutoff')),
+            'periodicity_transition_delta_GHz': periodicity,
+            'periodicity_screen': 'within_0.05_GHz' if periodicity <= .05 else 'REVIEW_REQUIRED',
+            'limits': 'sorted index only; no eigenstate overlap, EM/EPR, physical uncertainty',
+        }
+    report = {'schema': 'sqe.A16.native-benchmark.v1', 'case_id': 'B08',
+              'execution_kind': 'NATIVE_SCQUBITS', 'stage_status': 'BLOCKED_SCIENTIFIC_REVIEW',
+              'native_version': installed, 'studies': observed,
+              'cutoff_start_comparison': _b08_cutoff_start_comparison(observed),
+              'execution_resources': {
+                  'native_jobs_completed': len(observed), 'native_jobs_sequential': True,
+                  'total_wall_seconds': time.perf_counter() - benchmark_started,
+                  'basis_cutoff_max': 80, 'hilbert_dimension_max': MAX_COMPOSITE_DIM,
+                  'sweep_points_per_study': 3, 'levels_per_study': 3,
+                  'cpu_counter_scope': 'Python worker process; wall includes native scqubits call',
+                  'peak_memory_bytes': None, 'peak_memory_status': 'NOT_MEASURED',
+                  'hard_deadline_status': 'NOT_ENFORCED_IN_ADAPTER_A15_ISOLATED_WORKER_REQUIRED',
+              },
+              'limitations': ['independent EJ/EC/EL, not EM extracted',
+                              'no numerical independent reference or eigenstate-overlap identity',
+                              'single-step basis tests at two cutoff starts are not proof of convergence',
+                              'fabrication HOLD']}
+    _canonical(report)
+    _write(output / 'benchmark_B08.json', report)
+    return report

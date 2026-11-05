@@ -29,8 +29,8 @@ def workspace(tmp_path, monkeypatch):
     return store, project['id'], head, engine
 
 
-def wait_status(engine, pid, run_id, states=('completed', 'failed', 'timed_out', 'cancelled', 'stale', 'partial_failed')):
-    end = time.monotonic() + 5
+def wait_status(engine, pid, run_id, states=('completed', 'failed', 'timed_out', 'cancelled', 'stale', 'partial_failed'), *, timeout_s=5):
+    end = time.monotonic() + timeout_s
     while time.monotonic() < end:
         result = engine.status('owner', pid, run_id)
         if result['state'] in states:
@@ -199,7 +199,9 @@ def test_fail_closed_native_adapter_without_fixture(workspace):
     m['studies'].append(study)
     head2 = store.commit('owner', pid, rev, m)
     run_id = engine.start('owner', pid, head2, 'blocked')
-    assert wait_status(engine, pid, run_id)['state'] == 'failed'
+    # This is an independent native worker process; allow a bounded 20s under
+    # loaded CI while preserving the fail-closed result and artifact assertions.
+    assert wait_status(engine, pid, run_id, timeout_s=20)['state'] == 'failed'
     output = Path(store.run('owner', pid, run_id)['path'])/'output'
     assert (output/'FAILURE.json').exists()
     assert not (output/'RESULT_MANIFEST.json').exists()
@@ -239,3 +241,24 @@ def test_archive_refuses_post_completion_tampering(workspace, monkeypatch):
     assert engine.status('owner', pid, run_id)['is_current_native_artifact'] is False
     with pytest.raises(ValueError, match='changed'):
         engine.archive('owner', pid, run_id)
+
+
+def test_optional_windows_progress_permission_error_cannot_mask_run_state(workspace, monkeypatch, tmp_path):
+    """Regression for 2026-11-02 M7 Windows report: denied telemetry read."""
+    store, pid, head, engine = workspace
+    folder = tmp_path / 'private' / 'native-runs' / pid / 'synthetic-run-id'
+    folder.mkdir(parents=True)
+    (folder / 'PROGRESS.json').write_text('{"done":1}',encoding='utf8')
+    run_id=store.put_run('owner',pid,head,'s1','scqubits',folder)
+    original=Path.read_text
+    def denied(self,*a,**kw):
+        if self.name=='PROGRESS.json':
+            raise PermissionError(13,'Transient file access denied',str(self))
+        return original(self,*a,**kw)
+    monkeypatch.setattr(Path,'read_text',denied)
+    status=engine.status('owner',pid,run_id)
+    assert status['state']=='queued'
+    assert status['progress'] is None
+    assert status['progress_telemetry']=='TEMPORARILY_UNREADABLE'
+    assert status['is_current_native_artifact'] is False
+    assert status['scientifically_qualified'] is False

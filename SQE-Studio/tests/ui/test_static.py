@@ -1,10 +1,11 @@
+from sqe_studio.web_assets import javascript_bundle
 from pathlib import Path
 
 def test_product_does_not_ship_duplicate_workspaces():
     root=Path(__file__).resolve().parents[2]
     assets=list((root/'src/sqe_studio/web').iterdir())
-    assert {p.name for p in assets}=={'index.html','app.js','style.css'}
-    body=(root/'src/sqe_studio/web/app.js').read_text(encoding='utf-8')
+    assert {p.name for p in assets}=={'index.html','app.js','style.css','modules.json','modules'}
+    body=javascript_bundle((root/'src/sqe_studio/web/app.js').parent).decode('utf-8')
     assert 'Quantum Metal' in body and 'Revision history' in body
     assert 'Research v3 design loop' not in body
     assert 'SQE-owned' not in body

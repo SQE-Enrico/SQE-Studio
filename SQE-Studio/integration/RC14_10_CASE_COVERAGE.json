@@ -1,0 +1,174 @@
+{
+  "cases": [
+    {
+      "fabrication": "HOLD",
+      "id": "B00",
+      "implementation": "INTEGRATED_SOFTWARE_CHECKS",
+      "native_executed_by_a99": false,
+      "note": "Real local software/security tests and source/wheel checks; Windows browser/installer retest required",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A10",
+        "A14",
+        "A15"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Portable software/security + authentic browser/installer"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B01",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17 Quantum Metal/GDS geometry lineage screening; no A99 run of native Gmsh geometry",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A14"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Parametric CPW/QDesign -> GDS -> Gmsh physical lineage"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B02",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A11 Palace field handling and old native EM gate; no new qualifying two/three-mesh solve",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A11",
+        "A17"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "CPW quarter-wave eigenmodes, 2-3 mesh refinements and energy"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B03",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A11 complex E/H sample/overlap screens; missing paired registered native fields",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Complex E/H mode-overlap registration across meshes"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B04",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17/A12 native capacitance matrix readback and unit contracts; no new electrostatic deck executed",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A12"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Electrostatic X-mon/transmon capacitance matrix"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B05",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A11 driven-data review and A16 adapter support; no native S-parameter solve",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A11",
+        "A16"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Driven CPW 2-port S-parameters and resonance consistency"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B06",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A12/A11 reviewed EPR/participation contracts; no fresh junction-native EPR and transfer",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A12",
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "EPR junction participation and EM-to-Hamiltonian extraction"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B07",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17 material/kinetic inductance review contracts; no paired physically matched solves",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "PEC versus finite surface kinetic-inductance comparison"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B08",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A16 scqubits adapter and A12 independent parameters; native spectra on host not run",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A16",
+        "A12"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Native scqubits transmon and fluxonium spectra"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B09",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A16 JosephsonCircuits.jl adapter and HB diagnostics; native Julia circuit on host not run",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A16"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "JosephsonCircuits.jl linear and pumped JPA harmonic balance"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B10",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A13 objective/optimization and A14 Compare UI; no review-qualified native design loop",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A13",
+        "A14"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Revision-bound parameter variation, objective and design feedback"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B11",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17/A11 optional magnetostatic pilot contracts; no native magnetostatic run",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Flux-line magnetostatic pilot and design-side field review"
+    }
+  ],
+  "release": "RC14.10 Experimental",
+  "schema": "sqe.a99-rc1410-case-coverage.v1",
+  "scope": "Linux integrator host and merged source, not a Windows or native solver pass"
+}

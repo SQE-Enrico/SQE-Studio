@@ -1,0 +1,339 @@
+{
+  "agents": [
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 23,
+      "agent": "A10",
+      "archive_sha256": "e0f138fc44593949706e7cb58f906f7d87ff6bc7825317acc6a35594b1c7cb45",
+      "continuity_sha256": "3a6f2368f1a75a30ce7b3296c22593fd8cac9a78f18ee34b75673a9e1f2bd7ce",
+      "delivery_sha256": "49e2f90e5ecf6ad3c935de7e71c726e3a7f972a0947b3a95742a0d2a7d73317e",
+      "delta_name": "SQE-A10-RC14_10-delta-7ca38807f9ed(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 18,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 14,
+      "agent": "A11",
+      "archive_sha256": "c2cb04794793163fa7ef1865fd3a7d26d1bbab8bbc3f4cc27d5a5be653ec2a7b",
+      "continuity_sha256": "74b3a33978bf14dd2aa1b7ea9624758fef4d153a6d5d0bba452d2bd5c0a2debf",
+      "delivery_sha256": "a1d5d261e72ade03c95841178c1d40ac77e7d06536902d1d4927f88214ecebb0",
+      "delta_name": "A11-delta-RC14_10-a871e97e324a(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 9,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 17,
+      "agent": "A12",
+      "archive_sha256": "a34ab121d8a364cbf59f4f7fde5143206ee1c8ee3f0cca6c63fc962f313bd8be",
+      "continuity_sha256": "7c244eb97a04bc19a08f812d8cdc0f2865473d777138d5d22e41082a609153ec",
+      "delivery_sha256": "44cffebdccc25e29c78655d7ace2cc2844273831bdfbddc1da3e138138cd9272",
+      "delta_name": "SQE-A12-RC14_10-delta-a34ab121d8a3(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 13,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 26,
+      "agent": "A13",
+      "archive_sha256": "a122026119d600f69f60e25c3beb3730757854250df6a5cb3a905e78883047da",
+      "continuity_sha256": "a3c7098d27d63e869d3186c964fd42b6115c9bc7bde8c72069e14626fa59778e",
+      "delivery_sha256": "af9c47419aa1da06266ddef60ff5304ff8f3d68632bc98bf8b9a7ebb2292b711",
+      "delta_name": "A13-RC14_10-delta-20261031T144112Z-c0d24283(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 22,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 15,
+      "agent": "A14",
+      "archive_sha256": "2d08fef01f550566b6d93513bfc6c2e7a4246d1b30c4aa03e31d93e13af8d0a3",
+      "continuity_sha256": "d849ea18ae8773b80af5a8fb9c406a4e05e4d00f8478b5ba22af8fe53bcedbdb",
+      "delivery_sha256": "f76879735f61fb6ec919f0d5da9bc74b04f1cba8018ce2eabe7b067849456882",
+      "delta_name": "A14-delta-RC14.10-2d08fef01f55(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 11,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 24,
+      "agent": "A15",
+      "archive_sha256": "758ee05c8ac9aff2439b97b1735dc196947cccd4242505b8ddac4c20fc4fad53",
+      "continuity_sha256": "7a908de06cb6c005912fe149cf749fa35cb34418acc3e92687913833fe23420c",
+      "delivery_sha256": "8bb399d09a671c1d63dadf0adf4865fe388b0ca858c73d5c9d33f80c090afd88",
+      "delta_name": "A15-delta-RC14_10-d9b0b562503e(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 17,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 18,
+      "agent": "A16",
+      "archive_sha256": "9d0d387e7655c6951953c2bc9c9e9cdcc888b3b59473d75ba729d973d73a34af",
+      "continuity_sha256": "0ff800b318d460815d5a27727cd0cfb5d62c19c5e1b7ebf508af0fb3a81e5f4f",
+      "delivery_sha256": "025c15505e494f6687e4153026d78ba91713b9e0f48bedb7cc67658ce00b9f70",
+      "delta_name": "A16-delta-RC14_10-20261031-f7e3c8(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 14,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    },
+    {
+      "actual_evidence_in_archive": true,
+      "admitted_path_count": 18,
+      "agent": "A17",
+      "archive_sha256": "d2aa8d0e817323dfe99535fe89d5c86b72aa7082b5eb41f86bbb73973a6155ff",
+      "continuity_sha256": "5518dc648ff457230ae5230c5314a010bbcf0067a99ef043375e3574a48b2115",
+      "delivery_sha256": "5c0ac2aaef75483a9d3f077095730c1d20c49e94b32ab2f70015daa747b8bc2f",
+      "delta_name": "A17-delta-RC14_10-20261031T144126Z-c97fd7f8(1).zip",
+      "delta_source_identity_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+      "evidence_entries": 13,
+      "ownership_and_preimage_gate": "PASS_BY_OFFICIAL_VERIFY"
+    }
+  ],
+  "browser_module": {
+    "actual_exit": 0,
+    "notes": "Chromium local HTTP prevented by host policy; no real-browser PASS",
+    "passed": 1,
+    "skipped": 3
+  },
+  "dispatch": {
+    "archive_name": "SQE-Studio-RC14.9-to-RC14.10-SCIENCE-EXPANDED-AGENT-DISPATCH(9).zip",
+    "archive_sha256": "fcb121ea6737c197597e351797cc81dfe533c2d47fe51e5d6f3783251d2b90b9",
+    "source_inventory_digest": "88228a1dcd4b9b1bf239f62f4dc0aa560ff2edf649e099249e83c3aa1dedc649",
+    "source_manifest_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb"
+  },
+  "disposition": "SOURCE_AND_PORTABLE_SOFTWARE_TESTED; NATIVE_PHYSICS_NOT_ESTABLISHED; FABRICATION_HOLD",
+  "em_to_hamiltonian": "BLOCKED",
+  "exit_codes": {
+    "a10_audit": 0,
+    "all_eight_merge": 0,
+    "baseline_verify": 0,
+    "delta_verify": 0,
+    "early_merge_rejected": 1,
+    "installed_import": 0,
+    "isolated_install": 0,
+    "regression_release_browser": 0,
+    "regression_release_nonbrowser": 0,
+    "wheel_build1": 0,
+    "wheel_build2": 0
+  },
+  "fabrication": "HOLD",
+  "frozen_files_unchanged_count": 5,
+  "independent_a10": {
+    "actual_checks": {
+      "duplicate_entries": "REJECTED:ValueError",
+      "good_owned_zip": "ACCEPTED",
+      "nonregular_entry": "REJECTED:ValueError",
+      "raw_backslash": "REJECTED:ValueError",
+      "raw_nul_on_disk": "REJECTED:ValueError",
+      "raw_traversal": "REJECTED:ValueError",
+      "symlink_entry": "REJECTED:ValueError"
+    },
+    "all_unsafe_rejected": true,
+    "good_archive_accepted": true
+  },
+  "merge_state_at_admission": "MERGED_NOT_QUALIFIED",
+  "mode_identity": "UNRESOLVED",
+  "next_cycle": "RC14.11 prepared, not authorized",
+  "owned_changes_admitted": 155,
+  "package_version": "0.1.1.dev28",
+  "portable_regression": {
+    "actual_exit": 0,
+    "deselected": 6,
+    "passed": 850,
+    "skipped": 25,
+    "warnings": 2
+  },
+  "references": [
+    "agent_cycle/deliveries/A99/DELIVERY.md",
+    "integration/RC14_10_A99_AMENDMENTS.json",
+    "integration/RC14_10_CASE_COVERAGE.json",
+    "agent_cycle/next_cycle/RC14_11_ASSIGNMENTS.json"
+  ],
+  "release": "RC14.10 Experimental",
+  "schema": "sqe.a99-integration-manifest.v1",
+  "scientific_case_coverage": [
+    {
+      "fabrication": "HOLD",
+      "id": "B00",
+      "implementation": "INTEGRATED_SOFTWARE_CHECKS",
+      "native_executed_by_a99": false,
+      "note": "Real local software/security tests and source/wheel checks; Windows browser/installer retest required",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A10",
+        "A14",
+        "A15"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Portable software/security + authentic browser/installer"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B01",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17 Quantum Metal/GDS geometry lineage screening; no A99 run of native Gmsh geometry",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A14"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Parametric CPW/QDesign -> GDS -> Gmsh physical lineage"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B02",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A11 Palace field handling and old native EM gate; no new qualifying two/three-mesh solve",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A11",
+        "A17"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "CPW quarter-wave eigenmodes, 2-3 mesh refinements and energy"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B03",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A11 complex E/H sample/overlap screens; missing paired registered native fields",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Complex E/H mode-overlap registration across meshes"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B04",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17/A12 native capacitance matrix readback and unit contracts; no new electrostatic deck executed",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A12"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Electrostatic X-mon/transmon capacitance matrix"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B05",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A11 driven-data review and A16 adapter support; no native S-parameter solve",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A11",
+        "A16"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Driven CPW 2-port S-parameters and resonance consistency"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B06",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A12/A11 reviewed EPR/participation contracts; no fresh junction-native EPR and transfer",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A12",
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "EPR junction participation and EM-to-Hamiltonian extraction"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B07",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17 material/kinetic inductance review contracts; no paired physically matched solves",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "PEC versus finite surface kinetic-inductance comparison"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B08",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A16 scqubits adapter and A12 independent parameters; native spectra on host not run",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A16",
+        "A12"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Native scqubits transmon and fluxonium spectra"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B09",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A16 JosephsonCircuits.jl adapter and HB diagnostics; native Julia circuit on host not run",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A16"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "JosephsonCircuits.jl linear and pumped JPA harmonic balance"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B10",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A13 objective/optimization and A14 Compare UI; no review-qualified native design loop",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A13",
+        "A14"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Revision-bound parameter variation, objective and design feedback"
+    },
+    {
+      "fabrication": "HOLD",
+      "id": "B11",
+      "implementation": "PARTIAL_PRODUCTION_SCREEN_OR_CONTRACT",
+      "native_executed_by_a99": false,
+      "note": "A17/A11 optional magnetostatic pilot contracts; no native magnetostatic run",
+      "one_click_native_case_command_registered": false,
+      "owners": [
+        "A17",
+        "A11"
+      ],
+      "scientific_qualification": "NOT_ESTABLISHED",
+      "title": "Flux-line magnetostatic pilot and design-side field review"
+    }
+  ],
+  "scientific_qualification": "NOT_ESTABLISHED",
+  "wheel": {
+    "checked_installed_package_files": 47,
+    "independent_installed_match": true,
+    "missing_or_different": [],
+    "wheel_sha256": "f6da350056866bef6b9825d8cbc8cf31d76189c8dffbc586c8d13b4a25e56e3c"
+  },
+  "windows_native_test": "NOT_RUN_ON_LINUX_HOST"
+}

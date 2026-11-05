@@ -61,6 +61,13 @@ def _job_budget_seconds(snapshot):
     return MAX_SECONDS
 
 
+from .interop.independent_transmon_origin import (
+    ManualOriginBlocked, require_manual_study_creation,
+)
+from .interop.independent_transmon_execution import (
+    REQUEST_SCHEMA, build_independent_transmon_execution_preflight,
+)
+
 class Jobs:
     def __init__(self, store):
         self.store = store
@@ -156,6 +163,32 @@ class Jobs:
     def _submit(self, user, pid, rev, study_id, *, parents=(), force=False,
                 points=None, mode=None, retry_of=None, attempt=1):
         project, study = self._project(user, pid, rev, study_id)
+        extraction_context = None
+        from .interop.extracted_transmon import KIND, resolve_source, validate_inputs
+        if study_id.startswith('extracted_transmon_') and study.get('kind') != KIND:
+            raise Conflict('Saved extraction study cannot be relabeled as independent input')
+        if study.get('kind') == KIND:
+            if study['engine'] != 'scqubits' or points is not None or parents:
+                raise Conflict('Conditional extraction requires a standalone scqubits job')
+            source, _, _ = validate_inputs(study['inputs'])
+            extraction_context = resolve_source(self.store,user,pid,project,source['run_id'])
+            if source != extraction_context['source']:
+                raise Conflict('Saved extraction source no longer matches its verified run')
+        if study_id.startswith('independent_transmon_'):
+            # Do not allow the ordinary /runs, sweep or retry API to bypass
+            # the explicit M4 origin + M5 exact saved-study preflight.
+            if points is not None or parents:
+                raise Conflict('Independent manual Transmon prohibits EM parents and sweep execution')
+            try:
+                trusted=require_manual_study_creation(self.store,user,pid,rev,study_id)
+                checked=build_independent_transmon_execution_preflight(
+                    {'schema':REQUEST_SCHEMA,'project_id':pid,
+                     'expected_revision':rev,'study_id':study_id},
+                    trusted_revision=trusted)
+                if checked['status']!='READY_FOR_SOFTWARE_EXECUTION_ONLY':
+                    raise Conflict('Independent study software preflight blocked')
+            except (ManualOriginBlocked, ValueError) as exc:
+                raise Conflict('Independent manual study origin or preflight blocked') from exc
         project_sha = project['revision_digest']
         if not isinstance(parents, (tuple, list)) or len(parents) > 32 or any(not isinstance(r, str) for r in parents):
             raise ValueError('Invalid parent run identities')
@@ -191,6 +224,10 @@ class Jobs:
                         'expected_adapter_sha256': adapter_digest(study['engine']),
                         'submitted_at_utc': time.time(), 'attempt': attempt,
                         'retry_of': retry_of}
+            if extraction_context is not None:
+                # A distinct, versioned worker context. The client supplies only
+                # saved identities; Store supplies paths and the source snapshot.
+                snapshot['extraction_context'] = extraction_context
             if points is not None:
                 snapshot['sweep_plan'] = {'mode': mode, 'points': [
                     {'index': p.index, 'study': p.study,
@@ -436,7 +473,19 @@ class Jobs:
     def status(self, owner, pid, run_id):
         info = self.store.run(owner, pid, run_id)
         progress_file = Path(info['path']) / 'PROGRESS.json'
-        progress = json.loads(progress_file.read_text(encoding='utf8')) if progress_file.is_file() else None
+        # PROGRESS.json is *optional* UI telemetry, never the authoritative
+        # run state or native artifact integrity gate. Windows indexers / AV
+        # may briefly deny access while the atomic writer swaps this file.
+        # Do not turn a valid completed job into HTTP 500; do not accept or
+        # manufacture any scientific evidence from missing progress data.
+        progress_issue = None
+        try:
+            progress = json.loads(progress_file.read_text(encoding='utf8'))
+        except FileNotFoundError:
+            progress = None
+        except PermissionError:
+            progress = None
+            progress_issue = 'TEMPORARILY_UNREADABLE'
         project = self.store.project(owner, pid)
         current = info['revision_id'] == project['head']
         verified_current = False
@@ -453,7 +502,7 @@ class Jobs:
         return {'run_id': run_id, 'state': info['state'], 'revision_id': info['revision_id'],
                 'is_current_revision': current, 'is_current_native_artifact': verified_current,
                 'scientifically_qualified': False, 'artifact_evidence': evidence,
-                'progress': progress}
+                'progress': progress, 'progress_telemetry': progress_issue or 'AVAILABLE_OR_NOT_YET_WRITTEN'}
 
     def retry(self, owner, pid, run_id):
         """Retry a failed/cancelled run at most twice, against the same head."""

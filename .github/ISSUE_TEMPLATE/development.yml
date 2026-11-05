@@ -1,0 +1,32 @@
+name: Incremento di sviluppo
+description: Funzionalita o correzione con criteri verificabili e profili di test.
+title: "[Sviluppo] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Risultato atteso
+      description: Descrivere il comportamento osservabile e l'area del progetto.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criteri di completamento
+      description: Inserire una checklist con condizioni misurabili.
+      placeholder: "- [ ] Caso positivo verificato\n- [ ] Errori, provenienza e revisioni obsolete verificati"
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Test richiesti
+      description: Indicare test mirati, profili Automatic Test e natura delle evidenze native o fixture.
+      value: "Recommended; software prima dell'integrazione. Aggiungere il profilo nativo pertinente."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidenze e dipendenze
+      description: Collegare PR, report, esempi upstream e issue precedenti. Dichiarare i blocchi.

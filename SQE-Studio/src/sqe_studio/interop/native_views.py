@@ -6,6 +6,7 @@ verify_manifest for the same saved revision and declared file contents.
 from __future__ import annotations
 import csv
 import math
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from ..orchestration.artifacts import safe_file
 
@@ -14,7 +15,10 @@ class NativeDisplayError(ValueError):
 
 def palace_eigenmodes(folder: Path, manifest: dict):
     declared = {item['name'] for item in manifest.get('artifacts', [])}
-    if manifest.get('engine') != 'sqdmetal_palace' or manifest.get('kind') != 'eigenmode' or 'sqe_em/outputFiles/eig.csv' not in declared:
+    if (manifest.get('engine') != 'sqdmetal_palace' or
+        (manifest.get('artifact_type') != 'palace.eigenmodes' if 'artifact_type' in manifest
+         else manifest.get('kind') != 'eigenmode') or
+        'sqe_em/outputFiles/eig.csv' not in declared):
         return None
     path = safe_file(folder, 'sqe_em/outputFiles/eig.csv')
     if path.stat().st_size > 2_000_000:
@@ -29,8 +33,11 @@ def palace_eigenmodes(folder: Path, manifest: dict):
             if len(row) != len(head) or len(result) >= 32:
                 raise NativeDisplayError('Malformed or oversized Palace native table')
             try:
-                index=int(row[0]); freq=float(row[1])
-            except (TypeError,ValueError,IndexError) as exc:
+                native_index=Decimal(row[0].strip()); freq=float(row[1])
+                index=len(result)+1
+                if not native_index.is_finite() or native_index != index:
+                    raise NativeDisplayError('Native Palace mode labels must be consecutive integers')
+            except (TypeError,ValueError,IndexError,InvalidOperation) as exc:
                 raise NativeDisplayError('Invalid Palace native eigenfrequency') from exc
             if index != len(result)+1 or not math.isfinite(freq) or not 0 < freq <= 1000:
                 raise NativeDisplayError('Nonfinite, reordered or nonpositive Palace eigenmode')

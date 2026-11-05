@@ -1,5 +1,6 @@
 """Static semantic/accessibility checks; NOT substitutes for real-browser audits."""
 from __future__ import annotations
+from sqe_studio.web_assets import javascript_bundle
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -40,8 +41,8 @@ def test_semantic_shell_and_keyboard_intent():
     assert any(tag == 'nav' for tag,_ in parsed.attrs)
     assert any(tag == 'a' and v.get('href') == '#workspaceBody' for tag,v in parsed.attrs)
     assert any(v.get('aria-modal') == 'true' for _,v in parsed.attrs)
-    js = (WEB/'app.js').read_text(encoding='utf-8')
-    for signature in ('dialogKeys(event)', "event.key==='Escape'", "event.key!=='Tab'", "'Enter'||e.key===' '", 'aria-current="step"', "setAttribute('aria-expanded'", "canRun('quantum_metal')", "data.source!=='scqubits.eigenvals'"):
+    js = javascript_bundle((WEB/'app.js').parent).decode('utf-8')
+    for signature in ('dialogKeys(event)', "event.key==='Escape'", "event.key!=='Tab'", "'Enter'||e.key===' '", 'aria-current="step"', "setAttribute('aria-expanded'", "canRun('quantum_metal')", "data.source!=='native scqubits eigenvals'"):
         assert signature in js
     assert 'Math.random' not in js
     assert 'eval(' not in js

@@ -33,6 +33,29 @@ _LIMITS = {"R": (1e-4, 1e9), "L": (1e-15, 1e2), "C": (1e-19, 1.0), "Lj": (1e-15,
 FIXED_JULIA_WORKER = r'''# SQE Studio A05 fixed JosephsonCircuits.jl entrypoint. Never run user code.
 using JosephsonCircuits
 using Printf
+using TOML
+using SHA
+
+# Require the installed package to be resolved from a concrete Julia manifest.
+# A present Julia executable or a package merely on LOAD_PATH is not a pin.
+# Do not log personal project paths: only the manifest digest and locked tree.
+function native_lock_identity(ver)
+    project_file = Base.active_project()
+    project_file === nothing && error("Julia has no active Project.toml")
+    manifest_file = joinpath(dirname(project_file), "Manifest.toml")
+    isfile(manifest_file) || error("Julia active project has no Manifest.toml pin")
+    document = TOML.parsefile(manifest_file)
+    packages = get(document, "deps", nothing)
+    packages isa AbstractDict || error("Unrecognized Julia manifest format")
+    entries = get(packages, "JosephsonCircuits", nothing)
+    entries isa Vector && length(entries) == 1 || error("Missing/ambiguous locked JosephsonCircuits")
+    entry = only(entries)
+    locked_version = get(entry, "version", "")
+    tree = get(entry, "git-tree-sha1", "")
+    locked_version == string(ver) || error("Resolved JosephsonCircuits version differs from manifest pin")
+    occursin(r"^[0-9a-f]{40}$", tree) || error("Missing pinned JosephsonCircuits git tree")
+    return bytes2hex(sha256(read(manifest_file))), tree
+end
 
 function load_request(path)
     rows = readlines(path)
@@ -78,7 +101,8 @@ function main()
     kind, frequencies, elements, ports, pump = load_request(ARGS[1])
     ver = Base.pkgversion(JosephsonCircuits)
     ver === nothing && error("Cannot obtain JosephsonCircuits.jl version")
-    @info "Native Julia engine" julia_version=string(VERSION) josephson_version=string(ver)
+    manifest_sha256, josephson_tree_sha1 = native_lock_identity(ver)
+    @info "Native Julia engine" julia_version=string(VERSION) josephson_version=string(ver) manifest_sha256=manifest_sha256
     circuit = Tuple{String,String,String,Union{Float64,Int}}[]
     # Each native P has exactly one reserved matching shunt R; this is how
     # JosephsonCircuits discovers real reference port impedances.
@@ -129,6 +153,8 @@ function main()
         println(io, "schema\tsqe.josephson-native.v1")
         println(io, "julia_version\t", VERSION)
         println(io, "josephson_version\t", ver)
+        println(io, "manifest_sha256\t", manifest_sha256)
+        println(io, "josephson_tree_sha1\t", josephson_tree_sha1)
         println(io, "native_port_order\t", join(numbers, ","))
         println(io, "native_impedance_indices\t", join(lin.portimpedanceindices, ","))
         println(io, "elapsed_seconds\t", @sprintf("%.9g", elapsed))
@@ -158,7 +184,16 @@ def _exact_dict(value, keys, label):
 
 
 def _positive(value, lo, hi, label):
-    if type(value) not in (float, int) or not math.isfinite(value) or not lo <= value <= hi:
+    # math.isfinite(huge_int) can itself overflow during implicit conversion.
+    # All invalid user-supplied SI magnitudes must fail as a *blocked* model,
+    # never as an uncaught Python exception or native execution attempt.
+    if type(value) not in (float, int):
+        raise EngineBlocked(f"{label} must be a finite number in [{lo}, {hi}]")
+    try:
+        finite_and_bounded = math.isfinite(value) and lo <= value <= hi
+    except (OverflowError, ValueError):
+        finite_and_bounded = False
+    if not finite_and_bounded:
         raise EngineBlocked(f"{label} must be a finite number in [{lo}, {hi}]")
     return float(value)
 
@@ -290,19 +325,32 @@ def _wire(valid):
 
 def _parse_metadata(path, expected_ports):
     try:
-        metadata = dict(line.split("\t", 1) for line in path.read_text(encoding="utf-8").splitlines())
+        # A native TSV is evidence, not a loose config file. In particular a
+        # duplicate key must not silently replace a conflicting native version
+        # or completion status (dict() otherwise keeps the last value).
+        metadata = {}
+        for line in path.read_text(encoding="utf-8").splitlines():
+            fields = line.split("\t")
+            if len(fields) != 2 or not fields[0] or not fields[1] or fields[0] in metadata:
+                raise ValueError("Malformed/duplicate native metadata field")
+            metadata[fields[0]] = fields[1]
         required = {"schema", "julia_version", "josephson_version", "native_port_order",
                     "native_impedance_indices", "elapsed_seconds", "signal_mode",
+                    "manifest_sha256", "josephson_tree_sha1",
                     "frequency_unit", "s_parameter_unit", "convergence_evidence"}
         if set(metadata) != required or metadata["schema"] != "sqe.josephson-native.v1":
             raise ValueError("Invalid native metadata schema")
-        if not _VERSION.fullmatch(metadata["josephson_version"]):
-            raise ValueError("Missing native package version")
+        if not _VERSION.fullmatch(metadata["josephson_version"]) or not _VERSION.fullmatch(metadata["julia_version"]):
+            raise ValueError("Missing or malformed Julia/native package version")
+        if not re.fullmatch(r"[0-9a-f]{64}", metadata["manifest_sha256"]):
+            raise ValueError("Missing/malformed Julia manifest SHA-256 pin")
+        if not re.fullmatch(r"[0-9a-f]{40}", metadata["josephson_tree_sha1"]):
+            raise ValueError("Missing/malformed JosephsonCircuits locked git tree")
         if list(map(int, metadata["native_port_order"].split(","))) != expected_ports:
             raise ValueError("Native port order mismatch")
         inds = list(map(int, metadata["native_impedance_indices"].split(",")))
-        if len(inds) != len(expected_ports) or any(i < 1 for i in inds):
-            raise ValueError("Unresolved native reference impedances")
+        if len(inds) != len(expected_ports) or any(i < 1 for i in inds) or len(set(inds)) != len(inds):
+            raise ValueError("Unresolved or aliased native reference impedances")
         if not math.isfinite(float(metadata["elapsed_seconds"])) or float(metadata["elapsed_seconds"]) < 0:
             raise ValueError("Invalid native runtime")
         if metadata["signal_mode"] != "0" or metadata["frequency_unit"] != "Hz" or metadata["s_parameter_unit"] != "dimensionless_complex_native_power_wave":
@@ -339,6 +387,46 @@ def _check_s(path, freqs, ports):
         raise EngineFailure(f"Native JosephsonCircuits S-parameter artifact rejected: {exc}") from exc
 
 
+def _screen_passive_linear_s(path, freqs, ports):
+    """Bounded *native* linear-port screen; not EM calibration or HB proof.
+
+    No synthetic scattering is calculated: S is read from the already validated
+    native TSV. Singular values check all simultaneous port excitations (unlike
+    individual column-power checks), while reciprocity tests native power waves.
+    """
+    try:
+        import numpy as np
+        rows = path.read_text(encoding="utf-8").splitlines()[1:]
+        n = len(ports)
+        worst_singular, worst_reciprocity = 0.0, 0.0
+        for k in range(len(freqs)):
+            matrix = np.array([[complex(float(row[3]), float(row[4]))
+                                for row in (rows[(k*n*n)+(i*n)+j].split("\t") for j in range(n))]
+                               for i in range(n)], dtype=np.complex128)
+            singular = float(np.linalg.svd(matrix, compute_uv=False)[0])
+            reciprocity = float(np.max(np.abs(matrix - matrix.T)))
+            if not math.isfinite(singular) or not math.isfinite(reciprocity):
+                raise ValueError("Nonfinite native linear S diagnostics")
+            worst_singular = max(worst_singular, singular)
+            worst_reciprocity = max(worst_reciprocity, reciprocity)
+        # Native positive R,L,C,Lj small-signal ports must be reciprocal and
+        # passive under the declared real positive power-wave impedances.
+        if worst_singular > 1.0001 or worst_reciprocity > 1e-4:
+            raise ValueError("Native linear S violates passive/reciprocal port screen")
+        return {"status": "bounded_linear_port_screen_passed",
+                "max_singular_value": worst_singular,
+                "max_reciprocity_difference": worst_reciprocity,
+                "singular_value_limit": 1.0001,
+                "reciprocity_absolute_limit": 1e-4,
+                "scope": "native signal-band real-Z power waves; not EM calibration or independently converged physics"}
+    except ImportError as exc:
+        raise EngineBlocked("NumPy unavailable for required native RF passivity/reciprocity admission; "
+                            "no native S admitted") from exc
+    except (OSError, UnicodeError, ValueError, TypeError, IndexError,
+            ArithmeticError) as exc:
+        raise EngineFailure(f"Native linear RF physical screen rejected: {exc}") from exc
+
+
 def run(study, project, output_dir):
     valid = _validate(study, project)  # Reject invalid input BEFORE looking for Julia.
     binary = shutil.which("julia")
@@ -351,10 +439,19 @@ def run(study, project, output_dir):
     native_meta = output / "josephson_native_metadata.tsv"
     stdout = output / "josephson_native_stdout.log"
     stderr = output / "josephson_native_stderr.log"
-    if any(p.exists() for p in (request, script, native_s, native_meta, stdout, stderr)):
+    # exists() is false for dangling symlinks: write_text would otherwise
+    # follow them, potentially writing outside the native job directory.
+    if any(p.exists() or p.is_symlink() for p in
+           (request, script, native_s, native_meta, stdout, stderr,
+            output / "josephson_ports.json")):
         raise EngineBlocked("Native output directory already has Josephson files; refusing overwrite/replay")
-    request.write_text(_wire(valid), encoding="ascii")
-    script.write_text(FIXED_JULIA_WORKER, encoding="utf-8")
+    # Atomic exclusive creation also closes the check-to-write symlink race for
+    # these *Python-owned* artifacts (the native Julia outputs remain gated by
+    # the job worker's result manifest and are never themselves admission).
+    with request.open("x", encoding="ascii") as stream:
+        stream.write(_wire(valid))
+    with script.open("x", encoding="utf-8") as stream:
+        stream.write(FIXED_JULIA_WORKER)
     env = os.environ.copy()
     env.update(JULIA_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1", JULIA_PKG_PRECOMPILE_AUTO="0")
     started = time.monotonic()
@@ -371,25 +468,48 @@ def run(study, project, output_dir):
         raise EngineBlocked(f"Julia execution exceeded {NATIVE_TIMEOUT_SECONDS}s; no native result admitted") from exc
     except OSError as exc:
         raise EngineBlocked(f"Julia process could not start: {exc}") from exc
-    stdout.write_bytes(completed.stdout)
-    stderr.write_bytes(completed.stderr)
     if max(len(completed.stdout), len(completed.stderr)) > 4 * 1024 * 1024:
+        # Avoid persisting unbounded logs into the EDA job workspace. The
+        # complete subprocess output is never used as accepted numerical proof.
         raise EngineBlocked("Julia native log exceeds 4 MiB; no results admitted")
+    with stdout.open("xb") as stream:
+        stream.write(completed.stdout)
+    with stderr.open("xb") as stream:
+        stream.write(completed.stderr)
     if completed.returncode != 0:
         raise EngineBlocked(f"Julia/JosephsonCircuits failed (exit={completed.returncode}, elapsed={time.monotonic()-started:.3f}s); see native stderr/stdout; no results admitted")
     data = _parse_metadata(native_meta, [p[0] for p in valid[3]])
     _check_s(native_s, valid[1], [p[0] for p in valid[3]])
     if (valid[0] == "rf_linear") != (data["convergence_evidence"] == "linear_solve_returned"):
         raise EngineFailure("Wrong native study completion evidence")
+    linear_screen = (_screen_passive_linear_s(native_s, valid[1], [p[0] for p in valid[3]])
+                     if valid[0] == "rf_linear" else
+                     {"status": "not_applicable_pumped_signal_only",
+                      "scope": "HB returned no iteration residuals or idler channels; no nonlinear gain/passivity claim"})
     # This is a *port reference/evidence* sidecar, not a computed RF result.
     sidecar = {
         "schema": "sqe.josephson-port-contract.v1",
         "schematic_sha256": valid[5], "analysis": valid[0],
+        "study_sha256": _hash(study), "project_sha256": _hash(project),
+        "artifact_sha256": {
+            name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in (
+                ("josephson_request.tsv", request),
+                ("josephson_fixed_worker.jl", script),
+                ("josephson_native_sparameters.tsv", native_s),
+                ("josephson_native_metadata.tsv", native_meta),
+                ("josephson_native_stdout.log", stdout),
+                ("josephson_native_stderr.log", stderr),
+            )
+        },
         "port_order": [p[0] for p in valid[3]],
         "ports": [{"number": n, "node": node, "reference_impedance_ohm": z0,
                    "positive_terminal": node, "negative_terminal": "0"} for n, node, z0 in valid[3]],
         "normalization": "JosephsonCircuits native P port with dedicated Rport shunt; Kurokawa-type native power-wave S (photon-flux amplitude convention), dimensionless complex ratio",
         "frequency_unit": "Hz", "native_frequency_input_unit": "rad/s",
+        "frequency_points_hz": valid[1],
+        "observable": {"quantity": "complex_scattering_amplitude", "unit": "1",
+                       "representation": "real_and_imaginary", "wave_convention": "native_power_wave",
+                       "port_reference_plane": "explicit_schematic_node_to_ground_0"},
         "s_parameter_order": "frequency-major, output_port-major, input_port-minor",
         "mode": "(0,)->(0,) signal-only; nonlinear idler S not exported",
         "native_settings": {
@@ -405,14 +525,209 @@ def run(study, project, output_dir):
         "pump": None if valid[4] is None else dict(zip(
             ("frequency_hz", "port", "current_a", "pump_harmonics", "modulation_harmonics"), valid[4])),
         "native_engine_version": data["josephson_version"], "native_julia_version": data["julia_version"],
+        "native_version_pin": {"method": "active_julia_manifest_git_tree_sha1",
+                               "manifest_sha256": data["manifest_sha256"],
+                               "josephson_tree_sha1": data["josephson_tree_sha1"]},
+        "native_linear_port_screen": linear_screen,
         "native_elapsed_seconds": float(data["elapsed_seconds"]),
+        # This is the observed OS process completion, not an inferred HB
+        # iteration convergence certificate. Logs are hashed above as native
+        # provenance even when they are empty.
+        "native_process_exit_code": completed.returncode,
+        "native_process_wall_seconds": time.monotonic() - started,
         "convergence_evidence": data["convergence_evidence"],
         "scientific_status": "review_required",
-        "limitations": ["No independent scientific benchmark or Windows runtime execution verified by A05",
-                        "No iteration-resolved nonlinear convergence evidence", "Pumped idler channels not exported"],
+        "cross_engine_mapping": {"status": "blocked", "reason":
+            "No reviewed revision-bound EM-to-schematic port/geometry/junction mapping; "
+            "native circuit outputs do not verify EM mode identity or EPR."},
+        "limitations": ["Native return is not an independent RF benchmark or device qualification",
+                        "No iteration-resolved nonlinear convergence evidence", "Pumped idler channels not exported",
+                        "No EM mode/port or quantum Hamiltonian physical mapping certified"],
     }
-    (output / "josephson_ports.json").write_text(json.dumps(sidecar, sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    with (output / "josephson_ports.json").open("x", encoding="utf-8") as stream:
+        stream.write(json.dumps(sidecar, sort_keys=True, indent=2, allow_nan=False) + "\n")
     return {"engine_version": data["josephson_version"],
             "native_files": [request.name, script.name, native_s.name, native_meta.name,
                              stdout.name, stderr.name, "josephson_ports.json"],
             "kind": "josephson.sparameters", "scientific_status": "review_required"}
+
+
+# RC14.10: production-native B05/B09 benchmark entrypoints. These create
+# independent exploratory circuits, not simulated CPW EM or measured devices.
+def _b05_b09_native_studies(case_id):
+    if case_id not in ('B05', 'B09'):
+        raise EngineBlocked('Only A16 B05/B09 native RF benchmarks are allowlisted')
+    schematic = {
+        'nodes': ['0', 'in', 'tank', 'out'],
+        'elements': [
+            {'id': 'Cin', 'kind': 'C', 'nodes': ['in', 'tank'], 'value': 1e-13, 'unit': 'F'},
+            {'id': 'Cout', 'kind': 'C', 'nodes': ['tank', 'out'], 'value': 1e-13, 'unit': 'F'},
+            {'id': 'Ltank', 'kind': 'L', 'nodes': ['tank', '0'], 'value': 1e-8, 'unit': 'H'},
+            {'id': 'Rdamp', 'kind': 'R', 'nodes': ['tank', '0'], 'value': 500., 'unit': 'ohm'},
+        ],
+        'ports': [
+            {'number': 1, 'node': 'in', 'reference_impedance_ohm': 50.},
+            {'number': 2, 'node': 'out', 'reference_impedance_ohm': 75.},
+        ],
+    }
+    if case_id == 'B09':
+        schematic['elements'].append({'id': 'LjJPA', 'kind': 'Lj',
+                                      'nodes': ['tank', '0'], 'value': 1e-9, 'unit': 'H'})
+    points = [4.5e9, 4.75e9, 5e9, 5.25e9, 5.5e9]
+    variants = [('pump_off', None)] if case_id == 'B05' else [
+        ('pump_off', None), ('pump_harmonics_2', 2), ('pump_harmonics_3', 3)]
+    for label, harmonic in variants:
+        kind = 'rf_linear' if harmonic is None else 'rf_harmonic_balance'
+        opts = {'schematic_sha256': _hash(schematic), 'frequencies_hz': points[:]}
+        if harmonic is not None:
+            opts['pump'] = {'frequency_hz': 4.75e9, 'port': 1, 'current_a': 1e-9,
+                            'pump_harmonics': harmonic, 'modulation_harmonics': 1}
+        yield label, {'id': 'A16-' + case_id + '-' + label,
+                      'engine': 'josephson_circuits', 'kind': kind, 'inputs': opts}, {
+                          'schematic': schematic}
+
+
+def _benchmark_native_s21(path, frequencies):
+    """Extract actual complex S21, after the native shape/order validator."""
+    _check_s(path, frequencies, [1, 2])
+    try:
+        rows = path.read_text(encoding='utf-8').splitlines()[1:]
+        values = [complex(float(rows[4 * idx + 2].split('\t')[3]),
+                          float(rows[4 * idx + 2].split('\t')[4]))
+                  for idx in range(len(frequencies))]
+        if len(values) != len(frequencies) or not all(
+                math.isfinite(v.real) and math.isfinite(v.imag) for v in values):
+            raise ValueError('Nonfinite or absent native S21')
+        return values
+    except (ValueError, OSError, IndexError) as exc:
+        raise EngineFailure('B05/B09 native S21 evidence rejected: ' + str(exc)) from exc
+
+
+
+def _benchmark_rf_cross_job_identity(observed, case_id):
+    """Require one actual native engine + pinned manifest for a cross-job case.
+
+    A present version string alone is insufficient: all native subprocesses
+    must report the same active Julia Manifest SHA and package tree identity.
+    """
+    if set(observed) != ({'pump_off'} if case_id == 'B05' else
+                         {'pump_off', 'pump_harmonics_2', 'pump_harmonics_3'}):
+        raise EngineFailure(case_id + ': required native subjobs missing')
+    try:
+        identities = {(item['engine_version'], item['julia_version'],
+                       item['native_version_pin']['manifest_sha256'],
+                       item['native_version_pin']['josephson_tree_sha1'],
+                       item['schematic_sha256'], tuple(item['frequency_hz']))
+                      for item in observed.values()}
+    except (KeyError, TypeError) as exc:
+        raise EngineFailure(case_id + ': native provenance incomplete') from exc
+    if len(identities) != 1:
+        raise EngineFailure(case_id + ': cross-job Julia/Manifest/circuit identity changed; comparison blocked')
+
+
+def _benchmark_native_rf(case_id, output_dir):
+    if not shutil.which('julia'):
+        raise EngineBlocked(case_id + ': native Julia unavailable; no RF benchmark executed')
+    output = Path(output_dir)
+    if output.exists() or output.is_symlink():
+        raise EngineBlocked(case_id + ': case directory already exists; refusing replay')
+    output.mkdir(parents=True, exist_ok=False)
+    observed = {}
+    benchmark_started = time.monotonic()
+    for label, study, project in _b05_b09_native_studies(case_id):
+        job_started = time.monotonic()
+        dest = output / label
+        native = run(study, project, dest)
+        side = json.loads((dest / 'josephson_ports.json').read_text(encoding='utf-8'))
+        if (native['scientific_status'] != 'review_required' or
+                side['cross_engine_mapping']['status'] != 'blocked' or
+                side['native_process_exit_code'] != 0 or
+                side['study_sha256'] != _hash(study) or
+                side['schematic_sha256'] != _hash(project['schematic']) or
+                side['analysis'] != study['kind'] or
+                side['frequency_unit'] != 'Hz' or
+                side['frequency_points_hz'] != study['inputs']['frequencies_hz'] or
+                side['convergence_evidence'] != ('linear_solve_returned' if label == 'pump_off'
+                                                 else 'hbsolve_returned_no_iteration_log') or
+                not math.isfinite(side['native_elapsed_seconds']) or
+                side['native_elapsed_seconds'] < 0 or
+                not math.isfinite(side['native_process_wall_seconds']) or
+                side['native_process_wall_seconds'] < 0 or
+                side['port_order'] != [1, 2] or
+                [p['reference_impedance_ohm'] for p in side['ports']] != [50., 75.]):
+            raise EngineFailure(case_id + ': missing native port or process evidence')
+        s21 = _benchmark_native_s21(dest / 'josephson_native_sparameters.tsv',
+                                    study['inputs']['frequencies_hz'])
+        observed[label] = {
+            'study_wall_seconds': time.monotonic() - job_started,
+            'native_solver_elapsed_seconds': side['native_elapsed_seconds'],
+            'native_settings': side['native_settings'],
+            'input_sha256': side['study_sha256'],
+            'schematic_sha256': side['schematic_sha256'],
+            'engine_version': side['native_engine_version'],
+            'julia_version': side['native_julia_version'],
+            'native_version_pin': side['native_version_pin'],
+            'native_process_exit_code': side['native_process_exit_code'],
+            'native_process_wall_seconds': side['native_process_wall_seconds'],
+            'frequency_hz': study['inputs']['frequencies_hz'],
+            's21_real_imag': [[z.real, z.imag] for z in s21],
+            'port_normalization': side['normalization'],
+            'linear_passivity_screen': side['native_linear_port_screen'],
+            'native_completion_evidence': side['convergence_evidence'],
+            'raw_artifact_sha256': side['artifact_sha256'],
+            'native_sidecar_sha256': hashlib.sha256((dest / 'josephson_ports.json').read_bytes()).hexdigest(),
+            'pump': side['pump'],
+        }
+    _benchmark_rf_cross_job_identity(observed, case_id)
+    if case_id == 'B09':
+        # A signal-only amplitude ratio is an *observation*, not pump gain,
+        # noise, idler stability, or HB iteration convergence. Avoid division
+        # by zero, and never silently skip a missing reference frequency.
+        baseline = [complex(*z) for z in observed['pump_off']['s21_real_imag']]
+        for label in ('pump_harmonics_2', 'pump_harmonics_3'):
+            signal = [complex(*z) for z in observed[label]['s21_real_imag']]
+            observed[label]['signal_only_amplitude_ratio_to_pump_off'] = [
+                (abs(a)/abs(b) if abs(b) > 1e-12 else None)
+                for a, b in zip(signal, baseline)]
+            observed[label]['hb_residual_status'] = 'BLOCKED_NOT_EXPORTED_BY_NATIVE_WORKER'
+        # A difference between finite signal-only native S21 amplitudes is
+        # recorded, NEVER treated as a complete harmonic-balance residual.
+        harmonic_2 = [complex(*z) for z in observed['pump_harmonics_2']['s21_real_imag']]
+        harmonic_3 = [complex(*z) for z in observed['pump_harmonics_3']['s21_real_imag']]
+        signal_only_harmonic_delta = max(abs(x - y) for x, y in zip(harmonic_2, harmonic_3))
+        stage_status = 'BLOCKED_NO_HB_RESIDUAL_OR_IDLER_REFERENCE'
+    else:
+        stage_status = 'BLOCKED_NO_PALACE_EM_DRIVEN_COMPARISON'
+    report = {
+        'schema': 'sqe.A16.native-benchmark.v1', 'case_id': case_id,
+        'execution_kind': 'NATIVE_JOSEPHSON_CIRCUIT', 'stage_status': stage_status,
+        'studies': observed, 'signal_and_frequency_units': {'S': '1', 'frequency': 'Hz'},
+        'harmonic_2_vs_3_signal_only_complex_S21_max_delta': (
+            signal_only_harmonic_delta if case_id == 'B09' else None),
+        'harmonic_delta_qualification': 'BLOCKED_NOT_AN_HB_RESIDUAL_OR_IDLER_CONVERGENCE',
+        'execution_resources': {
+            'native_jobs_completed': len(observed), 'native_jobs_sequential': True,
+            'total_wall_seconds': time.monotonic() - benchmark_started,
+            'per_julia_process_timeout_seconds': NATIVE_TIMEOUT_SECONDS,
+            'julia_threads': 1, 'blas_threads': 1, 'native_nbatches': 1,
+            'native_frequency_points_per_study': 5,
+            'max_native_hb_iterations': 80 if case_id == 'B09' else None,
+            'peak_memory_bytes': None, 'peak_memory_status': 'NOT_MEASURED',
+        },
+        'limitations': ['independent lumped circuit, not Palace CPW, EM port calibrated, or measured device',
+                        'no idler/noise or native HB iteration residual exported',
+                        'no independent JPA model convergence or fabrication approval', 'fabrication HOLD'],
+    }
+    with (output / ('benchmark_' + case_id + '.json')).open('x', encoding='utf-8') as stream:
+        stream.write(json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + '\n')
+    return report
+
+
+def benchmark_b05(output_dir):
+    """Run native reference-impedance RF screen; B05 Palace/EM gate stays BLOCKED."""
+    return _benchmark_native_rf('B05', output_dir)
+
+
+def benchmark_b09(output_dir):
+    """Run native pump-off and two-harmonic HB sweep; residual gate BLOCKED."""
+    return _benchmark_native_rf('B09', output_dir)

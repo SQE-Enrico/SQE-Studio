@@ -1,0 +1,32 @@
+{
+  "schema": "sqe.automatic-test-plan.v2",
+  "milestone": "M20",
+  "version": 1,
+  "default_profile": "recommended",
+  "recommended_tasks": [
+    "targeted",
+    "http"
+  ],
+  "task_ids": [
+    "integrity",
+    "targeted",
+    "http",
+    "regression",
+    "browser",
+    "cad",
+    "quantum",
+    "extraction",
+    "rf",
+    "fields",
+    "field_compare",
+    "em",
+    "em_convergence",
+    "packaging"
+  ],
+  "wall_budget_s": 3600,
+  "packaging_reserve_s": 120,
+  "native_concurrency": 1,
+  "cancellation": "finish_current_bounded_task_then_package",
+  "scientific_status": "NOT_QUALIFIED",
+  "fabrication": "HOLD"
+}

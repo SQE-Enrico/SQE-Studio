@@ -6,6 +6,7 @@ as blocked, and the unimplemented EM port yields an actual failed worker archive
 from __future__ import annotations
 
 import json
+from importlib.util import find_spec
 import re
 import os
 import shutil
@@ -16,13 +17,34 @@ import zipfile
 from pathlib import Path
 
 import pytest
+if find_spec('playwright') is None:
+    pytest.skip('Real browser tests BLOCKED: Playwright not installed', allow_module_level=True)
 from playwright.sync_api import sync_playwright, expect, Error as PlaywrightError
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'src'))
 from sqe_studio.server import make_server
 
-CAPTURES = Path(os.environ.get('SQE_BROWSER_CAPTURE_DIR', str(ROOT / 'reports' / 'agents' / 'A07' / 'screenshots')))
+# Browser screenshots are test output, never authoritative release source.
+# A qualification process supplies its private report workspace explicitly;
+# standalone pytest uses an automatically cleaned, per-test temp directory.
+CAPTURES: Path | None = None
+
+
+@pytest.fixture(autouse=True)
+def _browser_capture_location(tmp_path, monkeypatch):
+    configured = os.environ.get('SQE_BROWSER_CAPTURE_DIR')
+    directory = Path(configured) if configured else tmp_path / 'browser-captures'
+    # Refuse caller-supplied paths inside the source tree instead of silently
+    # weakening the source inventory or creating untracked build artifacts.
+    if directory.resolve().is_relative_to(ROOT.resolve()):
+        raise ValueError('Browser evidence path must be outside release source')
+    monkeypatch.setattr(sys.modules[__name__], 'CAPTURES', directory)
+
+
+def test_capture_destination_is_not_release_source():
+    assert CAPTURES is not None
+    assert not CAPTURES.resolve().is_relative_to(ROOT.resolve())
 
 
 @pytest.fixture()

@@ -1,0 +1,62 @@
+{
+  "schema": "sqe.current-development-state.v2",
+  "runtime_version": "0.1.1.dev81",
+  "milestone": "M20",
+  "scope": "SOFTWARE_MODULARIZATION_AND_CONTEXT_REDUCTION",
+  "source_baseline": "0.1.1.dev78",
+  "recommended_profile": "recommended",
+  "recommended_tasks": [
+    "targeted",
+    "http"
+  ],
+  "current_windows_qualification": "PASS_SOFTWARE_WITH_DECLARED_CONDITIONAL_SKIPS",
+  "scientific_qualification": "NOT_ESTABLISHED",
+  "fabrication": "HOLD",
+  "latest_verified_host": {
+    "runtime": "0.1.1.dev81",
+    "report": "qualification-reports/SQE-RC14_12-report-0005.zip",
+    "report_sha256": "9d93b2a1031312b0d2162b0fba7e83262dac0ca3cf084079656e98dc056784f8",
+    "profile": "software",
+    "python": "3.11.9",
+    "duration_s": 994.48,
+    "passed_tests": 1757,
+    "skipped_tests": 23,
+    "automatic_tasks_passed": 5,
+    "ui_vm_checks_passed": 62,
+    "real_browser": "PASS",
+    "isolated_wheel_install": "PASS",
+    "native_palace_profile": "NOT_SELECTED"
+  },
+  "next_work": [
+    "Use dev.ps1 -Watch for local development, software before integration and the relevant native profile for scientific changes",
+    "Implement and retain layout-calculated capacitance with explicit conductor/ground identity",
+    "Evaluate mesh/domain/material sensitivity before grounded-chip literature and multimode SQDMetal EPR benchmarks"
+  ],
+  "constraints": [
+    "Reuse native packages; no new scientific solver",
+    "Preserve provenance, units, auth/CSRF and immutable source checks",
+    "Do not promote software/fixture/basis checks to physical qualification"
+  ],
+  "github_tracking": {
+    "repository": "https://github.com/SQE-Enrico/SQE-Studio",
+    "roadmap": "../.github/ROADMAP.md",
+    "active_issue": 1,
+    "future_issues": [2, 3, 4, 5],
+    "trigger": "push_and_pull_request",
+    "periodic_chat_checks": false
+  },
+  "context_entry": "python tools/context.py",
+  "history_policy": "Current state only; no nested releases or historical permit chain",
+  "local_development": {
+    "windows_entry": "../dev.ps1",
+    "watch": "../dev.ps1 -Watch",
+    "full_profile": "software",
+    "summary": "qualification-reports/local-latest.json",
+    "ci": "../.github/workflows/ci.yml",
+    "exit_codes": {
+      "0": "PASS_SELECTED_STABLE_SOURCE",
+      "1": "FAIL",
+      "2": "BLOCKED_OR_INCOMPLETE"
+    }
+  }
+}

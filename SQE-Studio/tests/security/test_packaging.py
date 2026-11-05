@@ -1,11 +1,13 @@
 """Static safety checks for off-line wheelhouse installer policy."""
 from pathlib import Path
+import tomllib
 
 ROOT=Path(__file__).resolve().parents[2]
 
 def test_wheel_assets_remain_declared_in_frozen_metadata():
     metadata=(ROOT/'pyproject.toml').read_text(encoding='utf-8')
-    assert 'sqe_studio = ["web/*.html", "web/*.css", "web/*.js"]' in metadata
+    assets=tomllib.loads(metadata)['tool']['setuptools']['package-data']['sqe_studio']
+    assert set(assets)>={'web/*.html','web/*.css','web/*.js','web/*.json','web/modules/*.js'}
     for a in ('index.html','app.js','style.css'):
         assert (ROOT/'src'/'sqe_studio'/'web'/a).is_file()
 

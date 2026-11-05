@@ -1,0 +1,155 @@
+{
+  "A10_independent_raw_archive_security_cases": {
+    "exit_code": 0,
+    "failed": 0,
+    "passed": 11
+  },
+  "a99_amendments_path": "integration/RC14_9_A99_AMENDMENTS.json",
+  "admitted_modified_paths": 128,
+  "agent_evidence_audit": {
+    "A10": {
+      "changes": 18,
+      "continuity_sha256": "eed33a176210c58ea15946c9fabfdd7d0492846a7253b3aa6def9137b78833ce",
+      "delivery_sha256": "1a35ccc0f6c0297ba533f32b4495ff41f7833a9b293fb25e0f4d61a2dc98bce3",
+      "delta_zip_sha256": "f1b26b6afdcc0861588dbd1f3e9010b1eee723ed9d16e6a4879fa976fb8f2087",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 38,
+      "updated_continuity_present": true
+    },
+    "A11": {
+      "changes": 14,
+      "continuity_sha256": "f01620fbaeda9b0a1da44fd0c87b44198c44a00baa32c83a70fc5366d8a236d1",
+      "delivery_sha256": "6ccbe7fb99d33104f9df94cfd7f2dc7bdbfd2d4e0a5e0538bb105c6e52b4b195",
+      "delta_zip_sha256": "dd84c9b71945f343cf9036ed49f9f0a1d246197c93d9218e9ae19bb071ed3856",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 21,
+      "updated_continuity_present": true
+    },
+    "A12": {
+      "changes": 16,
+      "continuity_sha256": "60e50ccfc9242c554d06977586e22ecb53431ccf3ae41e85d66343782e70e2e3",
+      "delivery_sha256": "7c39ded048cb7dd45b08897fd3523225e4a001d44334c8b65836544e777d93f2",
+      "delta_zip_sha256": "51c3fca0f8c7017cef2d3d4aec7ba28aec4910aa986fc0bb2ea05ab8eb3dc415",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 26,
+      "updated_continuity_present": true
+    },
+    "A13": {
+      "changes": 12,
+      "continuity_sha256": "a247f8ca79fe4299e762214780f32cbd03c526ca21605412f5afc082edee04b6",
+      "delivery_sha256": "4aa9b85a1f59ef1e5455e1bea9979e1cc494f47f572f0f9e0d12f9e4c61a69ad",
+      "delta_zip_sha256": "8c181b0be681ec75048b4c6c6abcc104764adc73cfef2eb9099874d9b685f284",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 17,
+      "updated_continuity_present": true
+    },
+    "A14": {
+      "changes": 17,
+      "continuity_sha256": "b9f1028ef2340b5a37837c00e6c967766e716e9521ce8f497f8003593d0d00b1",
+      "delivery_sha256": "6e5e7943fc945bfa9987fe3025557c7d389b4bfeed3024d0fb9ff390b8962f70",
+      "delta_zip_sha256": "23efc57cfd50b1ca3a93ccb667acf3b49768cbf0a17318216b2f3c3c985f956b",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 30,
+      "updated_continuity_present": true
+    },
+    "A15": {
+      "changes": 18,
+      "continuity_sha256": "e5b6af519e2892c4535f468095ee9220daaa0203021a1fbd32aca4e8cd388de2",
+      "delivery_sha256": "cc0aecb77152dad701d1cb1cb78d179299fa0b80c699617ea5e52d3761a26725",
+      "delta_zip_sha256": "fee605b2cc07bbf751d7f0b00e43757d0a5dc6adf5e17f084f12870554134fd0",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 23,
+      "updated_continuity_present": true
+    },
+    "A16": {
+      "changes": 19,
+      "continuity_sha256": "9ebaa52947d67feeb294c27d925e5d703f8da84618127389e44581dddaf30cee",
+      "delivery_sha256": "566c80909a2a830729398ce096eb40bf53b44e81faa84aed066b4337c606487e",
+      "delta_zip_sha256": "1c1d3ea833f5b1c0a7d4ed1277c45e989897e3575fdccd973956d9c266de3a51",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 27,
+      "updated_continuity_present": true
+    },
+    "A17": {
+      "changes": 14,
+      "continuity_sha256": "dc243f8346c250c5c6038120ba3076599814864b672256decd085151af35b1f8",
+      "delivery_sha256": "3445a59d8da4321254cd929eaec6aaae9291920f9623d8767b2338754a015f52",
+      "delta_zip_sha256": "3aa05cf246adcfcffc08aa588f114e79f491794e2d48eded0a3ddd567f99d851",
+      "note": "Agent-provided logs reviewed as inherited evidence, not independently treated as host execution. Cross-agent integrated tests and A10 independent adversarial suite run by A99.",
+      "owned_delivery_present": true,
+      "supplied_evidence_file_count": 24,
+      "updated_continuity_present": true
+    }
+  },
+  "current_release_report_plan": "SQE-RC14_9-report-0001.zip; next 0002; programmatic tests pass; full GUI click not performed on Linux",
+  "dispatch_archive_sha256": "9b212bddc409ab3a12d44fc6145d03374a2eb3d8b07b0da7da0fdaf44720c33d",
+  "dispatch_inventory_sha256": "835b439ed75921f9d37949d311043613156d228c8582df70d69418fa1ffd7137",
+  "dispatch_source_manifest_sha256": "4c53eedfa3467d17142a280a9b5755a3cf91e02a1f8f0166b59442ee3f0df768",
+  "frontend_node_check_exit_code": 0,
+  "full_nonbrowser_pytest_summary": {
+    "actual_exit_code": "UNRECORDED; enclosing process timed out after printed summary",
+    "failed": 0,
+    "passed": 712,
+    "skipped": 23
+  },
+  "individually_executed_suite_exit_codes": {
+    "adapters": 0,
+    "agent_cycle": 0,
+    "integration": 0,
+    "interop": 0,
+    "orchestration": 0,
+    "research": 0,
+    "root_test_modules": 0,
+    "security": 0,
+    "ui_browser": 0
+  },
+  "installed_http_auth_asset_smoke_exit_code": 0,
+  "isolated_import_verify_exit_code": 0,
+  "isolated_wheel_install_exit_code": 0,
+  "native_runtime_availability": {
+    "gmsh": false,
+    "gmsh_cli": null,
+    "julia": null,
+    "juliacall": false,
+    "palace": null,
+    "qiskit_metal": false,
+    "scqubits": false
+  },
+  "new_A10_verifier_exit_code": 0,
+  "no_early_merge_negative_exit_code": 1,
+  "official_merge_exit_code": 0,
+  "official_verify_exit_code": 0,
+  "offline_wheel_build_exit_code": 0,
+  "python_compile_exit_code": 0,
+  "real_browser_outcome": {
+    "chromium_over_local_http": "BLOCKED_MANAGED_URLBLOCKLIST",
+    "one_fixture_capture_test": "PASS",
+    "skipped": 3
+  },
+  "release": "RC14.9 Experimental",
+  "schema": "sqe.a99-integration-release.v1",
+  "scientific_gates": {
+    "EM_EPR_Hamiltonian": "BLOCKED",
+    "PDK_DRC_LVS": "NOT_ESTABLISHED",
+    "cross_mesh_field_registration": "BLOCKED",
+    "fabrication": "HOLD",
+    "independent_convergence": "NOT_ESTABLISHED",
+    "physical_mode_identity": "BLOCKED"
+  },
+  "source_inventory_release_digest_location": "EDA_SOURCE_MANIFEST.json (do not embed its own SHA in inventoried metadata)",
+  "version": "0.1.1.dev27",
+  "wheel_independent_builds": {
+    "SOURCE_DATE_EPOCH": "1793404800",
+    "first_exit_code": 0,
+    "identical_sha256": "4e51c526930e7b555dd6bf64c2325b2f2ed2b4cc2c915218bcf324c4b4a36601",
+    "second_exit_code": 0
+  },
+  "windows11_laptop_test": "NOT_PERFORMED_ON_THIS_LINUX_HOST"
+}

@@ -21,6 +21,7 @@ import re
 import shutil
 import subprocess
 import time
+import zlib
 
 from .base import EngineBlocked, EngineFailure, require_module, safe_output
 
@@ -28,6 +29,7 @@ KINDS = {'capacitance': 'Electrostatic', 'eigenmode': 'Eigenmode',
          'sparameters': 'Driven'}
 NAME = re.compile(r'^[A-Za-z][A-Za-z0-9_]{0,39}$')
 MAX_NATIVE_BYTES = 128 * 1024 * 1024
+MAX_NATIVE_PREVIEW_BYTES = 16 * 1024 * 1024
 
 
 def _blocked(condition, reason):
@@ -138,7 +140,7 @@ def preflight(study, project):
     _positive_int(solver['order'], 'solver order', 4)
     _number(solver['tolerance'], 'solver tolerance', 0, 1e-2)
     _positive_int(solver['max_iterations'], 'solver max_iterations', 1000)
-    _positive_int(solver['num_cpus'], 'solver num_cpus', 8)
+    _positive_int(solver['num_cpus'], 'solver num_cpus (MPI ranks)', 16)
     if study['kind'] == 'eigenmode':
         _number(solver['start_hz'], 'start frequency Hz', 1e6, 100e9)
         _positive_int(solver['modes'], 'number of eigenmodes', 12)
@@ -347,6 +349,25 @@ def _checked_qdesign(project, a02):
     return design
 
 
+def _check_native_material_catalogue(stack, material_class):
+    """Fail quickly if SQDMetal's installed material catalogue differs from review.
+
+    This is an *additional* early gate, not a replacement for checking the
+    generated Palace deck and its real Gmsh physical tags after meshing.
+    """
+    for record, region in ((stack[0], 'substrate'), (stack[2], 'superstrate')):
+        native = material_class(record['material'])
+        eps = getattr(native, 'permittivity', None)
+        loss = getattr(native, 'loss_tangent', None)
+        _blocked(_numeric_equal(eps, record['relative_permittivity'])
+                 and _numeric_equal(loss, record['loss_tangent']),
+                 f'SQDMetal installed {region} material table differs from reviewed physical stack: '
+                 f'native eps_r={eps!r}, tan_delta={loss!r}; '
+                 f'reviewed eps_r={record["relative_permittivity"]!r}, '
+                 f'tan_delta={record["loss_tangent"]!r}. '
+                 'Revise research assumptions and acknowledge them; never silently substitute materials')
+
+
 def _make_native(study, project, em, a02, root):
     from SQDMetal.PALACE.Capacitance_Simulation import PALACE_Capacitance_Simulation
     from SQDMetal.PALACE.Eigenmode_Simulation import PALACE_Eigenmode_Simulation
@@ -356,6 +377,10 @@ def _make_native(study, project, em, a02, root):
     else:
         cls = (PALACE_Capacitance_Simulation if study['kind'] == 'capacitance'
                else PALACE_Eigenmode_Simulation)
+    # Reject mismatches before potentially expensive native QDesign/meshing.
+    # This uses the actual SQDMetal package selected by the scientific env.
+    from SQDMetal.Utilities.Materials import Material
+    _check_native_material_catalogue(project['process']['stack'], Material)
     design = _checked_qdesign(project, a02)
     options = em['solver']
     substrate, metal, cap = project['process']['stack']
@@ -370,7 +395,10 @@ def _make_native(study, project, em, a02, root):
     }
     if study['kind'] == 'eigenmode':
         settings.update(starting_freq=options['start_hz'], number_of_freqs=options['modes'],
-                        solns_to_save=0)
+                        # Explicit, budgeted Palace visualization of mode 1 on real solves.
+                        # Deck-only keeps the historically validated Save=0.
+                        # Field presence is NOT a physical mode-match claim.
+                        solns_to_save=1 if em['execution'] == 'solve' else 0)
     sim = cls(name='sqe_em', metal_design=design, sim_parent_directory=str(root) + '/',
               mode='simPC', meshing='GMSH', user_options=settings,
               view_design_gmsh_gui=False, create_files=True)
@@ -454,9 +482,18 @@ def _validate_deck(config, em, study, volumes, surfaces):
     substrate, _, cap = study['_stack_for_validation']
     for item, expected, label in zip(mats, (cap, substrate), ('vacuum', 'substrate')):
         _attr_set(item.get('Attributes'), label + ' volume', volumes)
-        _blocked(_numeric_equal(item.get('Permittivity'), expected['relative_permittivity'])
-                 and _numeric_equal(item.get('LossTan', 0), expected['loss_tangent']),
-                 f'Palace {label} material permittivity/loss differs from reviewed physical stack')
+        # Do not silently replace user-reviewed dielectric properties with
+        # SQDMetal catalogue defaults. Show both values in bounded diagnostics
+        # so a native mismatch can be traced without hiding the safety gate.
+        native_eps = item.get('Permittivity')
+        native_tan = item.get('LossTan', 0)
+        _blocked(_numeric_equal(native_eps, expected['relative_permittivity'])
+                 and _numeric_equal(native_tan, expected['loss_tangent']),
+                 f'Palace {label} material permittivity/loss differs from reviewed physical stack: '
+                 f'native eps_r={native_eps!r}, tan_delta={native_tan!r}; '
+                 f'reviewed eps_r={expected["relative_permittivity"]!r}, '
+                 f'tan_delta={expected["loss_tangent"]!r}. '
+                 'No automatic physical-material substitution is permitted')
     _blocked(not (set(mats[0]['Attributes']) & set(mats[1]['Attributes'])),
              'Palace volume material assignments overlap')
     _blocked(set(mats[0]['Attributes']) | set(mats[1]['Attributes']) == volumes,
@@ -502,6 +539,14 @@ def _validate_deck(config, em, study, volumes, surfaces):
         _blocked(eigen.get('N') == em['solver']['modes']
                  and _numeric_equal(eigen.get('Target'), em['solver']['start_hz'] / 1e9),
                  'Palace eigenmode target/mode count mismatch')
+        # Request a *real* Palace mode-1 complex E export in solves, never in
+        # deck-only tests. The exact Save setting must survive SQDMetal's
+        # generator; no silent rewrite of a generated physical deck.
+        if em['execution'] == 'solve':
+            _blocked(eigen.get('Save') == 1,
+                     'SQDMetal did not enable the reviewed Palace eigenmode field export')
+            _blocked(config['Problem'].get('OutputFormats', {}).get('Paraview') is not False,
+                     'Palace ParaView field output explicitly disabled')
 
 
 def _numeric_equal(actual, expected):
@@ -550,6 +595,55 @@ def _native_result_csv(path):
     return rows
 
 
+
+def _validate_native_preview_png(path):
+    """Admit a bounded, structurally valid SQDMetal diagnostic PNG only.
+
+    Do not inspect it as physics data or grant it a scientific result type.
+    Keep unknown binary extensions fail-closed. PNG chunks are checked without
+    an image decoder or a new runtime dependency.
+    """
+    _blocked(path.is_file() and not path.is_symlink()
+             and 0 < path.stat().st_size <= MAX_NATIVE_PREVIEW_BYTES,
+             'Unsafe SQDMetal diagnostic PNG size')
+    raw = path.read_bytes()
+    _blocked(raw.startswith(b'\x89PNG\r\n\x1a\n'),
+             'Invalid SQDMetal diagnostic PNG signature')
+    offset = 8
+    chunks = 0
+    saw_data = False
+    while offset < len(raw):
+        _blocked(offset + 12 <= len(raw), 'Truncated SQDMetal diagnostic PNG chunk')
+        length = int.from_bytes(raw[offset:offset+4], 'big')
+        kind = raw[offset+4:offset+8]
+        end = offset + 12 + length
+        _blocked(end <= len(raw) and length <= MAX_NATIVE_PREVIEW_BYTES,
+                 'Invalid SQDMetal diagnostic PNG chunk length')
+        data = raw[offset+8:offset+8+length]
+        recorded_crc = int.from_bytes(raw[end-4:end], 'big')
+        _blocked(zlib.crc32(kind + data) & 0xffffffff == recorded_crc,
+                 'Invalid SQDMetal diagnostic PNG chunk checksum')
+        if chunks == 0:
+            _blocked(kind == b'IHDR' and length == 13,
+                     'Invalid SQDMetal diagnostic PNG image header')
+            width = int.from_bytes(data[:4], 'big')
+            height = int.from_bytes(data[4:8], 'big')
+            _blocked(0 < width <= 20000 and 0 < height <= 20000,
+                     'Unsafe SQDMetal diagnostic PNG dimensions')
+            _blocked(data[10:12] == b'\x00\x00' and data[12] in (0, 1),
+                     'Unsupported SQDMetal diagnostic PNG compression/filter')
+        if kind == b'IDAT':
+            saw_data = True
+        if kind == b'IEND':
+            _blocked(length == 0 and saw_data and end == len(raw),
+                     'Invalid SQDMetal diagnostic PNG terminator')
+            return
+        chunks += 1
+        _blocked(chunks < 10000, 'Excessive SQDMetal diagnostic PNG chunk count')
+        offset = end
+    raise EngineBlocked('Missing SQDMetal diagnostic PNG terminator')
+
+
 def _run_palace(readiness, folder, config_name, cpus):
     command = readiness['command'][:]
     if readiness['backend'] == 'wsl':
@@ -560,19 +654,42 @@ def _run_palace(readiness, folder, config_name, cpus):
                                     capture_output=True, text=True, timeout=15, check=False)
         _blocked(translated.returncode == 0 and translated.stdout.strip().startswith('/'),
                  'Windows workspace cannot be safely translated to a WSL mount')
-        command = [*prefix, '--cd', translated.stdout.strip(), '--exec', command[-1]]
+        command = [*prefix, '--cd', translated.stdout.strip(), '--exec', '/usr/bin/timeout', '--signal=TERM', '--kill-after=15s', '810s', command[-1]]
     command += ['-np', str(cpus), '-nt', '1', config_name]
     started = time.perf_counter()
+    phases = folder / 'palace-phases.json'
+    events = []
+    def event(phase, **details):
+        events.append({'phase': phase, 'elapsed_seconds': round(time.perf_counter()-started, 3), **details})
+        scratch = phases.with_suffix('.partial')
+        scratch.write_text(json.dumps({'schema':'sqe.palace-phases.v1', 'events':events,
+                           'mpi_ranks':cpus, 'omp_threads':1}, sort_keys=True)+'\n', encoding='utf-8')
+        os.replace(scratch, phases)
+    event('solver_spawn_requested')
     with (folder / 'palace-native.log').open('wb') as stream:
         try:
             completed = subprocess.run(command, cwd=folder, stdout=stream,
                                        stderr=subprocess.STDOUT, timeout=840, check=False)
         except (subprocess.TimeoutExpired, OSError) as exc:
+            event('solver_process_failed_or_timed_out', error_type=type(exc).__name__)
             raise EngineFailure(f'Palace native execution failed: {type(exc).__name__}') from exc
+    event('solver_process_returned', exit_code=completed.returncode)
     _blocked(completed.returncode == 0,
              f'Palace native solver exited {completed.returncode}; inspect palace-native.log')
-    return {'exit_code': completed.returncode,
+    return {'exit_code': completed.returncode, 'mpi_ranks':cpus, 'omp_threads':1,
             'elapsed_seconds': round(time.perf_counter() - started, 3)}
+
+
+def _phase_checkpoint(folder, phase):
+    path = folder / 'palace-phases.json'
+    if path.is_file():
+        content = json.loads(path.read_text(encoding='utf-8'))
+        _blocked(content.get('schema') == 'sqe.palace-phases.v1'
+                 and isinstance(content.get('events'), list), 'Invalid native Palace phase diagnostic')
+        content['events'].append({'phase': phase, 'elapsed_seconds': None})
+        temporary = path.with_suffix('.partial')
+        temporary.write_text(json.dumps(content,sort_keys=True)+'\n',encoding='utf-8')
+        os.replace(temporary,path)
 
 
 def run(study, project, output_dir):
@@ -610,11 +727,12 @@ def run(study, project, output_dir):
     frequency_hz = None
     if em['execution'] == 'solve':
         completion = _run_palace(readiness, folder, deck.name, em['solver']['num_cpus'])
-        native.append('sqe_em/palace-native.log')
+        native.extend(('sqe_em/palace-native.log', 'sqe_em/palace-phases.json'))
         csv_name = {'capacitance': 'terminal-C.csv', 'eigenmode': 'eig.csv',
                     'sparameters': 'port-S.csv'}[study['kind']]
         result = folder / 'outputFiles' / csv_name
         _native_result_csv(result)
+        _phase_checkpoint(folder, 'required_csv_validated')
         if study['kind'] == 'sparameters':
             frequency_hz = _csv_frequency(result, em['solver']['frequencies_hz'])
         native.append('sqe_em/outputFiles/' + csv_name)
@@ -630,20 +748,30 @@ def run(study, project, output_dir):
                              'Unsafe optional Palace native EPR/loss table: ' + extra)
                     _native_result_csv(candidate)
                     native.append('sqe_em/outputFiles/' + extra)
+    if em['execution'] == 'solve':
+        _phase_checkpoint(folder, 'native_auxiliary_collection_started')
     # Real Palace/SQDMetal versions may produce further diagnostic CSVs, field
     # visualizations and resolved JSON alongside eig.csv. The worker refuses
     # undeclared files: explicitly inventory only bounded native data formats,
     # reject executable/script material, and preserve every observed byte.
     permitted_extensions = {'.csv', '.json', '.msh', '.log', '.vtu', '.pvtu',
                             '.pvd', '.vtk', '.txt', '.dat', '.geo', '.msh2'}
+    # SQDMetal may emit sqe_em.png as a diagnostic mesh-preview image.
+    # Admit it only if it is a real, bounded PNG. It is not a solver result.
     declared = set(native)
     for candidate in sorted(folder.rglob('*')):
         _blocked(not candidate.is_symlink(),
                  'Native SQDMetal/Palace output includes a symbolic link')
         if candidate.is_dir():
             continue
-        _blocked(candidate.is_file() and candidate.suffix.lower() in permitted_extensions,
-                 'Unrecognized native output extension; fail closed: ' + candidate.name)
+        relative_native = candidate.relative_to(folder).as_posix()
+        if candidate.suffix.lower() == '.png':
+            _blocked(relative_native == 'sqe_em.png',
+                     'Unrecognized native PNG path; fail closed: ' + relative_native)
+            _validate_native_preview_png(candidate)
+        else:
+            _blocked(candidate.is_file() and candidate.suffix.lower() in permitted_extensions,
+                     'Unrecognized native output extension; fail closed: ' + candidate.name)
         _blocked(0 < candidate.stat().st_size <= MAX_NATIVE_BYTES,
                  'Unsafe native output size: ' + candidate.name)
         name = candidate.relative_to(output).as_posix()
@@ -651,6 +779,8 @@ def run(study, project, output_dir):
             native.append(name)
             declared.add(name)
         _blocked(len(declared) <= 128, 'Too many native output files for laptop budget')
+    if em['execution'] == 'solve':
+        _phase_checkpoint(folder, 'native_auxiliary_collection_finished')
     artefacts = []
     for name in native:
         path = (output / name).resolve()
@@ -658,11 +788,47 @@ def run(study, project, output_dir):
                  and 0 < path.stat().st_size <= MAX_NATIVE_BYTES, 'Unsafe native artifact: ' + name)
         artefacts.append({'name': name, 'sha256': _hash(path), 'bytes': path.stat().st_size,
                           'type': ('gmsh.mesh' if name.endswith('.msh') else 'palace.deck'
-                                   if name.endswith('.json') else 'palace.native_log'
-                                   if name.endswith('.log') else 'palace.native_field_or_auxiliary'
+                                   if name == 'sqe_em/sqe_em.json' else 'palace.native_execution_trace'
+                                   if name == 'sqe_em/palace-phases.json' else 'palace.native_log'
+                                   if name.endswith('.log') else 'sqdmetal.diagnostic_png'
+                                   if name == 'sqe_em/sqe_em.png' else 'palace.native_field_or_auxiliary'
                                    if not name.endswith('.csv') else {'capacitance':'palace.capacitance_matrix',
                                    'eigenmode':'palace.eigenmodes',
                                    'sparameters':'palace.sparameters'}[study['kind']])})
+    # Inspect *only* the native Palace export and SHA-bound manifest artifacts.
+    # Missing/incompatible fields cannot turn scalar frequency/Q into mode
+    # identity, and no field files are copied to portable qualification ZIPs.
+    field_export = None
+    if study['kind'] == 'eigenmode':
+        from ..interop.native_field import (inspect_palace_field_export,
+                                            NativeFieldEvidenceError)
+        try:
+            field_export = inspect_palace_field_export(output, config, artefacts)
+        except NativeFieldEvidenceError as exc:
+            # An invalid claimed field is a scientific gate failure, not an
+            # excuse to discard an otherwise real eig.csv solve result.
+            field_export = {'schema': 'sqe.palace-complex-field-evidence.v1',
+                            'status': 'BLOCKED_INVALID_NATIVE_FIELD_EVIDENCE',
+                            'reason': str(exc), 'complex_overlap': 'NOT_COMPUTED',
+                            'mode_identity': 'UNRESOLVED'}
+    # Science-expanded benchmark hooks operate exclusively on this worker's
+    # SHA-bound original native artifacts, never on synthetic scalar proxies.
+    from ..interop.scientific_review import screen_native_em_benchmark_cases
+    try:
+        native_benchmarks = screen_native_em_benchmark_cases(
+            output, config, artefacts, kind=study['kind'],
+            solve_completed=em['execution'] == 'solve',
+            requested_frequencies_hz=em['solver'].get('frequencies_hz'),
+            excited_port=em['solver'].get('excited_port'))
+    except ValueError as exc:
+        # A broken/unsupported native result is not a scientific PASS. Preserve
+        # the legitimate solver evidence and expose a bounded blocked reason.
+        native_benchmarks = {'schema': 'sqe.a11-native-em-benchmarks.v1',
+                             'mode_identity': 'UNRESOLVED', 'em_to_hamiltonian': 'BLOCKED',
+                             'fabrication': 'HOLD', 'cases': {
+                                 ('B05' if study['kind'] == 'sparameters' else 'B02'): {
+                                     'stage_status': 'BLOCKED_INVALID_NATIVE_BENCHMARK_EVIDENCE',
+                                     'reason': type(exc).__name__}}}
     report = {
         'schema': 'sqe.a03.native-artifacts.v1', 'engine': 'sqdmetal_palace',
         'versions': version, 'execution': em['execution'], 'native_solver': readiness and
@@ -676,6 +842,9 @@ def run(study, project, output_dir):
                             'note': 'Driven port-S.csv is only the native excited-column output, not a fabricated full S matrix'},
         'frequency_hz': frequency_hz,
         'native_epr_tables': [name for name in native if name.endswith(('port-EPR.csv', 'port-Q.csv', 'domain-E.csv'))],
+        'complex_field_export': field_export,
+        'native_scientific_benchmarks': native_benchmarks,
+        'mode_identity': 'UNRESOLVED_REQUIRES_VERIFIED_COMMON_DOMAIN_COMPLEX_OVERLAP_AND_EXPERT_REVIEW',
         'epr_quantization': 'not_performed_requires_reviewed_mode_normalization_and_external_validation',
         'mesh_convergence': {'planned_native_refinement_levels': em['mesh']['refinement_levels'],
                              'requested_relative_tolerance': em['mesh']['relative_tolerance'],

@@ -1,3 +1,4 @@
+from sqe_studio.web_assets import javascript_bundle
 """HTTP and catalog regression for the one canonical GUI design workflow."""
 from pathlib import Path
 import http.cookiejar
@@ -122,7 +123,7 @@ def test_native_parameter_sweep_api_rejects_invalid_axes_without_queue(gui_host)
 
 def test_generic_gui_assets_and_frozen_schema_unchanged():
     root=Path(__file__).resolve().parents[2]
-    text=(root/'src/sqe_studio/web/app.js').read_text(encoding='utf-8')
+    text=javascript_bundle((root/'src/sqe_studio/web/app.js').parent).decode('utf-8')
     assert 'function componentDialog' in text and 'function emEditor' in text
     assert 'Native parametric exploration' in text and 'designTemplates' in text
     assert 'sqe.project.v1' in text

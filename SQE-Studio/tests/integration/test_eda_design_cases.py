@@ -1,3 +1,4 @@
+from sqe_studio.web_assets import javascript_bundle
 """EDA capability declarations and UI use cases must remain fail closed."""
 from pathlib import Path
 import copy
@@ -98,7 +99,7 @@ def test_use_case_registry_is_visible_only_to_authenticated_gui(tmp_path):
 
 
 def test_client_only_shows_case_info_not_engine_shortcuts():
-    app=(Path(__file__).resolve().parents[2]/'src/sqe_studio/web/app.js').read_text(encoding='utf-8')
+    app=javascript_bundle((Path(__file__).resolve().parents[2]/'src/sqe_studio/web/app.js').parent).decode('utf-8')
     assert 'function useCaseOverview' in app
     assert 'function capabilityOverview' in app
     assert 'Published-method design cases' in app

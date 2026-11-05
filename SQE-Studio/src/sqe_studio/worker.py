@@ -88,7 +88,15 @@ def run(snapshot_path, root):
     adapter_sha = adapter_digest(engine)
     if snap.get('expected_adapter_sha256') and snap['expected_adapter_sha256'] != adapter_sha:
         raise ArtifactInvalid('Native adapter source changed since job submission')
-    result = REGISTRY[engine](study, model, root)
+    from .interop.extracted_transmon import KIND, run as run_extracted_transmon
+    if study.get('kind') == KIND:
+        if engine != 'scqubits' or parents or snap.get('sweep_point') is not None:
+            raise ArtifactInvalid('Conditional extraction prohibits generic parents and sweeps')
+        result = run_extracted_transmon(study, model, root, snap.get('extraction_context'))
+    else:
+        if 'extraction_context' in snap:
+            raise ArtifactInvalid('Extraction worker context cannot certify an independent spectrum')
+        result = REGISTRY[engine](study, model, root)
     if not isinstance(result, dict) or not isinstance(result.get('engine_version'), str) or not result['engine_version'] or result['engine_version'] == 'unavailable':
         raise ArtifactInvalid('Native engine did not report a verifiable version')
     if snap.get('expected_engine_version') and result['engine_version'] != snap['expected_engine_version']:

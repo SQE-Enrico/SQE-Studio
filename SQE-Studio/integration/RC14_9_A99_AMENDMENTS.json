@@ -1,0 +1,404 @@
+{
+  "edits": [
+    {
+      "after_sha256": "3aabceaa4ee4925ef7e81f53b12b11b5192ab0e59f4f2efcfa365ca63d6a08d0",
+      "before_sha256": "9eeb128ba2e67fa037de18e31398d6903d74d411f2240cad2dfdb6c80f8c4207",
+      "path": "src/sqe_studio/cycle_qualification.py",
+      "reason": "Align immutable current release version, report numbering and qualifications with RC14.9"
+    },
+    {
+      "after_sha256": "585295c06b4662f7ed05a8b00b04f06af508149387515bb9ed5386a54309cbe4",
+      "before_sha256": "ccd31e9337d702fc7840df39da90af202c83a5aa09da38481ae968dc5d833531",
+      "path": "tests/integration/test_cycle_qualification.py",
+      "reason": "Align immutable current release version, report numbering and qualifications with RC14.9"
+    },
+    {
+      "after_sha256": "5322f0f68eed2840d28ebb72eb334a1af62812ddf8aa1868d7bf4477bc652ea1",
+      "before_sha256": "328fee6f6307027293d56b049499688ce1e09c674ac1f7b3ebbcb73bfc7b0800",
+      "path": "qualification_plan.json",
+      "reason": "Align immutable current release version, report numbering and qualifications with RC14.9"
+    },
+    {
+      "after_sha256": "61a4ab1e275fe5a795eeae6aa6d955d5d4cde00b2c57772a15d7ebc3d25a5147",
+      "before_sha256": "4be927b1fc2647514730cbcfe8fb074b428fc326ed3a0da253916e4e4b19ac6a",
+      "path": "src/sqe_studio/__init__.py",
+      "reason": "Align immutable current release version, report numbering and qualifications with RC14.9"
+    },
+    {
+      "after_sha256": "d48cb79892da5ce18fbc7e088ad868f543a16e2aba72f5bae2afeb1d06934b49",
+      "before_sha256": "f4ec2d444b4a80d4af93ed0c52e58750405c68411a9df0112df117bd936fae37",
+      "path": "pyproject.toml",
+      "reason": "Align immutable current release version, report numbering and qualifications with RC14.9"
+    },
+    {
+      "after_sha256": null,
+      "before_sha256": "af59261e164acdc7bd7cf4efd83275831c3353920148d44c507d4814c12e1a5b",
+      "path": "tests/integration/test_rc14_8_a99_release.py",
+      "reason": "Superseded version-bound release test; preserved historical snapshot in archive"
+    },
+    {
+      "after_sha256": "cc289f3e5a9712bb40597dacb07fb5a3f39021d9aeeb278e033dad326ce8adea",
+      "before_sha256": null,
+      "path": "tests/integration/test_rc14_9_a99_release.py",
+      "reason": "New version-bound release regression with RC14.9 report naming"
+    },
+    {
+      "after_sha256": "ee887c917bb29d2dafed6f3e11d172be93fbaf55423bc3e8dde07006959cffbb",
+      "before_sha256": "0a4135222c3d46fb19dcf8b2c507cd49e3eaacbb5b02d55db88e6e4715c500c6",
+      "path": "README.md",
+      "reason": "Replace obsolete RC14.8 current operator and worker instructions"
+    },
+    {
+      "after_sha256": "a7fd81d493b5494ef0dfa1e6182e769bafadb67284b99410dc0db8d891a2a41c",
+      "before_sha256": "964417a6b5dd1f96d50efd9c3df2e0f46b74a27761476fa3bd25f5a6af1de4c3",
+      "path": "docs/LAPTOP_QUALIFICATION.md",
+      "reason": "Align current single-click Windows operator guide and report filename to RC14.9"
+    },
+    {
+      "after_sha256": "ee88b2afa5c8d690e58e24f2fd2c9aada3cdb719743a483d72e752cb3705a9bc",
+      "before_sha256": "d700aba2b8bf257bb75f5b6e8cbf0f8772d4719667c17239a575324f5f523281",
+      "path": "agent_cycle/assignments.json",
+      "reason": "Prepare RC14.10 assignments and source-identity rule without changing exclusive owners"
+    },
+    {
+      "after_sha256": "0fb9c4c3dfd699d19d03ea6b3430e0362048860f7b39e0ddf858ea4eafef3fe0",
+      "before_sha256": null,
+      "path": "agent_cycle/RC14_10_RELEASE_OBJECTIVES.md",
+      "reason": "Create next-cycle objectives"
+    },
+    {
+      "after_sha256": "d77d83366b67e870cb22c44bb0a8a05504be487697b5fe30653a321a97758bf9",
+      "before_sha256": null,
+      "path": "agent_cycle/RC14_9_FEEDBACK_TRIAGE.md",
+      "reason": "Track missing actual future laptop feedback without inventing validation"
+    },
+    {
+      "after_sha256": "cb8d27c6c736d7ff7b3c6534a77d2c47502529a18f14a63d3ff82982bf13d679",
+      "before_sha256": "3e1f9ac0b2d47b3c6abcf0f0b834fff6a995df0c5b82ce4d8d62c801e2404410",
+      "path": "agent_cycle/CYCLE_PROTOCOL.md",
+      "reason": "Carry cycle rules forward and stop old-dispatch reuse"
+    },
+    {
+      "after_sha256": "e0da7da63799bf7f0e3fef930ef72e6bd45a99a44ce786c7f4457cf91107d4a8",
+      "before_sha256": "9acc7de32a35059809f87e78bf97856c259fb8f9b68a59ed9b10efd5450ec7e0",
+      "path": "agent_cycle/CYCLE_STATE.json",
+      "reason": "Persist truthful A99 integrated cycle state and pending new laptop evidence"
+    },
+    {
+      "after_sha256": "b2789c8668778febdd7d95c298917753f62bc175395230fb80804a1389b1a8a5",
+      "before_sha256": "7532e2f1fb9bfbed7b4b66f8b9c9a874ff988f282a1d81fa31f0b198748120da",
+      "path": "agent_cycle/A10.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "c338aeee6c90deb846d7904891f33e34ff2f6e2e66c2a7d4b3dddb2825e5624a",
+      "before_sha256": "3c9d15e206390878af1b6004fe2a4b774e58a67cdf0373ed69270da778626492",
+      "path": "agent_cycle/A11.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "f556539fe380240747c6030f58d10a39eb27d00c782b2a09e4eefb6ea4d66c8b",
+      "before_sha256": "e2058036a57637561cf4401da3d06b28b36bb01704866f4743b28e471d2e7729",
+      "path": "agent_cycle/A12.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "d3f67083ff6b84e5da43463b7aab61180dd99ed38f776d062a3cb431efc83c69",
+      "before_sha256": "06334a1b32e16ca5d51efdbb6083a2891069d1e74e47c18681aeb0785412967d",
+      "path": "agent_cycle/A13.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "9fb7e8c34ffe7c343f743c9baa7ed5b8795876ec47d3e9d3e447a675160627b6",
+      "before_sha256": "00e7f898b67cc96f93320a6638c2a1bcced948f7a96daf983a20d9c2aa4c2890",
+      "path": "agent_cycle/A14.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "643b66a38d57d237332cb3b176d5febf136e0e45b0b5cff87ce52cf0cdcc2c7c",
+      "before_sha256": "df5df6b2c658d275576620c68eaa6d28dbc7e6bb12e55c62a2539af8d558afb3",
+      "path": "agent_cycle/A15.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "f819dfa78894047f420929b201218338d277f8df9703e9cfb2d2ad02fb2ab3b0",
+      "before_sha256": "b3e92a81d612c4974adbadd3e1c954efe5d0e66012c9305ed2a54a97bed5e1bc",
+      "path": "agent_cycle/A16.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "211ac2604277dd2315cbe36f29eaa412e554d8a2d1b7c7d32875111528ca2b2a",
+      "before_sha256": "6bfdc3a257477d6dca632763bd939d192f753470ed79e9248521a6febd5c9b5c",
+      "path": "agent_cycle/A17.md",
+      "reason": "Prepare stable specialist instructions with preserved continuity and historical dispatch"
+    },
+    {
+      "after_sha256": "3a0e2405577f36bea380beddd5e99f0cda422a4ed205a30c4ed4824a22430b64",
+      "before_sha256": "da97e93f52c1e3ad1a0677e8a24dc7d0a5d6ebd5e5413404dd7feeafaf7394f2",
+      "path": "agent_cycle/A99.md",
+      "reason": "Update A99 standing instructions for RC14.10"
+    },
+    {
+      "after_sha256": "f9b5c066a7f73fd6439222989ba00aaae85aa58b1e880ad543586d91e4439f9d",
+      "before_sha256": "2ae43124237a1ac3b36d6b86f88930d7a78ee7606a4001fb9ab411b60c3520dc",
+      "path": "agent_cycle/DISPATCH_README.md",
+      "reason": "Prevent confusion between current release and new dispatch"
+    },
+    {
+      "after_sha256": "e5662c59c858b4fcd919f6901f80f5211cd5dfa696bebebfefaa9bb2e8f53ab3",
+      "before_sha256": "b7f41828599535c55a97a760f564d08842b17b12ef02aaadf46825ce748c26ac",
+      "path": "agent_cycle/MINIMAL_PROMPTS.md",
+      "reason": "Prepare next-cycle copyable prompts, not a fabricated dispatch"
+    },
+    {
+      "after_sha256": "872457df0a93a39dd50a4ba45c002ba29b6ecffd39231a3012950666920a8c4d",
+      "before_sha256": "aaf59b981b62a6e428a877dc62e32d7f0116dd5e0b0ec97d2beb092dc018de33",
+      "path": "agent_cycle/continuity/A99.md",
+      "reason": "Document final integration identity, limits and stable-team dependencies"
+    },
+    {
+      "after_sha256": "7532e2f1fb9bfbed7b4b66f8b9c9a874ff988f282a1d81fa31f0b198748120da",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A10.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "3c9d15e206390878af1b6004fe2a4b774e58a67cdf0373ed69270da778626492",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A11.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "e2058036a57637561cf4401da3d06b28b36bb01704866f4743b28e471d2e7729",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A12.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "06334a1b32e16ca5d51efdbb6083a2891069d1e74e47c18681aeb0785412967d",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A13.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "00e7f898b67cc96f93320a6638c2a1bcced948f7a96daf983a20d9c2aa4c2890",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A14.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "df5df6b2c658d275576620c68eaa6d28dbc7e6bb12e55c62a2539af8d558afb3",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A15.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "b3e92a81d612c4974adbadd3e1c954efe5d0e66012c9305ed2a54a97bed5e1bc",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A16.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "6bfdc3a257477d6dca632763bd939d192f753470ed79e9248521a6febd5c9b5c",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A17.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "da97e93f52c1e3ad1a0677e8a24dc7d0a5d6ebd5e5413404dd7feeafaf7394f2",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/A99.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "3e1f9ac0b2d47b3c6abcf0f0b834fff6a995df0c5b82ce4d8d62c801e2404410",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/CYCLE_PROTOCOL.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "9acc7de32a35059809f87e78bf97856c259fb8f9b68a59ed9b10efd5450ec7e0",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/CYCLE_STATE.json",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "2ae43124237a1ac3b36d6b86f88930d7a78ee7606a4001fb9ab411b60c3520dc",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/DISPATCH_README.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "b7f41828599535c55a97a760f564d08842b17b12ef02aaadf46825ce748c26ac",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/MINIMAL_PROMPTS.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "1a06206ef0b807a66800e348b7bea9153e14dd9aa658cfc294e8a903e2712ec9",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/RC14_9_RELEASE_OBJECTIVES.md",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "d700aba2b8bf257bb75f5b6e8cbf0f8772d4719667c17239a575324f5f523281",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/assignments.json",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "af59261e164acdc7bd7cf4efd83275831c3353920148d44c507d4814c12e1a5b",
+      "before_sha256": null,
+      "path": "agent_cycle/archive/RC14_9_dispatch/test_rc14_8_a99_release.py.txt",
+      "reason": "Preserve immutable next-cycle dispatch instructions and release-boundary regression as historical context"
+    },
+    {
+      "after_sha256": "dd3cc38fa96fd6d8d133fe2742a7d55d33a9024ef39b9d15e870000ff123534f",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/DELIVERY.md",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "9a12164fbf0fdeb611d7c74467ce1dc0dfecac2bac34b6cdc4f53ec6378ef70a",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/TEST_EXIT_EVIDENCE.txt",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "13bba534041b83652c48df1d398cf145ec056592aa1bc53e8f3fcc759906cd39",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/a10_adversarial.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "ba82645b737184ab97bfb787eca1903e042e7a89d59ea5f223b0451d73612c8e",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/adapters_explicit.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "6eccc364611548985f208f5481a2446555d33eeacf0dfb8ff80511bddec9fd1d",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/browser_all.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "e77b6eb2a8cb240941c0f5f25ae367d5bbfad55f6e205dbdaff1d406131697e9",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/focused_pre_harmonization.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "75e11c8cda420231de5b565a76d5850a4e2b816c2163f870697ad1b81595acce",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/full_nonbrowser.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "bbaf558fd3b6768122d77baab81b921bc1e40922494f5eb859b3d6f3b74ad612",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/full_nonbrowser_explicit.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "f52e8c77e11632896c55887cf2f4e8bdf864cbe7db3f9a5e358f947c9c71d3d8",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/harmonized_focused.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "29954b240e0c1ec38cec45209b39220a5a738e36402d841fb2dbc48cf39ea304",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/installed_http.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "5baac0243651e7f07bc785caa5fa59aba79d7d0c2827c8f31992faf55fa907ea",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/installed_verify.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "c771940da297a903af8cf6d99fd36a2ad5b48198a3b3bc98e3d71dc5c9eb1c15",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/no_early_merge.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "e8a8fb1233819a3dc32069c2ca5f664f921ed81c5dc154146c23dc3e11547a4a",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/official_merge.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "1cbeab03653561af231baeb13b609c3842f67633c7a8adcda664b1ac62a82336",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/official_verify.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "9d17cbcbe185c30d9aa89df7e418322e2640619a279c209f038fe8d43c6f9119",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/reproA.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "662aad56b806eecbc177d357ac668167710d3c1a7c135ffa08d4e23db49388e0",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/reproB.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "a7a289e3c083b84ca4399e05c9699fdbb8806a52fa3f91b577707ccf169c8c8f",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/source_refresh_initial.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "a550d091ce049ca0760c076181cfd14662a794711d328e804ee205a6ee39d787",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/split_exit_status.txt",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "1a31c8d8e27670f368130e2e7b7c48183af213df4688c8d95d2c758ccce4233d",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/split_exit_status_extra.txt",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "ced7d48f12081e74dbf60a4774cd31d51e85c683b262826aaee0e264de5f71fe",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/wheel_build_independent.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "be29aba371741c8db6c4483feacb3fe3b9590f2b2482b76b6ce2709d816821ba",
+      "before_sha256": null,
+      "path": "agent_cycle/deliveries/A99/evidence/wheel_build_pip.log",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "9f3f7ff234453e38527955acfdd9c57e5880e1d97dc9d98a5d5b62a6e48b64e7",
+      "before_sha256": null,
+      "path": "integration/RC14_9_AGENT_MERGE_ADMISSION.json",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    },
+    {
+      "after_sha256": "fde5f7fe2a5edccf842f3b3f490b6e07d8719e70a767aeadb4a958c83c4abbb1",
+      "before_sha256": null,
+      "path": "integration/RC14_9_INTEGRATION_MANIFEST.json",
+      "reason": "A99 original independent verification evidence and integration provenance record"
+    }
+  ],
+  "note": "All A99-edited or archived release content has external before/after SHA-256; generated integrity manifests themselves are intentionally not self-hashed. Archived worker submissions keep their original digests.",
+  "release": "RC14.9 Experimental",
+  "release_version": "0.1.1.dev27",
+  "schema": "sqe.a99-harmonization.v1",
+  "scientific": {
+    "convergence": "NOT_ESTABLISHED",
+    "em_epr_hamiltonian": "BLOCKED",
+    "fabrication": "HOLD",
+    "mode_identity": "BLOCKED"
+  }
+}

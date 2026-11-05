@@ -367,13 +367,28 @@ def build_qdesign(layout: dict) -> QDesignBuild:
                         tuple(sorted(junction_layers)))
 
 
+def _gds_real8(raw: bytes) -> float:
+    """Decode GDSII's 8-byte base-16 real (not IEEE-754)."""
+    if len(raw) != 8:
+        _reject('Truncated GDSII real8 value')
+    if raw == b'\0' * 8:
+        return 0.0
+    exponent = (raw[0] & 0x7f) - 64
+    mantissa = int.from_bytes(raw[1:], 'big')
+    if not mantissa:
+        _reject('Invalid GDSII real8 mantissa')
+    value = (mantissa / (1 << 56)) * (16.0 ** exponent)
+    return -value if raw[0] & 0x80 else value
+
+
 def _inspect_native_gds(path: Path, expected_layers: set[int], required_cells: set[str],
                         allowed_layers: set[int] | None = None) -> dict:
     """Bounded *read-only* structural inspection of the native GDSII file.
 
     This is NOT a GDS writer or renderer. The native renderer alone serializes
-    mask geometry. Scan only record lengths/tags, layer numbers and cell names;
-    no geometry construction, numeric interpretation or process qualification.
+    mask geometry. Decode native GDSII length units and cell-local primitive
+    XY envelopes, but do not follow hierarchical cell references/transforms,
+    extend PATH widths, reconstruct mask polygons or qualify a process.
     """
     try:
         size = path.stat().st_size
@@ -385,6 +400,16 @@ def _inspect_native_gds(path: Path, expected_layers: set[int], required_cells: s
     pos, cells, layers = 0, set(), set()
     started, finished, in_structure, shape_count = False, False, False, 0
     seen_header = seen_bgnlib = seen_units = False
+    db_unit_m = user_unit_m = None
+    active_shape = None
+    active_reference = None
+    current_cell = None
+    reference_edges: dict[str, set[str]] = {}
+    reference_count = 0
+    bounds_by_layer: dict[int, list[int]] = {}
+    counts_by_layer: dict[int, int] = {}
+    polygon_area_dbu2_by_layer: dict[int, float] = {}
+    polygon_count_by_layer: dict[int, int] = {}
     while pos < size:
         if size - pos < 4:
             _reject('truncated native GDSII record header')
@@ -398,14 +423,24 @@ def _inspect_native_gds(path: Path, expected_layers: set[int], required_cells: s
             seen_header = length == 6 and dtype == 2
         elif tag == 0x01:  # BGNLIB
             seen_bgnlib = True
-        elif tag == 0x03:  # UNITS
-            seen_units = length == 20 and dtype == 5
+        elif tag == 0x03:  # UNITS: database unit in user units, then metres
+            if seen_units or length != 20 or dtype != 5:
+                _reject('Missing or duplicate GDSII length units')
+            user_scale, db_unit_m = _gds_real8(payload[:8]), _gds_real8(payload[8:])
+            if (not math.isfinite(user_scale) or not 0 < user_scale <= 1
+                    or not math.isfinite(db_unit_m) or not 1e-15 <= db_unit_m <= 1e-3):
+                _reject('Unusable GDSII database length units')
+            user_unit_m = db_unit_m / user_scale
+            if not math.isfinite(user_unit_m) or not 0 < user_unit_m <= 1:
+                _reject('Unusable GDSII user length unit')
+            seen_units = True
         elif tag == 0x05:  # BGNSTR
             if in_structure:
                 _reject('nested GDSII structures')
             started, in_structure = True, True
+            current_cell = None
         elif tag == 0x06:  # STRNAME
-            if not in_structure or dtype != 6:
+            if not in_structure or current_cell is not None or dtype != 6:
                 _reject('GDSII cell name outside structure')
             try:
                 name = payload.rstrip(b'\0').decode('ascii')
@@ -414,18 +449,100 @@ def _inspect_native_gds(path: Path, expected_layers: set[int], required_cells: s
             if not name or len(name) > 32 or name in cells:
                 _reject('invalid/duplicate native GDSII cell identity')
             cells.add(name)
+            current_cell = name
+            reference_edges[name] = set()
         elif tag == 0x07:  # ENDSTR
-            if not in_structure:
-                _reject('GDSII structure end without beginning')
+            if not in_structure or current_cell is None or active_shape is not None or active_reference is not None:
+                _reject('GDSII structure is incomplete or has an unclosed element')
             in_structure = False
-        elif tag in (0x08, 0x09):  # BOUNDARY or PATH
-            if not in_structure:
-                _reject('GDSII geometry outside structure')
+            current_cell = None
+        elif tag in (0x0a, 0x0b):  # SREF or AREF: inspect cell dependencies, not placement
+            if not in_structure or current_cell is None or active_shape is not None or active_reference is not None:
+                _reject('GDSII cell reference outside a named structure or nested element')
+            active_reference = {'kind': tag, 'name': None, 'xy': None, 'colrow': None}
+        elif tag == 0x12 and active_reference is not None:  # SNAME
+            if dtype != 6 or active_reference['name'] is not None:
+                _reject('Malformed or duplicate GDSII reference cell name')
+            try:
+                name = payload.rstrip(b'\0').decode('ascii')
+            except UnicodeDecodeError:
+                _reject('Non-ASCII GDSII referenced cell identity')
+            if not name or len(name) > 32:
+                _reject('Invalid GDSII referenced cell identity')
+            active_reference['name'] = name
+        elif tag == 0x13 and active_reference is not None:  # AREF COLROW
+            if (active_reference['kind'] != 0x0b or active_reference['colrow'] is not None
+                    or dtype != 2 or length != 8):
+                _reject('Invalid GDSII AREF array dimensions')
+            columns, rows = struct.unpack('>HH', payload)
+            if not 1 <= columns <= 32767 or not 1 <= rows <= 32767:
+                _reject('Invalid GDSII AREF positive array dimensions')
+            active_reference['colrow'] = (columns, rows)
+        elif tag == 0x10 and active_reference is not None:  # reference XY placement
+            expected_bytes = 8 if active_reference['kind'] == 0x0a else 24
+            if dtype != 3 or len(payload) != expected_bytes or active_reference['xy'] is not None:
+                _reject('Missing or malformed GDSII SREF/AREF placement coordinates')
+            active_reference['xy'] = True
+        elif tag in (0x08, 0x09, 0x2d):  # BOUNDARY, PATH or BOX
+            if not in_structure or current_cell is None or active_shape is not None or active_reference is not None:
+                _reject('GDSII geometry outside structure or nested element')
             shape_count += 1
+            active_shape = {'kind': tag, 'layer': None, 'xy': None, 'twice_area': None}
         elif tag == 0x0D:  # LAYER
             if not in_structure or dtype != 2 or length != 6:
                 _reject('malformed native GDSII layer record')
-            layers.add(struct.unpack('>H', payload)[0])
+            layer = struct.unpack('>H', payload)[0]
+            # A GDS library can also contain LAYER records on TEXT/NODE
+            # elements. Only completed physical BOUNDARY/PATH/BOX shapes can
+            # support the declared mask geometry layer inventory.
+            if active_shape is not None:
+                if active_shape['layer'] is not None:
+                    _reject('Duplicate geometry layer record')
+                active_shape['layer'] = layer
+        elif tag == 0x10 and active_shape is not None:  # XY integer DBU coordinates
+            if (dtype != 3 or active_shape['xy'] is not None or len(payload) % 8
+                    or len(payload) < (16 if active_shape['kind'] == 0x09 else 32)
+                    or len(payload) > 8 * 8192):
+                _reject('Missing or malformed GDSII polygon/path coordinates')
+            values = struct.unpack('>' + 'i' * (len(payload) // 4), payload)
+            coords = list(zip(values[::2], values[1::2]))
+            if active_shape['kind'] != 0x09 and coords[0] != coords[-1]:
+                _reject('Unclosed GDSII boundary/box polygon')
+            active_shape['xy'] = (min(x for x, _ in coords), min(y for _, y in coords),
+                                  max(x for x, _ in coords), max(y for _, y in coords))
+            if active_shape['kind'] != 0x09:
+                # Shoelace area of each closed primitive only; neither BOOLEAN
+                # mask union nor hierarchy placement. Integer DBUs avoid
+                # cancellation/roundoff on fine cryogenic layout geometry.
+                twice = sum(x1 * y2 - x2 * y1
+                            for (x1, y1), (x2, y2) in zip(coords, coords[1:]))
+                if not twice:
+                    _reject('Degenerate GDSII polygon has zero signed area')
+                active_shape['twice_area'] = abs(twice)
+        elif tag == 0x11 and active_reference is not None:  # reference ENDEL
+            if (active_reference['name'] is None or active_reference['xy'] is None
+                    or (active_reference['kind'] == 0x0b and active_reference['colrow'] is None)):
+                _reject('GDSII SREF/AREF missing cell identity or placement record')
+            reference_edges[current_cell].add(active_reference['name'])
+            reference_count += 1
+            active_reference = None
+        elif tag == 0x11 and active_shape is not None:  # ENDEL
+            layer, xy = active_shape['layer'], active_shape['xy']
+            if layer is None or xy is None:
+                _reject('GDSII polygon/path missing layer or XY coordinates')
+            layers.add(layer)
+            if layer not in bounds_by_layer:
+                bounds_by_layer[layer] = list(xy)
+                counts_by_layer[layer] = 0
+            box = bounds_by_layer[layer]
+            box[0] = min(box[0], xy[0]); box[1] = min(box[1], xy[1])
+            box[2] = max(box[2], xy[2]); box[3] = max(box[3], xy[3])
+            counts_by_layer[layer] += 1
+            if active_shape['twice_area'] is not None:
+                polygon_area_dbu2_by_layer[layer] = (polygon_area_dbu2_by_layer.get(layer, 0)
+                                                     + active_shape['twice_area'] / 2)
+                polygon_count_by_layer[layer] = polygon_count_by_layer.get(layer, 0) + 1
+            active_shape = None
         elif tag == 0x04:  # ENDLIB
             if in_structure:
                 _reject('unclosed native GDSII structure')
@@ -433,6 +550,30 @@ def _inspect_native_gds(path: Path, expected_layers: set[int], required_cells: s
         pos += length
     if not (seen_header and seen_bgnlib and seen_units and started and finished and cells and shape_count):
         _reject('native GDSII missing mandatory library, structure or shape records')
+    if active_shape is not None or active_reference is not None or not bounds_by_layer:
+        _reject('Unclosed or unlocated native GDSII polygon/path/reference')
+    referenced_cells = set().union(*reference_edges.values()) if reference_edges else set()
+    if not referenced_cells <= cells:
+        _reject(f'Native GDSII cell references missing definitions: {sorted(referenced_cells - cells)}')
+    # A recursive hierarchy cannot be expanded into a finite native layout.
+    # Iterative DFS avoids Python recursion limits on adversarial GDS graphs.
+    visited: set[str] = set()
+    for cell in cells:
+        if cell in visited:
+            continue
+        processing: set[str] = set()
+        stack = [(cell, False)]
+        while stack:
+            name, complete = stack.pop()
+            if complete:
+                processing.remove(name)
+                visited.add(name)
+            elif name in processing:
+                _reject('Native GDSII has a cyclic cell-reference hierarchy')
+            elif name not in visited:
+                processing.add(name)
+                stack.append((name, True))
+                stack.extend((child, False) for child in reference_edges[name])
     if not expected_layers <= layers:
         _reject(f'GDS layers {sorted(layers)} omit required QGeometry layers {sorted(expected_layers)}')
     if allowed_layers is not None and not layers <= allowed_layers:
@@ -440,7 +581,24 @@ def _inspect_native_gds(path: Path, expected_layers: set[int], required_cells: s
     if not required_cells <= cells:
         _reject(f'GDS missing required junction cells {sorted(required_cells - cells)}')
     return {'cells': sorted(cells), 'layers': sorted(layers), 'geometry_records': shape_count,
-            'inspection': 'read_only_gdsii_record_scan'}
+            'inspection': 'read_only_gdsii_record_scan',
+            'sref_aref_records': reference_count,
+            'referenced_cells': sorted(referenced_cells),
+            'hierarchy_scope': 'references_resolved_and_acyclic_only_no_cell_placement_or_transforms',
+            'database_unit_m': db_unit_m,
+            'user_unit_m': user_unit_m,
+            'xy_local_bounds_um_by_layer': {
+                str(layer): [round(value * db_unit_m * 1e6, 9) for value in box]
+                for layer, box in sorted(bounds_by_layer.items())},
+            'xy_shape_counts_by_layer': {str(layer): counts_by_layer[layer]
+                                         for layer in sorted(counts_by_layer)},
+            'polygon_primitive_area_um2_by_layer': {
+                str(layer): round(area * (db_unit_m * 1e6) ** 2, 9)
+                for layer, area in sorted(polygon_area_dbu2_by_layer.items())},
+            'polygon_primitive_counts_by_layer': {str(layer): polygon_count_by_layer[layer]
+                                                   for layer in sorted(polygon_count_by_layer)},
+            'xy_scope': 'cell_local_vertices_only_no_hierarchy_transforms_or_path_widths',
+            'area_scope': 'sum_of_cell_local_closed_polygon_areas_no_boolean_union_hierarchy_or_paths'}
 
 
 def run(study: dict, project: dict, output_dir: str | Path) -> dict:
@@ -481,6 +639,9 @@ def run(study: dict, project: dict, output_dir: str | Path) -> dict:
     output = safe_output(output_dir)
     filename = 'quantum_metal_unqualified.gds'
     target = output / filename
+    if (target.exists() or target.is_symlink() or (output / 'gds_hold.json').exists()
+            or (output / 'gds_hold.json').is_symlink()):
+        raise EngineBlocked('Existing GDS draft/hold evidence cannot be overwritten')
     try:
         renderer = QGDSRenderer(design=build.design)
         renderer.options['fabricate'] = 'False'
@@ -503,6 +664,10 @@ def run(study: dict, project: dict, output_dir: str | Path) -> dict:
     (output / 'gds_hold.json').write_text(json.dumps({
         'fabrication_status': 'HOLD', 'source': 'Quantum Metal QGDSRenderer',
         'engine_version': version, 'recipe_sha256': build.recipe_sha256,
+        'gds_sha256': sha256(target.read_bytes()).hexdigest(),
+        'component_names': list(build.component_names),
+        'route_net_names': [route[0] for route in build.routes],
+        'gds_to_mesh_registration': 'not_established_requires_native_mesh_and_independent_geometry_review',
         'layers_declared': sorted(layer_set), 'qgeometry_layers': list(build.layers),
         'negative_mask_layers': sorted(negative_set), 'gds_structure': inspection,
         'junction_cells': [], 'reason': 'No approved PDK, DRC/LVS, mask polarity approval, or foundry signoff',

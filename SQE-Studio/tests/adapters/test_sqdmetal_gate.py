@@ -218,3 +218,25 @@ def test_wsl_readiness_refuses_non_windows(monkeypatch):
     monkeypatch.setattr(em.platform, 'system', lambda: 'Linux')
     with pytest.raises(EngineBlocked, match='Windows'):
         em._palace_readiness()
+
+
+def test_fast_upstream_material_catalogue_gate_remains_fail_closed():
+    from types import SimpleNamespace
+    study, project = physical_case()
+    stack = project['process']['stack']
+    class Material:
+        def __init__(self, name):
+            self.permittivity = 11.45 if name == 'silicon' else 1.0
+            self.loss_tangent = 2.7e-6 if name == 'silicon' else 0.0
+    with pytest.raises(EngineBlocked, match='installed substrate material table differs'):
+        em._check_native_material_catalogue(stack, Material)
+    stack[0]['relative_permittivity'] = 11.45
+    stack[0]['loss_tangent'] = 2.7e-6
+    em._check_native_material_catalogue(stack, Material)
+    class AlteredMaterial(Material):
+        def __init__(self, name):
+            super().__init__(name)
+            if name == 'silicon':
+                self.loss_tangent = 0.0
+    with pytest.raises(EngineBlocked, match='tan_delta'):
+        em._check_native_material_catalogue(stack, AlteredMaterial)

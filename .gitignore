@@ -1,0 +1,4 @@
+# Temporary test/solver collectors live outside the inventoried Python project.
+.sqe-regression-*/
+.sqe-em-report-*/
+/EVIDENCE/

@@ -13,6 +13,7 @@ import urllib.request
 from pathlib import Path
 from sqe_studio.server import make_server
 from sqe_studio.eda.use_cases import list_use_cases
+import sqe_studio
 
 
 def main():
@@ -57,7 +58,10 @@ def main():
             assert request('/api/engines')[0]==200
             assert request('/api/logout',{},csrf)[0]==200
             assert request('/api/projects')[0]==401
-            print('PASS: installed wheel, real local HTTP, auth/CSRF, CPW model, stale revision, UI resources, logout')
+            source_root = Path(__file__).resolve().parents[1]/'src'
+            scope = ('source runtime' if Path(sqe_studio.__file__).resolve().is_relative_to(source_root)
+                     else 'installed wheel')
+            print('PASS: '+scope+', real local HTTP, auth/CSRF, CPW model, stale revision, UI resources, logout')
             print('No native EM solve or scientific validation was asserted.')
         finally:
             server.shutdown();server.server_close();thread.join(timeout=4)

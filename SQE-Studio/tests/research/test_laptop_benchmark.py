@@ -26,7 +26,7 @@ def _write(path, data):
 def _reviewed(tmp_path, *, execution='solve'):
     model = resonator_project(execution=execution)
     evidence = tmp_path / 'assumptions.md'
-    evidence.write_text('Research assumptions only: silicon 11.7, Al film assumed, not independently measured.\n')
+    evidence.write_text('Research assumptions only: silicon 11.45 tan-delta 2.7e-6, Al film assumed, not independently measured.\n')
     reviewed, record = approve_exploratory_stack(model, reviewer='PhysicsReviewer',
                  document=evidence, source_url='https://sqdlab.github.io/SQDMetal/examples/Palace_Eigenmode_Res_Gmsh.html')
     return reviewed, evidence, record
@@ -124,6 +124,35 @@ def test_eigenmode_parser_rejects_units_empty_and_nonfinite(tmp_path):
             _native_eig(f)
 
 
+def test_real_palace_scientific_notation_mode_indices(tmp_path):
+    # Palace 0.16 writes m as 1.00e+00 rather than the integer string '1'.
+    # These are native-output FORMAT fixtures, not a solver validation.
+    eig = tmp_path / 'eig.csv'
+    eig.write_text(
+        '        m,                Re{f} (GHz),                Im{f} (GHz),'
+        '                          Q,              Error (Bkwd.),'
+        '               Error (Abs.)\n'
+        ' 1.00e+00,        +5.904978e+00,        +8.173443e-06,'
+        '        +3.612295e+05,        +6.732491e-12,        +3.078225e-05\n'
+        ' 2.00e+00,        +6.120000e+00,        +1.000000e-05,'
+        '        +3.000000e+05,        +1.000000e-11,        +2.000000e-05\n',
+        encoding='utf-8',
+    )
+    modes = _native_eig(eig)
+    assert modes == [{'mode_index': 1, 'frequency_GHz': 5.904978},
+                     {'mode_index': 2, 'frequency_GHz': 6.12}]
+
+
+@pytest.mark.parametrize('bad_mode', ['1.5e+00', '0.00e+00', '2.00e+00',
+                                      'NaN', 'Inf', '-1.00e+00', 'not-a-mode'])
+def test_palace_mode_indices_must_be_exact_finite_ordered_integers(tmp_path, bad_mode):
+    eig = tmp_path / 'eig.csv'
+    eig.write_text('m,Re{f} (GHz),Im{f} (GHz)\n'
+                   + bad_mode + ',+5.904978e+00,+8.173443e-06\n', encoding='utf-8')
+    with pytest.raises(BenchmarkBlocked):
+        _native_eig(eig)
+
+
 def test_refinement_numeric_difference_requires_consistent_geometry(tmp_path):
     ready, _, _ = _reviewed(tmp_path)
     a = assess_native_run(ready, _fixture(tmp_path, ready, run='a', frequency=5.00))
@@ -218,6 +247,8 @@ def test_a03_worker_output_type_and_native_epr_tables_are_not_hidden(tmp_path, m
             'Problem':{'Type':'Eigenmode', 'Output':'outputFiles'}, 'Model':{'Mesh':'sqe_em.msh'}}))
     def solve(readiness, folder, deck, cpus):
         (folder/'palace-native.log').write_text('test fixture only')
+        (folder/'palace-phases.json').write_text(json.dumps({'schema':'sqe.palace-phases.v1',
+            'events':[{'phase':'solver_process_returned','exit_code':0}]}))
         (folder/'outputFiles/eig.csv').write_text('Mode,Re{f} (GHz)\n1,5.01\n')
         (folder/'outputFiles/port-EPR.csv').write_text('Mode,Port1\n1,0.2\n')
         return {'exit_code':0,'elapsed_seconds':0.0}

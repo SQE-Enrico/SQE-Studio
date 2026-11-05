@@ -1,0 +1,517 @@
+{
+  "benchmark_cases": [
+    {
+      "budget_s": 750,
+      "checks": [
+        "all executed tests exit cleanly",
+        "no bypass of CSP, ZIP traversal or revision/auth checks"
+      ],
+      "domain": "release",
+      "engines": [
+        "pytest",
+        "Playwright/Chromium",
+        "Python packaging"
+      ],
+      "evidence": [
+        "source and plan digests",
+        "pytest per-case and toolchain versions",
+        "installed wheel and real HTTP auth/revision",
+        "actual browser test trace or BLOCKED"
+      ],
+      "id": "B00",
+      "limitations": "Software correctness does not establish physical validity.",
+      "owners": [
+        "A10",
+        "A14",
+        "A15"
+      ],
+      "priority": "mandatory",
+      "requires": [
+        "clean source",
+        "available browser for browser-specific PASS"
+      ],
+      "title": "Portable software/security + authentic browser/installer"
+    },
+    {
+      "budget_s": 180,
+      "checks": [
+        "nondegenerate geometry",
+        "correct pin/route and layer lineage",
+        "same design revision across exports"
+      ],
+      "domain": "cad",
+      "engines": [
+        "Quantum Metal",
+        "Gmsh"
+      ],
+      "evidence": [
+        "verified GDS and mesh hashes",
+        "layer/port/physical-tag mapping",
+        "geometry dimensions, units and area checks"
+      ],
+      "id": "B01",
+      "limitations": "Geometric consistency is not foundry DRC/LVS approval.",
+      "owners": [
+        "A17",
+        "A14"
+      ],
+      "priority": "mandatory",
+      "requires": [
+        "native supported CAD installed",
+        "exact geometry/material parameters"
+      ],
+      "title": "Parametric CPW/QDesign -> GDS -> Gmsh physical lineage"
+    },
+    {
+      "budget_s": 780,
+      "checks": [
+        "independent solver exit and residual",
+        "no auto PASS for mode-index matching",
+        "frequency and Q mesh drift explicitly quantified",
+        "negative kappa preserved for physical review"
+      ],
+      "domain": "em_eigenmode",
+      "engines": [
+        "SQDMetal",
+        "Gmsh",
+        "Palace"
+      ],
+      "evidence": [
+        "mesh counts/order/scale and solver convergence",
+        "complex field export availability",
+        "frequency, signed kappa, total/external Q",
+        "electric/magnetic energy residual",
+        "native input/output hashes"
+      ],
+      "id": "B02",
+      "limitations": "The previous 2.093% frequency drift is not converged physics. Third mesh is attempted only with time/memory budget and provenance.",
+      "owners": [
+        "A11",
+        "A17"
+      ],
+      "priority": "mandatory",
+      "requires": [
+        "native Palace WSL or qualified binary",
+        "reviewed exploratory CPW reference parameters"
+      ],
+      "title": "CPW quarter-wave eigenmodes, 2-3 mesh refinements and energy"
+    },
+    {
+      "budget_s": 210,
+      "checks": [
+        "mode pairing based on validated complex-field overlap, not scalar frequencies",
+        "no mode match when normalization/registration ambiguous"
+      ],
+      "domain": "field_identity",
+      "engines": [
+        "Palace field outputs"
+      ],
+      "evidence": [
+        "original field member hashes",
+        "registration and phase-invariant overlap per mode",
+        "normalization and uncertainty assessment"
+      ],
+      "id": "B03",
+      "limitations": "Missing fields are BLOCKED; field energy ratio is not spatial mode overlap.",
+      "owners": [
+        "A11"
+      ],
+      "priority": "mandatory_if_fields",
+      "requires": [
+        "genuine complex fields for two solutions",
+        "validated coordinates, orientations, units, material domains, interpolation and overlap norm"
+      ],
+      "title": "Complex E/H mode-overlap registration across meshes"
+    },
+    {
+      "budget_s": 360,
+      "checks": [
+        "C matrix symmetry within recorded numerical tolerance",
+        "physically valid energy and conductor mapping",
+        "no invented EJ/EC from missing geometry"
+      ],
+      "domain": "em_electrostatic",
+      "engines": [
+        "SQDMetal",
+        "Gmsh",
+        "Palace electrostatic"
+      ],
+      "evidence": [
+        "native C-matrix with units and conductor order",
+        "mesh revision",
+        "reciprocity/symmetry residual and physical sign checks",
+        "Csum and EC transfer assumptions"
+      ],
+      "id": "B04",
+      "limitations": "References show methods, not transferable target capacitance without matching geometry and boundary conditions.",
+      "owners": [
+        "A17",
+        "A12"
+      ],
+      "priority": "mandatory_if_available",
+      "requires": [
+        "native electrostatic setup with labeled conductors"
+      ],
+      "title": "Electrostatic X-mon/transmon capacitance matrix"
+    },
+    {
+      "budget_s": 360,
+      "checks": [
+        "passivity for clearly passive model with defined port normalization",
+        "reciprocity where medium/ports warrant it",
+        "frequency-domain peak/dip compared only for compatible resonators"
+      ],
+      "domain": "em_driven",
+      "engines": [
+        "Palace driven",
+        "SQDMetal"
+      ],
+      "evidence": [
+        "frequency grid",
+        "S11/S21 complex values, unit conventions",
+        "eigenmode frequency comparison and loss assumptions"
+      ],
+      "id": "B05",
+      "limitations": "Mismatch or unknown port/deembedding reference is BLOCKED rather than silently corrected.",
+      "owners": [
+        "A11",
+        "A16"
+      ],
+      "priority": "if_budget",
+      "requires": [
+        "qualified two-port driven deck and port normalization"
+      ],
+      "title": "Driven CPW 2-port S-parameters and resonance consistency"
+    },
+    {
+      "budget_s": 360,
+      "checks": [
+        "EPR and junction normalization within explicit bounds",
+        "expert-review gate cannot be bypassed",
+        "no unconditional EPR->Hamiltonian or unreviewed physical convergence PASS"
+      ],
+      "domain": "quantum_extraction",
+      "engines": [
+        "Palace eigenmode",
+        "SQDMetal EPR",
+        "scqubits"
+      ],
+      "evidence": [
+        "signed per-mode junction participation and energy budget",
+        "normalized mode mapping and units",
+        "native EPR vs reviewed derived Hamiltonian term trace"
+      ],
+      "id": "B06",
+      "limitations": "Published EPR methodology is not proof of equivalence between our geometry and measurements.",
+      "owners": [
+        "A12",
+        "A11"
+      ],
+      "priority": "mandatory_if_available",
+      "requires": [
+        "verified junction/port identity, normalizations and selected physical modes",
+        "native participations and units"
+      ],
+      "title": "EPR junction participation and EM-to-Hamiltonian extraction"
+    },
+    {
+      "budget_s": 300,
+      "checks": [
+        "finite Ls applied only to reviewed physical surfaces",
+        "frequency trend screened, not predetermined without physical setup",
+        "PEC vs Ls comparison uses compatible meshes"
+      ],
+      "domain": "material",
+      "engines": [
+        "Palace",
+        "SQDMetal"
+      ],
+      "evidence": [
+        "PEC vs Ls decks and boundary hashes",
+        "mode-matched frequency shift",
+        "film/surface properties with provenance"
+      ],
+      "id": "B07",
+      "limitations": "Al 100 nm PEC default cannot itself validate kinetic inductance. Values require reviewed assumptions, not fabricated measurements.",
+      "owners": [
+        "A17",
+        "A11"
+      ],
+      "priority": "if_budget",
+      "requires": [
+        "validated film thickness, penetration/ sheet inductance model and surface tags",
+        "same geometry and mode identity"
+      ],
+      "title": "PEC versus finite surface kinetic-inductance comparison"
+    },
+    {
+      "budget_s": 180,
+      "checks": [
+        "convergence with increasing cutoffs",
+        "periodicity/symmetries only where applicable",
+        "energy level ordering and unit consistency"
+      ],
+      "domain": "quantum_circuit",
+      "engines": [
+        "scqubits"
+      ],
+      "evidence": [
+        "spectral table vs flux and parameter changes",
+        "Hilbert/truncation convergence and numeric tolerances",
+        "environment and version"
+      ],
+      "id": "B08",
+      "limitations": "Independent input spectra do not qualify EM-derived Hamiltonians.",
+      "owners": [
+        "A16",
+        "A12"
+      ],
+      "priority": "mandatory_if_available",
+      "requires": [
+        "native scqubits",
+        "documented independent EJ, EC, EL, flux values"
+      ],
+      "title": "Native scqubits transmon and fluxonium spectra"
+    },
+    {
+      "budget_s": 240,
+      "checks": [
+        "HB residual and stability diagnostics",
+        "linear passive limit and unit/port conventions",
+        "gain alone does not prove converged physics"
+      ],
+      "domain": "rf_nonlinear",
+      "engines": [
+        "Julia",
+        "JosephsonCircuits.jl"
+      ],
+      "evidence": [
+        "pump OFF linear baseline",
+        "pump ON gain and scattering/noise outputs where supported",
+        "HB solver convergence/residual and harmonics sweep"
+      ],
+      "id": "B09",
+      "limitations": "No published experimental noise-limit agreement without matching device and calibration.",
+      "owners": [
+        "A16"
+      ],
+      "priority": "mandatory_if_available",
+      "requires": [
+        "native Julia package and reviewed small JPA netlist"
+      ],
+      "title": "JosephsonCircuits.jl linear and pumped JPA harmonic balance"
+    },
+    {
+      "budget_s": 270,
+      "checks": [
+        "no unrelated mode comparison",
+        "no optimizer modifies frozen or unreviewed physical parameters",
+        "no design-ranked PASS on unavailable native outputs"
+      ],
+      "domain": "optimization",
+      "engines": [
+        "SQE design orchestration",
+        "supported native CAD/solvers"
+      ],
+      "evidence": [
+        "geometry diff and revision hashes",
+        "objective targets/units and run lineage",
+        "results in production Results/Compare and re-iteration"
+      ],
+      "id": "B10",
+      "limitations": "Small bounded sweep is not an automatically validated global optimization.",
+      "owners": [
+        "A13",
+        "A14"
+      ],
+      "priority": "mandatory_if_available",
+      "requires": [
+        "two or more genuine comparable design revisions",
+        "comparable physical observables"
+      ],
+      "title": "Revision-bound parameter variation, objective and design feedback"
+    },
+    {
+      "budget_s": 240,
+      "checks": [
+        "real current excitation and units",
+        "no automatic cross-engine equivalence assertion"
+      ],
+      "domain": "em_magnetostatic",
+      "engines": [
+        "SQDMetal",
+        "Gmsh",
+        "Palace magnetostatic"
+      ],
+      "evidence": [
+        "magnetostatic deck/mesh hashes",
+        "B-field/surface tags",
+        "unit and energy checks"
+      ],
+      "id": "B11",
+      "limitations": "Pilot only; do not claim mutual inductance accuracy without independent reference.",
+      "owners": [
+        "A17",
+        "A11"
+      ],
+      "priority": "optional_if_budget",
+      "requires": [
+        "qualified flux-line geometry and DC current boundary"
+      ],
+      "title": "Flux-line magnetostatic pilot and design-side field review"
+    }
+  ],
+  "engine_policy": "native or BLOCKED; synthetic inputs allowed only for parser/unit-security tests and labeled FIXTURE",
+  "execution_policy": {
+    "automatic_numbering": true,
+    "available_time_not_scientific_pass": true,
+    "button": "Automatic Test",
+    "clicks": 1,
+    "engine_runtimes_discovered_on_host": true,
+    "failed_stage_allows_next_safe_stage": true,
+    "memory_control_required": true,
+    "priority_order": [
+      "B00",
+      "B01",
+      "B02",
+      "B03",
+      "B04",
+      "B06",
+      "B08",
+      "B09",
+      "B10",
+      "B05",
+      "B07",
+      "B11"
+    ],
+    "report_subfolder": "qualification-reports",
+    "skip_by_time_status": "BLOCKED_TIME_BUDGET",
+    "soft_goal_only": true,
+    "target_wall_seconds": 3600,
+    "user_selectable_parameters": false
+  },
+  "literature_sources": [
+    {
+      "cases": [
+        "B01",
+        "B02",
+        "B03",
+        "B05"
+      ],
+      "id": "SQD-CPW",
+      "title": "SQDMetal - eigenmode side-coupled CPW resonator",
+      "url": "https://sqdlab.github.io/SQDMetal/examples/Palace_Eigenmode_Res_PortFeed_Gmsh.html"
+    },
+    {
+      "cases": [
+        "B04",
+        "B06"
+      ],
+      "id": "SQD-TRANSMON",
+      "title": "SQDMetal - floating transmon capacitance and eigenmode/EPR",
+      "url": "https://sqdlab.github.io/SQDMetal/examples/Palace_Eigenmode_FloatingTransmon.html"
+    },
+    {
+      "cases": [
+        "B04",
+        "B11"
+      ],
+      "id": "SQD-EXAMPLES",
+      "title": "SQDMetal - worked examples index",
+      "url": "https://sqdlab.github.io/SQDMetal/examples/index.html"
+    },
+    {
+      "cases": [
+        "B02",
+        "B04",
+        "B05",
+        "B06",
+        "B07"
+      ],
+      "id": "SQD-SIM",
+      "title": "SQDMetal - Palace simulation interfaces",
+      "url": "https://sqdlab.github.io/SQDMetal/simulations/simpalace.html"
+    },
+    {
+      "cases": [
+        "B02",
+        "B03",
+        "B05",
+        "B07",
+        "B11"
+      ],
+      "id": "PALACE",
+      "title": "Palace - Maxwell solvers, conventions and problem types",
+      "url": "https://awslabs.github.io/palace/stable/reference/"
+    },
+    {
+      "cases": [
+        "B06"
+      ],
+      "id": "MINEV-2021",
+      "title": "Minev et al. Energy-participation quantization, npj Quantum Information 7, 131 (2021)",
+      "url": "https://doi.org/10.1038/s41534-021-00461-8"
+    },
+    {
+      "cases": [
+        "B08",
+        "B06"
+      ],
+      "id": "SCQUBITS",
+      "title": "scqubits library and documentation",
+      "url": "https://scqubits.readthedocs.io/"
+    },
+    {
+      "cases": [
+        "B09"
+      ],
+      "id": "JOSEPHSON",
+      "title": "JosephsonCircuits.jl native harmonic-balance examples",
+      "url": "https://josephsoncircuits.org/stable/"
+    },
+    {
+      "cases": [
+        "B00",
+        "B01",
+        "B02",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B09",
+        "B10"
+      ],
+      "id": "KEYSIGHT",
+      "title": "Keysight QuantumPro - product capabilities (comparison only, not validation)",
+      "url": "https://www.keysight.com/us/en/products/design-engineering-software/electronic-design-automation/quantum-design-suite/quantum-em-professional-quantumpro.html"
+    }
+  ],
+  "per_case_report_fields": [
+    "case_id",
+    "stage_status",
+    "execution_kind",
+    "provenance",
+    "solver_version",
+    "input_sha256",
+    "geometry_revision_sha256",
+    "material_bc_mesh_hashes",
+    "units",
+    "measurements",
+    "numerical_tolerances",
+    "solver_exit_code",
+    "duration_s",
+    "scientific_limitations",
+    "failure_reason",
+    "log_sha256"
+  ],
+  "schema": "sqe.scientific-benchmark-dispatch.v1",
+  "scientific_release_gates": {
+    "foundry": "HOLD; no approval inferred",
+    "hamiltonian_transfer": "BLOCKED until signed EPR/junction and units reviewed",
+    "mode_identity": "BLOCKED until native complex-field overlap registered, reviewed and converged",
+    "unavailable_tool": "BLOCKED not PASS",
+    "unexecuted_case": "NOT_RUN not PASS"
+  },
+  "status": "COORDINATION_SPECIFICATION_NOT_YET_IMPLEMENTED_OR_EXECUTED",
+  "target_release": "RC14.12"
+}

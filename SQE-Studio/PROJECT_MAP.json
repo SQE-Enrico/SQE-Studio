@@ -1,0 +1,165 @@
+{
+  "schema": "sqe.project-map.v1",
+  "entry": "AGENTS.md",
+  "state": "CURRENT_STATE.json",
+  "areas": {
+    "http": {
+      "purpose": "Loopback API, sessions, projects and verified results",
+      "code": [
+        "src/sqe_studio/server.py",
+        "src/sqe_studio/http_api/*.py"
+      ],
+      "tests": [
+        "tests/security",
+        "tests/extraction/test_conditional_transmon.py"
+      ]
+    },
+    "ui": {
+      "purpose": "Workspace, editors, results and GUI actions",
+      "code": [
+        "src/sqe_studio/web/app.js",
+        "src/sqe_studio/web/modules/*.js",
+        "src/sqe_studio/web_assets.py"
+      ],
+      "tests": [
+        "tests/ui",
+        "scripts/*_ui_qa.cjs"
+      ]
+    },
+    "projects": {
+      "purpose": "Immutable models, SQLite, revisions and ownership",
+      "code": [
+        "src/sqe_studio/contracts.py",
+        "src/sqe_studio/store.py"
+      ],
+      "tests": [
+        "tests/core",
+        "tests/security"
+      ]
+    },
+    "jobs": {
+      "purpose": "Native workers, artifacts, cancellation, sweeps and caching",
+      "code": [
+        "src/sqe_studio/jobs.py",
+        "src/sqe_studio/worker.py",
+        "src/sqe_studio/orchestration/*.py"
+      ],
+      "tests": [
+        "tests/orchestration",
+        "tests/optimization"
+      ]
+    },
+    "cad": {
+      "purpose": "Quantum Metal recipes, native QDesign and GDS",
+      "code": [
+        "src/sqe_studio/adapters/quantum_metal_adapter.py",
+        "src/sqe_studio/design_library.py"
+      ],
+      "tests": [
+        "tests/adapters/test_quantum_metal*.py"
+      ]
+    },
+    "em": {
+      "purpose": "SQDMetal/Gmsh/Palace integration and native evidence",
+      "code": [
+        "src/sqe_studio/adapters/sqdmetal_palace_adapter.py",
+        "src/sqe_studio/native_em_qualification.py",
+        "src/sqe_studio/interop/native_em_evidence.py",
+        "src/sqe_studio/interop/em_convergence.py"
+      ],
+      "tests": [
+        "tests/adapters/test_sqdmetal*.py",
+        "tests/fields"
+      ]
+    },
+    "fields": {
+      "purpose": "Read-only field provenance, VTK diagnostics and comparisons",
+      "code": [
+        "src/sqe_studio/interop/native_field.py",
+        "src/sqe_studio/eda/upstream_*.py",
+        "src/sqe_studio/eda/field_lineage.py"
+      ],
+      "tests": [
+        "tests/fields"
+      ]
+    },
+    "extraction": {
+      "purpose": "Saved capacitance, terminal reduction and conditional quantization",
+      "code": [
+        "src/sqe_studio/interop/extracted_transmon.py",
+        "src/sqe_studio/interop/capacitance_*.py",
+        "src/sqe_studio/interop/transmon_*.py",
+        "src/sqe_studio/interop/independent_transmon_*.py"
+      ],
+      "tests": [
+        "tests/extraction",
+        "tests/quantum"
+      ]
+    },
+    "quantum": {
+      "purpose": "Native scqubits models, basis curves and reference comparisons",
+      "code": [
+        "src/sqe_studio/adapters/scqubits_adapter.py",
+        "src/sqe_studio/eda/scientific_references.py"
+      ],
+      "tests": [
+        "tests/quantum",
+        "tests/adapters/test_scqubits*.py"
+      ]
+    },
+    "rf": {
+      "purpose": "JosephsonCircuits.jl adapter, RF evidence and targets",
+      "code": [
+        "src/sqe_studio/adapters/josephson_adapter.py",
+        "src/sqe_studio/interop/native_rf_evidence.py",
+        "src/sqe_studio/interop/design_targets.py"
+      ],
+      "tests": [
+        "tests/adapters/test_josephson_adapter.py",
+        "tests/science"
+      ]
+    },
+    "testing": {
+      "purpose": "Automatic Test selection, profiles, budgets and immutable reports",
+      "code": [
+        "src/sqe_studio/testing/*.py",
+        "tools/dev.py",
+        "src/sqe_studio/cycle_qualification.py",
+        "src/sqe_studio/qualification.py",
+        "automatic_test_plan.json",
+        "config/scientific_benchmarks.json"
+      ],
+      "tests": [
+        "tests/runtime",
+        "tests/core"
+      ]
+    },
+    "setup": {
+      "purpose": "Windows launcher, engine runtimes and environment recovery",
+      "code": [
+        "Launch SQE Studio.pyw",
+        "workstation_setup.py",
+        "solver_setup.py",
+        "sqdmetal_source.py"
+      ],
+      "tests": [
+        "tests/test_launcher*.py",
+        "tests/test_solver_setup.py",
+        "tests/runtime"
+      ]
+    },
+    "integrity": {
+      "purpose": "Current source fingerprint, core contract and release inventory",
+      "code": [
+        "src/sqe_studio/governance.py",
+        "tools/*.py",
+        "DEVELOPMENT_POLICY.json",
+        "config/core_hashes.json"
+      ],
+      "tests": [
+        "tests/core/test_current_*.py",
+        "tests/security"
+      ]
+    }
+  }
+}

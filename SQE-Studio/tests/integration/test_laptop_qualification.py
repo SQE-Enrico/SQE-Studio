@@ -19,13 +19,26 @@ def source_stub(tmp_path):
     return root
 
 
+def test_verbose_windows_path_redaction_with_escaped_separators():
+    from sqe_studio.qualification import _safe_log
+    inputs = [
+        r'C:\Users\SampleAccount\AppData\Local\Temp\stage',
+        r'C:\\Users\\SampleAccount\\AppData\\Local\\Temp\\stage',
+        r'C:\Documents and Settings\SampleAccount\Temp',
+    ]
+    for sample in inputs:
+        clean = _safe_log('Error in ' + sample, ())
+        assert 'SampleAccount' not in clean
+        assert '[user-home]' in clean
+
+
 def test_report_is_integrity_checked_sanitized_and_explicitly_blocked(tmp_path, monkeypatch):
     root=source_stub(tmp_path)
     monkeypatch.setattr(q,'available',lambda x: x=='pytest')
     monkeypatch.setattr(q.shutil,'which',lambda _:None)
     # Test-only fake subprocess statuses; never scientific engine output.
     def child(args,cwd,env,timeout):
-        if 'pytest' in args:return 0, '239 passed, 13 skipped', 0.1
+        if any(str(arg).endswith('portable_regression.py') for arg in args): return 0, '239 passed, 13 skipped', 0.1
         if 'wheel' in args: return None, 'No module named wheel', 0.1
         return 0, 'PASS email wheel@example.invalid path '+str(Path.home()), 0.1
     monkeypatch.setattr(q,'_run',child)
@@ -152,3 +165,60 @@ def test_comprehensive_julia_probe_cannot_overwrite_report_destination(tmp_path,
     with zipfile.ZipFile(dest) as evidence:
         assert evidence.testzip() is None
         assert json.loads(evidence.read('QUALIFICATION.json'))['profile']=='comprehensive'
+
+
+def test_a15_detailed_junit_evidence_is_included_redacted_and_hashed(tmp_path, monkeypatch):
+    """A broken A15 run must yield actionable details without changing FAIL to PASS."""
+    root = source_stub(tmp_path)
+    monkeypatch.setattr(q,'available',lambda name: name == 'pytest')
+    monkeypatch.setattr(q.shutil,'which',lambda _:None)
+
+    def child(args,cwd,env,timeout):
+        if any(str(arg).endswith('portable_regression.py') for arg in args):
+            folder = Path(env['SQE_QUALIFICATION_DIAGNOSTIC_DIR'])
+            assert folder.is_dir() and folder.is_relative_to(Path(env['HOME']).parent)
+            sample = {
+                'schema':'sqe.a15-detailed-test-evidence.v1',
+                'host_relationships':{'active_equals_base_prefix_text':False},
+                'cases':[{'test':'tests.agent_cycle.A15.test_wheel_isolation::test_one',
+                          'status':'FAILURE','duration_s':1.2,
+                          'diagnostic':r'C:\Users\PrivateAccount\AppData\Local failed PREFIX_MISMATCH',
+                          'traceback':r'C:\Users\PrivateAccount\AppData\Local\Temp\pytest ... EXECUTABLE_MISMATCH'}]
+            }
+            (folder/'A15_CASES.json').write_text(json.dumps(sample),encoding='utf-8')
+            return 1,'GROUP agent_cycle_A15 exit=1 elapsed_s=1.2\nREGRESSION_FAIL groups=agent_cycle_A15',1.2
+        if 'wheel' in args:
+            return 1,'build unavailable',0.2
+        return 0,'example PASS',0.1
+    monkeypatch.setattr(q,'_run',child)
+    dest = tmp_path/'debug.zip'
+    report = q.qualify(root,dest,profile='quick')
+    assert next(g['status'] for g in report['gates'] if g['id']=='integrated_regression')=='FAIL'
+    with zipfile.ZipFile(dest) as archive:
+        assert archive.testzip() is None
+        item = json.loads(archive.read('diagnostics/A15_CASES.json'))
+        assert item['cases'][0]['status']=='FAILURE'
+        assert 'PREFIX_MISMATCH' in item['cases'][0]['diagnostic']
+        assert 'EXECUTABLE_MISMATCH' in item['cases'][0]['traceback']
+        assert 'PrivateAccount' not in archive.read('diagnostics/A15_CASES.json').decode()
+        steps = json.loads(archive.read('diagnostics/WHEEL_ISOLATION_STEPS.json'))
+        assert steps['steps']==[]
+        manifest=json.loads(archive.read('INTEGRITY.json'))['files']
+        for filename in ('diagnostics/A15_CASES.json','diagnostics/WHEEL_ISOLATION_STEPS.json'):
+            assert hashlib.sha256(archive.read(filename)).hexdigest()==manifest[filename]
+
+
+def test_failed_probe_exposes_relations_but_no_private_paths(tmp_path):
+    import sys
+    # An unrelated interpreter is deliberately rejected, regardless of the
+    # marker file written in the expected private environment.
+    private=tmp_path/'not-a-venv'
+    private.mkdir()
+    (private/'pyvenv.cfg').write_text('include-system-site-packages = false\n',encoding='utf-8')
+    code,log,_=q._isolated_venv_probe(Path(sys.executable),private,tmp_path,{})
+    assert code != 0
+    assert 'ISOLATION_FAILED' in log
+    assert 'SQE_ISOLATION_PATH_RELATIONS=' in log
+    assert 'prefix_normcase_eq_expected' in log
+    assert str(tmp_path) not in log
+    assert not (private/'.sqe-private-venv-probe').exists()

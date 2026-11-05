@@ -1,0 +1,24 @@
+{
+  "schema": "sqe.web-modules.v1",
+  "scripts": [
+    "app.js",
+    "modules/workspace.js",
+    "modules/run_history.js",
+    "modules/field_validation.js",
+    "modules/field_comparison.js",
+    "modules/comparisons.js",
+    "modules/canvas.js",
+    "modules/em_results.js",
+    "modules/result_panels.js",
+    "modules/component_editor.js",
+    "modules/terminal_selection.js",
+    "modules/em_editor.js",
+    "modules/study_editor.js",
+    "modules/independent_quantum.js",
+    "modules/job_controls.js",
+    "modules/extraction.js",
+    "modules/result_inspector.js",
+    "modules/project_dialog.js",
+    "modules/bootstrap.js"
+  ]
+}

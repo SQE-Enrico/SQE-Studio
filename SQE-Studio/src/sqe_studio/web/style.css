@@ -25,3 +25,45 @@
 .review-check input{width:18px;height:18px;min-height:18px;flex-shrink:0;margin:2px 0 0}
 .canvas-route-intent{stroke:#6fbfae;stroke-width:2;stroke-dasharray:6 4;fill:none}
 @media(max-width:640px){.form-grid{grid-template-columns:1fr}.stacked-workflow{gap:12px}}
+/* A14: one revision-bound native evidence review, without promoting observations to qualification. */
+.run-list-tools{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:4px 0 17px}
+.run-list-tools label{font-size:12px;font-weight:650;color:#d5e3f1}
+.run-list-tools select{width:min(230px,100%);min-width:140px;max-width:100%}
+.neutral-run{color:#dcecf8}
+.scientific-review{border:1px solid #55677b;background:#102136;border-radius:10px;padding:14px;margin:17px 0}
+.scientific-review h3{margin:0 0 5px;font-size:14px}
+.scientific-review .gate-row{gap:20px}
+.scientific-review .gate-row strong{max-width:65%;text-align:right;font-size:12px;overflow-wrap:anywhere}
+.scientific-review .gate-row .gate-hold{color:#f6ce8b}
+.provenance-list{display:grid;grid-template-columns:minmax(115px,1fr) minmax(0,2fr);gap:8px 14px;font-size:12px;margin:12px 0}
+.provenance-list dt{color:#b5ccdf;font-weight:650}
+.provenance-list dd{margin:0;overflow-wrap:anywhere;color:#f1f8ff}
+.artifact-list{margin:10px 0;padding-left:21px;overflow-wrap:anywhere;font-size:12px;line-height:1.7}
+.artifact-list code{white-space:normal;overflow-wrap:anywhere}
+#resultView:empty{display:none}
+#resultView{min-width:0;margin-top:19px}
+#resultView:focus-visible{outline-offset:5px}
+@media(max-width:640px){.scientific-review .gate-row{flex-direction:column;gap:4px}.scientific-review .gate-row strong{max-width:100%;text-align:left}.provenance-list{grid-template-columns:1fr;gap:3px}.provenance-list dd{margin-bottom:10px}}
+
+/* Creation remains visibly pending until a saved revision is read back. */
+.project-create-status{font-size:12px;color:var(--warn);min-height:19px;overflow-wrap:anywhere;margin:10px 0 0}
+
+/* M2: explicit, non-inferred transmon terminal mapping in the ordinary EM editor. */
+.transmon-grid{display:grid;grid-template-columns:minmax(220px,1fr) minmax(220px,1fr);gap:15px;align-items:start}
+.transmon-source{padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:12px;overflow-wrap:anywhere}
+.transmon-terminals{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px;margin:13px 0 17px}
+.transmon-terminals>div{padding:10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);overflow-wrap:anywhere}
+.transmon-terminals small{display:block;margin-top:3px}
+#transmonState{margin:14px 0;overflow-wrap:anywhere}
+@media(max-width:740px){.transmon-grid{grid-template-columns:1fr}}
+
+/* M4: RAM-only independent designer declaration. Never a Results/EM transfer. */
+.manual-transmon{margin-top:18px;border-color:#55778a}
+.manual-transmon-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:0 13px;margin:13px 0}
+.manual-transmon-fields input{font-variant-numeric:tabular-nums}
+.manual-transmon-ack{max-width:100%}
+.manual-transmon-status{font-family:Consolas,monospace;color:var(--warn);overflow-wrap:anywhere;font-size:12px;font-weight:700;margin:15px 0 8px}
+.manual-transmon-summary{font-size:12px;color:#d2e2f1;overflow-wrap:anywhere;margin:8px 0}
+#manualTransmonCheckResult{font-size:12px;min-height:19px;overflow-wrap:anywhere}
+#manualTransmonServerAction:disabled{cursor:not-allowed;opacity:.7}
+@media(max-width:640px){.manual-transmon-fields{grid-template-columns:1fr}}

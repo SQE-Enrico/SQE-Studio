@@ -167,9 +167,10 @@ def _require_josephson_package():
     julia = shutil.which('julia')
     if not julia:
         pytest.skip('Native Julia unavailable; no RF smoke executed')
+    # Allow bounded cold startup on hosted Windows before package discovery.
     probe = subprocess.run([julia, '--startup-file=no', '-e',
         'print(Base.find_package("JosephsonCircuits") === nothing ? "MISSING" : "PRESENT")'],
-        capture_output=True, text=True, timeout=25, check=False)
+        capture_output=True, text=True, timeout=90, check=False)
     if probe.returncode == 0 and probe.stdout.strip() == 'MISSING':
         pytest.skip('Julia present but JosephsonCircuits.jl package missing; native RF BLOCKED')
     # An installed-but-broken Julia environment is a FAIL, not a skip.
@@ -197,3 +198,23 @@ def test_native_harmonic_balance_smoke_when_installed(tmp_path):
     assert ports["analysis"] == "rf_harmonic_balance"
     assert ports["convergence_evidence"] == "hbsolve_returned_no_iteration_log"
     print("NATIVE HB version=", result["engine_version"], "elapsed=", ports["native_elapsed_seconds"])
+
+
+@pytest.mark.parametrize("field,raw", [
+    ("frequency", 10 ** 500),
+    ("port_impedance", 10 ** 500),
+    ("inductance", 10 ** 500),
+])
+def test_unbounded_integer_never_crashes_or_reaches_julia(field, raw, monkeypatch, tmp_path):
+    study, project = make_case()
+    if field == "frequency":
+        study["inputs"]["frequencies_hz"][0] = raw
+    elif field == "port_impedance":
+        project["schematic"]["ports"][0]["reference_impedance_ohm"] = raw
+    else:
+        project["schematic"]["elements"][1]["value"] = raw
+    study["inputs"]["schematic_sha256"] = ja._hash(project["schematic"])
+    monkeypatch.setattr(ja.shutil, "which", lambda _: pytest.fail("Invalid magnitude reached native probe"))
+    with pytest.raises(EngineBlocked, match="finite number"):
+        ja.run(study, project, tmp_path)
+    assert not list(tmp_path.iterdir())

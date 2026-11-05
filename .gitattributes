@@ -1,0 +1,9 @@
+# Preserve inventoried bytes, including manifests generated with Windows CRLF.
+# Automatic newline conversion would invalidate source and numerical hashes.
+* -text
+*.zip binary
+*.whl binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary

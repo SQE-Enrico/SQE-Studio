@@ -75,6 +75,16 @@ def adapter_digest(engine: str) -> str:
     source = Path(REGISTRY[engine].__code__.co_filename)
     if not source.is_file():
         raise ArtifactInvalid('Native adapter source not available')
+    if engine == 'scqubits':
+        # Conditional extraction uses these modules in the isolated worker.
+        # Their bytes must invalidate both source and installed-wheel caches.
+        package = source.parent.parent
+        files = (source, package/'interop/extracted_transmon.py',
+                 package/'interop/transmon_workflow.py',package/'interop/transmon_reduction.py',
+                 package/'interop/capacitance_topology.py',package/'interop/native_capacitance_evidence.py',
+                 package/'adapters/sqdmetal_palace_adapter.py',package/'eda/scientific_references.py',
+                 package/'worker.py',package/'jobs.py',package/'orchestration/artifacts.py')
+        return sha_bytes(b''.join(str(p.relative_to(package)).encode()+b'\0'+p.read_bytes()+b'\0' for p in files))
     return sha_bytes(source.read_bytes())
 
 

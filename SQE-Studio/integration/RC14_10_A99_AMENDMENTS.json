@@ -1,0 +1,113 @@
+{
+  "base_source_manifest_sha256": "033f27e632f854ad13cbbbf5300f5054fc24d432e0a6b0ffdb46f0f26d28b1cb",
+  "changes": [
+    {
+      "after_sha256": "155d6c51d3529684311d59a87429eec1ac62afb081ab8ccfd9520496705dda33",
+      "before_sha256": "d48cb79892da5ce18fbc7e088ad868f543a16e2aba72f5bae2afeb1d06934b49",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "pyproject.toml",
+      "rationale": "Release version identity RC14.10"
+    },
+    {
+      "after_sha256": "a528c286635632340b3990fb39aae85a39189361559d29594bce25ffe77ed75f",
+      "before_sha256": "61a4ab1e275fe5a795eeae6aa6d955d5d4cde00b2c57772a15d7ebc3d25a5147",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "src/sqe_studio/__init__.py",
+      "rationale": "Release version identity RC14.10"
+    },
+    {
+      "after_sha256": "203541c598a68be18e8f2489a181411327f6d80cf0978429abef0d61c8c4819c",
+      "before_sha256": "5e828603144fa19b9edb64634d857810aba6ce6e0ad23129c03a8170c2e3cfe0",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "src/sqe_studio/cycle_qualification.py",
+      "rationale": "Active qualification case and report schema use new release; no historic evidence promoted"
+    },
+    {
+      "after_sha256": "722a6eb9e79390b2c9b7857f0d2cc4cdeab303174f499ce37b488f44149503e5",
+      "before_sha256": "5322f0f68eed2840d28ebb72eb334a1af62812ddf8aa1868d7bf4477bc652ea1",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "qualification_plan.json",
+      "rationale": "Release pinned science-expanded B00-B11 specification and fail-closed adapter status"
+    },
+    {
+      "after_sha256": null,
+      "before_sha256": "cc289f3e5a9712bb40597dacb07fb5a3f39021d9aeeb278e033dad326ce8adea",
+      "owner_override": "A99 integration-only",
+      "path": "tests/integration/test_rc14_9_a99_release.py",
+      "rationale": "Replace obsolete active RC14.9 release regression; archived prior history retained"
+    },
+    {
+      "after_sha256": "2cf0a5deee42d97b237fd5def15748f46a6c87f60d754f50a2794f8f19c1346e",
+      "before_sha256": null,
+      "owner_override": "A99 integration-only",
+      "path": "tests/integration/test_rc14_10_a99_release.py",
+      "rationale": "New RC14.10 release-boundary regression with version, plan and monotonic report numbers"
+    },
+    {
+      "after_sha256": "f041c5e28546c9ea5bb0cdb5e914873bca13a71ba1200b16853964a5b1cad73e",
+      "before_sha256": "ee887c917bb29d2dafed6f3e11d172be93fbaf55423bc3e8dde07006959cffbb",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "README.md",
+      "rationale": "Current user-facing RC14.10 product and launch instructions"
+    },
+    {
+      "after_sha256": "44da3c992e07d5add7b083a8309a283f86a4f26b76e4073829705f7e7016c75d",
+      "before_sha256": "a7fd81d493b5494ef0dfa1e6182e769bafadb67284b99410dc0db8d891a2a41c",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "docs/LAPTOP_QUALIFICATION.md",
+      "rationale": "Single-click current release operator guide with science gates; standardized one-click wording"
+    },
+    {
+      "after_sha256": "abb4e849b0ad6209f1b7ac26d64028607470859773b64768e1b232a6757cb71d",
+      "before_sha256": null,
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "integration/RC14_10_CASE_COVERAGE.json",
+      "rationale": "Explicit case-by-case code-vs-real-execution disclosure"
+    },
+    {
+      "after_sha256": "ad65f0935001225891508d4150aa022cb31e6b9a8893ef063d39d4e8032f0cc1",
+      "before_sha256": null,
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "docs/RC14_10_SCIENTIFIC_COVERAGE.md",
+      "rationale": "Explicit science coverage and NOT_RUN disclosure"
+    },
+    {
+      "after_sha256": "c53dcb085cec7e2417409009e9e7721dbc8a4f6ee05d3a4c06d0fdda96d15ead",
+      "before_sha256": null,
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "agent_cycle/next_cycle/RC14_11_ASSIGNMENTS.json",
+      "rationale": "Prepared RC14.11 exclusive scopes and truthful per-owner follow-up"
+    },
+    {
+      "after_sha256": "7ee746331485d9e6ee20f67481596a1f2ff306dd09ce1953a989fa5e27caa2a8",
+      "before_sha256": null,
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "agent_cycle/next_cycle/RC14_11_COORDINATOR_HANDOFF.md",
+      "rationale": "Next cycle operator/coordinator technical handoff"
+    },
+    {
+      "after_sha256": "6f47451b1897e919d0c66ab95cc52b4c54f924ca802e23f9218a885a30c91749",
+      "before_sha256": "ee184f9d39ef484ed2176522b1f6e50158e2f81d3c6c31930572ba7ed14ada48",
+      "owner_override": "A99 integration-only; original agent delta preserved",
+      "path": "agent_cycle/continuity/A99.md",
+      "rationale": "A99 permanent continuity: integrated science and unresolved native gates"
+    },
+    {
+      "after_sha256": "5dd04b05dcef0a84a3ce1380467996c9888d1013d0dc3a2a4071b5b39e5d6ee5",
+      "before_sha256": "380aca502dc9bf9f81a97090841f6533b36f2f9754f67fba3193a6c45793023d",
+      "owner_override": "A99 integration-only",
+      "path": "tests/integration/test_cycle_qualification.py",
+      "rationale": "Version-bound cycle report sequencing assertions must reserve RC14.10 names; old previous-release filenames do not consume RC14.10 numbers"
+    },
+    {
+      "after_sha256": "12196ef825047d76cdf2ec3b6be0426cd48ff5b1f937455e396864b1e9418e33",
+      "before_sha256": "a0c434a9fc338cb48694caf1311ed500a24ceaa6890d4e9ddc26fdc343c47b10",
+      "owner_override": "A99 release-state harmonization",
+      "path": "agent_cycle/CYCLE_STATE.json",
+      "rationale": "Active cycle state must identify RC14.10, not the historical RC14.9 dispatch; move old report checksum and prior source identity to explicit historical block, never claim current Windows host report"
+    }
+  ],
+  "note": "Historical original agent and dispatch sources unmodified; A99 overrides are release-only, no scientific promotion",
+  "release": "RC14.10 Experimental",
+  "schema": "sqe.a99-integration-amendments.v1"
+}

@@ -6,15 +6,18 @@ and an E/h Hamiltonian energy parameter are deliberately different dimensions.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from enum import Enum
 
 
 class Dimension(str, Enum):
     FREQUENCY = 'frequency'
     ENERGY_OVER_H = 'energy_over_h'
+    ENERGY = 'energy'
+    CURRENT = 'current'
     CAPACITANCE = 'capacitance'
     INDUCTANCE = 'inductance'
+    PERMEABILITY = 'permeability'
     LENGTH = 'length'
     RESISTANCE = 'resistance'
     CONDUCTANCE = 'conductance'
@@ -25,8 +28,11 @@ class Dimension(str, Enum):
 _UNIT_FACTORS: dict[Dimension, dict[str, Decimal]] = {
     Dimension.FREQUENCY: {'Hz': Decimal('1'), 'kHz': Decimal('1e3'), 'MHz': Decimal('1e6'), 'GHz': Decimal('1e9')},
     Dimension.ENERGY_OVER_H: {'Hz': Decimal('1'), 'MHz': Decimal('1e6'), 'GHz': Decimal('1e9')},
+    Dimension.ENERGY: {'J': Decimal('1'), 'aJ': Decimal('1e-18'), 'fJ': Decimal('1e-15')},
+    Dimension.CURRENT: {'A': Decimal('1'), 'mA': Decimal('1e-3'), 'uA': Decimal('1e-6'), 'nA': Decimal('1e-9')},
     Dimension.CAPACITANCE: {'F': Decimal('1'), 'pF': Decimal('1e-12'), 'fF': Decimal('1e-15')},
     Dimension.INDUCTANCE: {'H': Decimal('1'), 'nH': Decimal('1e-9')},
+    Dimension.PERMEABILITY: {'H/m': Decimal('1'), 'uH/m': Decimal('1e-6')},
     Dimension.LENGTH: {'m': Decimal('1'), 'mm': Decimal('1e-3'), 'um': Decimal('1e-6'), 'nm': Decimal('1e-9')},
     Dimension.RESISTANCE: {'ohm': Decimal('1'), 'kohm': Decimal('1e3')},
     Dimension.CONDUCTANCE: {'S': Decimal('1'), 'mS': Decimal('1e-3')},
@@ -71,7 +77,12 @@ class Quantity:
         factors = _UNIT_FACTORS[self.dimension]
         if target_unit not in factors:
             raise InteropValidationError(f'Cannot convert {self.dimension.value} to {target_unit!r}')
-        return Quantity(self.value * factors[self.unit] / factors[target_unit], target_unit, self.dimension)
+        # SI-prefix operations must not silently round high-precision numerical
+        # physics outputs under Decimal's default 28-digit process context.
+        with localcontext() as context:
+            context.prec = max(28, len(self.value.as_tuple().digits) + 32)
+            converted = self.value * factors[self.unit] / factors[target_unit]
+        return Quantity(converted, target_unit, self.dimension)
 
     def si(self) -> 'Quantity':
         return self.as_unit(_BASE_UNITS[self.dimension])
@@ -104,3 +115,48 @@ class ComplexQuantity:
 
     def as_unit(self, unit: str) -> 'ComplexQuantity':
         return ComplexQuantity(self.real.as_unit(unit), self.imag.as_unit(unit))
+
+
+@dataclass(frozen=True, slots=True)
+class QuantityInterval:
+    """Deterministic *bounds*, not a statistical confidence interval.
+
+    Nominal, lower and upper must be explicit quantities of the same physical
+    dimension; conversion to SI precedes comparison. The endpoint values are
+    inclusive and represent worst-case declared uncertainty, without assuming
+    independence, normal distributions or calibrated measurement quality.
+    """
+
+    nominal: Quantity
+    lower: Quantity
+    upper: Quantity
+    schema_version: str = 'sqe.quantity-interval.a12.v1'
+
+    def __post_init__(self) -> None:
+        if self.schema_version != 'sqe.quantity-interval.a12.v1':
+            raise InteropValidationError('Unsupported quantity interval schema version')
+        if any(not isinstance(q, Quantity) for q in (self.nominal, self.lower, self.upper)):
+            raise InteropValidationError('Interval requires explicit dimensioned nominal and bounds')
+        if len({q.dimension for q in (self.nominal, self.lower, self.upper)}) != 1:
+            raise InteropValidationError('Interval dimensions disagree')
+        low = self.lower.si().value
+        mid = self.nominal.si().value
+        high = self.upper.si().value
+        if not low <= mid <= high:
+            raise InteropValidationError('Interval must contain the nominal value')
+
+    def require(self, dimension: Dimension, *, strictly_positive: bool = False,
+                nonnegative: bool = False) -> 'QuantityInterval':
+        self.nominal.require(dimension)
+        if strictly_positive and self.lower.si().value <= 0:
+            raise InteropValidationError(f'{dimension.value} uncertainty interval must stay positive')
+        if nonnegative and self.lower.si().value < 0:
+            raise InteropValidationError(f'{dimension.value} uncertainty interval must stay nonnegative')
+        return self
+
+    def as_unit(self, unit: str) -> 'QuantityInterval':
+        return QuantityInterval(self.nominal.as_unit(unit), self.lower.as_unit(unit),
+                                self.upper.as_unit(unit))
+
+    def si(self) -> 'QuantityInterval':
+        return QuantityInterval(self.nominal.si(), self.lower.si(), self.upper.si())

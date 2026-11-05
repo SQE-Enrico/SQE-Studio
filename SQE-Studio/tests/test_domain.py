@@ -49,9 +49,23 @@ def test_worker_fail_closed_without_external_engines(tmp_path):
         else:raise AssertionError('Unsafe engine unexpectedly accepted empty physical inputs')
         assert not any(out.glob('*.gds'))
 
-def test_engine_job_without_installed_native_engine_is_not_faked(tmp_path):
+@pytest.mark.parametrize('native_available', [False, True], ids=['engine-absent', 'real-native-engine'])
+def test_engine_job_without_installed_native_engine_is_not_faked(tmp_path, monkeypatch, native_available):
     import time
-    from sqe_studio.jobs import Jobs
+    from importlib.util import find_spec
+    from sqe_studio import jobs
+    from sqe_studio.jobs import Jobs, MAX_SECONDS, PROCESS_TERMINATE_GRACE
+    if native_available and find_spec('scqubits') is None:
+        pytest.skip('Native scqubits case unavailable; missing-engine case is tested separately')
+    if not native_available:
+        # Run the real worker without third-party site-packages. This proves
+        # actual dependency absence even on the scientific workstation.
+        original_popen = jobs.subprocess.Popen
+        def no_site_packages(command, **options):
+            if 'sqe_studio.worker' in command:
+                command = [command[0], '-S', *command[1:]]
+            return original_popen(command, **options)
+        monkeypatch.setattr(jobs.subprocess, 'Popen', no_site_packages)
     s=Store(tmp_path);s.setup('engine@example.org','LongSecretPassword56789')
     token,_=s.login('engine@example.org','LongSecretPassword56789');uid=s.session(token)['user_id']
     p=s.create(uid,'Native Only','generic')
@@ -59,22 +73,23 @@ def test_engine_job_without_installed_native_engine_is_not_faked(tmp_path):
         'inputs':{'model':'Transmon','parameters':{'EJ':15.,'EC':.25,'ng':0.,'ncut':25},'levels':5}}]
     rev=s.commit(uid,p['id'],p['head'],m)
     j=Jobs(s);rid=j.start(uid,p['id'],rev,'quantum_primary')
-    # Windows may spend several seconds importing native scqubits.
-    deadline=time.monotonic()+55
+    # Let the application supervise its full native budget, including shutdown.
+    budget = MAX_SECONDS + PROCESS_TERMINATE_GRACE + 10 if native_available else 55
+    deadline=time.monotonic()+budget
     while True:
         info=s.run(uid,p['id'],rid)
         if info['state'] not in ('queued','running') or time.monotonic()>=deadline:break
         time.sleep(.15)
     if info['state'] in ('queued','running'):
         j.cancel(uid,p['id'],rid)
-        pytest.fail('Native worker did not reach a terminal state within 55 seconds; '
+        pytest.fail(f'Native worker did not reach a terminal state within {budget} seconds; '
                     'cancelled test job. Last state: '+repr(info['state']))
     from pathlib import Path
     from sqe_studio.orchestration.artifacts import verify_manifest
     folder=Path(info['path'])/'output'
-    if info['state']=='completed':
-        # Native scqubits may be installed on the target laptop. Completion
-        # is acceptable ONLY if the worker wrote revision-bound real evidence.
+    if native_available:
+        assert info['state']=='completed', info
+        # Completion requires the real worker's revision-bound native evidence.
         reference=verify_manifest(folder, revision_id=rev,
                                   project_digest=digest(m),
                                   study_id='quantum_primary', engine='scqubits')

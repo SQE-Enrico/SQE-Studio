@@ -4,4 +4,14 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 dist/
+build/
+release/
 *.egg-info/
+
+qualification-reports/*.zip
+qualification-reports/*.partial
+qualification-reports/*.error.json
+qualification-reports/*.running
+qualification-reports/local-*.json
+qualification-reports/.m17-work-*/
+wheels/

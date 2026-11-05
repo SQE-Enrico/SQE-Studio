@@ -184,7 +184,7 @@ def test_missing_native_engine_creates_no_artifact(tmp_path):
     if find_spec('scqubits') is not None:
         pytest.skip('scqubits available; native integration covered separately')
     with pytest.raises(EngineBlocked, match='not installed'):
-        a.run({'id': 'q', 'inputs': transmon()}, project(), tmp_path)
+        a.run({'id': 'q', 'engine': 'scqubits', 'kind': 'spectrum', 'inputs': transmon()}, project(), tmp_path)
     assert list(tmp_path.iterdir()) == []
 
 
@@ -192,7 +192,7 @@ def test_invalid_model_fails_before_module_import(tmp_path):
     values = transmon()
     values['model'] = 'RawPython'
     with pytest.raises(EngineBlocked, match='unsupported'):
-        a.run({'id': 'q', 'inputs': values}, project(), tmp_path)
+        a.run({'id': 'q', 'engine': 'scqubits', 'kind': 'spectrum', 'inputs': values}, project(), tmp_path)
     assert list(tmp_path.iterdir()) == []
 
 
@@ -263,3 +263,67 @@ def test_standalone_implicit_truncation_is_deterministic_and_declared():
     assert a._spec(inp, project())['groups'][0]['parameters']['truncated_dim'] == 9
     inp['parameters']['ncut'] = 3
     assert_blocks(inp, 'native basis dimension')
+
+
+def test_basis_comparison_records_per_point_native_calls_and_relative_units():
+    """Dispatch spy (not a solver): verifies auditing of native return shapes only."""
+    values = fluxonium()
+    values['sweep'] = {'subsystem': 'primary', 'parameter': 'flux',
+                       'values': [0.25, 0.5], 'unit': 'Phi0'}
+    values['convergence'] = {'enabled': True, 'tolerance_GHz': .1,
+                             'basis_increment': 2}
+    spec = a._spec(values, project())
+    calls = []
+
+    class NativeAPIShapeSpy:
+        class Fluxonium:
+            def __init__(self, **kwargs):
+                self.args = kwargs
+                calls.append((kwargs['flux'], kwargs['cutoff']))
+
+            def eigenvals(self, evals_count):
+                assert evals_count == 3
+                # Synthetic unit-test responses only; no production artifact
+                # or numerical physics/benchmark is reported from this test.
+                offset = self.args['flux'] * 2
+                extra = .02 if self.args['cutoff'] == 22 else 0.
+                return [offset, offset + 1. + extra, offset + 2. + extra]
+
+    energies, uncoupled, points = a._execute(NativeAPIShapeSpy, spec)
+    assert uncoupled == []
+    assert calls == [(.25, 20), (.25, 22), (.5, 20), (.5, 22)]
+    assert len(energies) == 2 and len(points) == 2
+    assert [item['point_index'] for item in points] == [0, 1]
+    assert [item['sweep_value'] for item in points] == [.25, .5]
+    assert points[0]['base_transitions_GHz'] == [1., 2.]
+    assert points[0]['max_delta_GHz'] == pytest.approx(.02)
+    assert points[1]['max_delta_GHz'] == pytest.approx(.02)
+
+
+def test_nonfinite_arithmetic_from_finite_native_eigenenergies_is_rejected():
+    # Prevent a nonfinite derived transition or a fake convergence "pass".
+    with pytest.raises(EngineBlocked, match='ground-referenced transition'):
+        a._native_transitions([-1e308, 1e308])
+    with pytest.raises(EngineBlocked, match='dressed-minus-uncoupled'):
+        a._finite_difference(1e308, -1e308, 'dressed-minus-uncoupled energy')
+
+
+def test_native_basis_comparison_rejects_disagreement_without_output(tmp_path):
+    values = fluxonium()
+    values['convergence'] = {'enabled': True, 'tolerance_GHz': .001,
+                             'basis_increment': 2}
+    spec = a._spec(values, project())
+
+    class NativeAPIShapeSpy:
+        class Fluxonium:
+            def __init__(self, **kwargs):
+                self.args = kwargs
+
+            def eigenvals(self, evals_count):
+                # Synthetic shape-only spy, not a native result.
+                shift = .1 if self.args['cutoff'] == 22 else 0.
+                return [0., 1. + shift, 2. + shift]
+
+    with pytest.raises(EngineBlocked, match='native basis convergence failed at point 0'):
+        a._execute(NativeAPIShapeSpy, spec)
+    assert list(tmp_path.iterdir()) == []

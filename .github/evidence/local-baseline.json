@@ -1,11 +1,11 @@
 {
   "schema": "sqe.github-local-baseline.v1",
   "runtime_version": "0.1.1.dev81",
-  "report_name": "SQE-RC14_12-report-0005.zip",
-  "report_sha256": "9d93b2a1031312b0d2162b0fba7e83262dac0ca3cf084079656e98dc056784f8",
-  "source_manifest_sha256_at_run": "b2ce691bebea911d8405333c8890f64669a1dc6fe3770c94bf1635015f11e560",
-  "report_finished_utc": "2026-11-05T10:09:06+00:00",
-  "duration_s": 994.48,
+  "report_name": "SQE-RC14_12-report-0009.zip",
+  "report_sha256": "cdca92c8cfc1313a0fa2c0205ca8866d898891239ed687868d9a99f216df06e3",
+  "source_manifest_sha256_at_run": "5580bd1ac421fc8ce7a8663ea8c706134803a1bde68bac3758418a74e542ebf2",
+  "report_finished_utc": "2026-11-05T14:07:07+00:00",
+  "duration_s": 716.61,
   "environment": {
     "architecture": "AMD64",
     "os": "Windows",
@@ -28,8 +28,8 @@
       "OPENBLAS_NUM_THREADS": 1
     }
   },
-  "passed_tests": 1757,
-  "skipped_tests": 23,
+  "passed_tests": 1761,
+  "skipped_tests": 24,
   "ui_vm_checks_passed": 62,
   "automatic_test_families": [
     {
@@ -91,5 +91,6 @@
   ],
   "original_report_location": "WORKSTATION_ONLY",
   "scientific_qualification": "NOT_ESTABLISHED",
-  "fabrication": "HOLD"
+  "fabrication": "HOLD",
+  "git_commit_at_run": "038963aa91a8f0e37af3068f5dc924bafad50e7c"
 }

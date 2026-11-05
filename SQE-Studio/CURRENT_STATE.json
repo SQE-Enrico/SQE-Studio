@@ -14,13 +14,13 @@
   "fabrication": "HOLD",
   "latest_verified_host": {
     "runtime": "0.1.1.dev81",
-    "report": "qualification-reports/SQE-RC14_12-report-0005.zip",
-    "report_sha256": "9d93b2a1031312b0d2162b0fba7e83262dac0ca3cf084079656e98dc056784f8",
+    "report": "qualification-reports/SQE-RC14_12-report-0009.zip",
+    "report_sha256": "cdca92c8cfc1313a0fa2c0205ca8866d898891239ed687868d9a99f216df06e3",
     "profile": "software",
     "python": "3.11.9",
-    "duration_s": 994.48,
-    "passed_tests": 1757,
-    "skipped_tests": 23,
+    "duration_s": 716.61,
+    "passed_tests": 1761,
+    "skipped_tests": 24,
     "automatic_tasks_passed": 5,
     "ui_vm_checks_passed": 62,
     "real_browser": "PASS",
@@ -41,7 +41,12 @@
     "repository": "https://github.com/SQE-Enrico/SQE-Studio",
     "roadmap": "../.github/ROADMAP.md",
     "active_issue": 1,
-    "future_issues": [2, 3, 4, 5],
+    "future_issues": [
+      2,
+      3,
+      4,
+      5
+    ],
     "trigger": "push_and_pull_request",
     "periodic_chat_checks": false
   },

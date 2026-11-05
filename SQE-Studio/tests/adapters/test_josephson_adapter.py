@@ -167,9 +167,10 @@ def _require_josephson_package():
     julia = shutil.which('julia')
     if not julia:
         pytest.skip('Native Julia unavailable; no RF smoke executed')
+    # Allow bounded cold startup on hosted Windows before package discovery.
     probe = subprocess.run([julia, '--startup-file=no', '-e',
         'print(Base.find_package("JosephsonCircuits") === nothing ? "MISSING" : "PRESENT")'],
-        capture_output=True, text=True, timeout=25, check=False)
+        capture_output=True, text=True, timeout=90, check=False)
     if probe.returncode == 0 and probe.stdout.strip() == 'MISSING':
         pytest.skip('Julia present but JosephsonCircuits.jl package missing; native RF BLOCKED')
     # An installed-but-broken Julia environment is a FAIL, not a skip.

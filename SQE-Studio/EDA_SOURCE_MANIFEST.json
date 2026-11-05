@@ -1,10 +1,10 @@
 {
-  "current_source_inventory_sha256": "46d3f9ee6e4590b6b97ddb5e52d873a3d6b32e7fc2e7271bd41cf40004be9ca6",
+  "current_source_inventory_sha256": "6923260ca0fabca36d2ae4ca333037744465900f100994b243313fd2666cd436",
   "files": {
     ".gitignore": "ece3f2cb0ee45087488d71cbb34c84122de9ec991a885b6d41b686961d1f47cf",
     "AGENTS.md": "175cad3f498216883d8a59d1e4acfe33d98fd42e4402d88af705932412529fee",
-    "CURRENT_STATE.json": "c8eebbc451d491b306bb532c339490606f765ee278428d4c963f18027561eab0",
-    "DEVELOPMENT_POLICY.json": "c659d70a28a1e1859ee7c4345ba898ab26b33347cece3f81e8d4ee3ac7135ad4",
+    "CURRENT_STATE.json": "a4857859b45f0f681d889252412a1064d0c501286bcc35f028096e23278f5b37",
+    "DEVELOPMENT_POLICY.json": "524c2f0db717840f06da818cb7f1d11de8f07ffd3b7059cb6709cdc61e17d4c0",
     "FOUNDATION_LOCK.json": "57c3f261528d66b1da5c597eb9244f7d634dc8cbef43d77da69e223b9eaf8139",
     "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
     "Launch SQE Studio.pyw": "706aaf8ec23490401d9d64f9cb8f263de1a19fb9385d2d196a329e92d066f6e3",
@@ -189,7 +189,7 @@
     "src/sqe_studio/web/style.css": "d5e4c513e3330b14c2f905ad98c4dc3db540163d83d5b9928fa0b8806f64a507",
     "src/sqe_studio/web_assets.py": "4a0e388706b8b15964aebe0cb0a8dcd3596e3068c93f22f298dddd37074a456f",
     "src/sqe_studio/worker.py": "6d1e8f96a7365eec940cd628f99baa2d092a87262e2746c9255ce5932547b29a",
-    "tests/adapters/test_josephson_adapter.py": "42137327819f7fc6d761b7b6dca223fdb18054d2a772f56f1c856cf537b731aa",
+    "tests/adapters/test_josephson_adapter.py": "ea19429274e7a877ddd4a84f3ebc494050fc99b508e66f37494fb8a273cfcecb",
     "tests/adapters/test_quantum_metal_adapter.py": "72827cae92614a3b3b6cd250e852bedf9d4ff41870780bab91129bd78b02893c",
     "tests/adapters/test_quantum_metal_native.py": "61c7e3093676dd84b518f3304df7f85114634b042b1b5a5e5f2ba079c882c41e",
     "tests/adapters/test_quantum_metal_recipe.py": "dd72eec8c4230e9eab5e46ec85a7752005c424625d887a9432f1cb9f7f489cbf",

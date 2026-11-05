@@ -31,10 +31,12 @@ TASKS = (
     Task('field_compare', 'VTK cross-mesh sampling / analytic complex MAC (no Palace)', ('integrity', 'targeted'), 300, 'native_software_fixture'),
     Task('em', 'Palace single-mesh smoke / field diagnostics', ('integrity',), 1000, 'native', True),
     Task('em_convergence', 'Palace two-mesh fields and scalar diagnostics', ('integrity', 'field_compare'), 1900, 'native', True),
+    Task('transmon_chain', 'Native single transmon / layout to saved spectrum and browser', ('integrity', 'targeted', 'http'), 2100, 'native', True),
     Task('packaging', 'Fresh wheel and isolated HTTP installation', ('integrity',), 240, 'software'),
 )
 BY_ID = {t.id: t for t in TASKS}
 PROFILES = {
+    'single_transmon': ('transmon_chain',),
     'recommended': ('targeted', 'http'),
     'extraction': ('targeted', 'http', 'extraction'),
     'quick': ('targeted', 'http'),
@@ -50,6 +52,7 @@ PROFILES = {
     'milestone': ('regression', 'http', 'browser', 'cad', 'quantum', 'rf', 'fields', 'em', 'packaging'),
 }
 LABELS = {
+    'single_transmon': 'Single transmon · real Palace, scqubits and browser',
     'recommended': 'Recommended · modular software and HTTP',
     'extraction': 'Extraction · saved source to scqubits (EM fixture; no Palace)',
     'quick': 'Quick · software and HTTP', 'cad': 'CAD / GDS',

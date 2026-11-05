@@ -82,8 +82,14 @@ def adapter_digest(engine: str) -> str:
         files = (source, package/'interop/extracted_transmon.py',
                  package/'interop/transmon_workflow.py',package/'interop/transmon_reduction.py',
                  package/'interop/capacitance_topology.py',package/'interop/native_capacitance_evidence.py',
+                 package/'interop/capacitance_identity.py',
                  package/'adapters/sqdmetal_palace_adapter.py',package/'eda/scientific_references.py',
                  package/'worker.py',package/'jobs.py',package/'orchestration/artifacts.py')
+        return sha_bytes(b''.join(str(p.relative_to(package)).encode()+b'\0'+p.read_bytes()+b'\0' for p in files))
+    if engine == 'sqdmetal_palace':
+        package = source.parent.parent
+        files = (source, package/'interop/capacitance_identity.py',
+                 package/'adapters/quantum_metal_adapter.py')
         return sha_bytes(b''.join(str(p.relative_to(package)).encode()+b'\0'+p.read_bytes()+b'\0' for p in files))
     return sha_bytes(source.read_bytes())
 

@@ -21,6 +21,7 @@
     "field_compare",
     "em",
     "em_convergence",
+    "transmon_chain",
     "packaging"
   ],
   "wall_budget_s": 3600,

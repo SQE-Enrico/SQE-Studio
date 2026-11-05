@@ -128,6 +128,9 @@ def execute(task, root, folder):
     elif task == 'extraction':
         from sqe_studio.testing.native_extraction import run_workflow
         return run_workflow(folder)
+    elif task == 'transmon_chain':
+        from sqe_studio.testing.native_transmon import run_workflow
+        return run_workflow(root, folder)
     elif task == 'fields':
         from sqe_studio.testing.native_fields import run_workflow
         return run_workflow()

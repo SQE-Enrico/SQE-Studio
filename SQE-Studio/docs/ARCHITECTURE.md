@@ -26,7 +26,7 @@ remains in isolated worker processes. Results are revision/hash checked before
 scientific readers consume them.
 
 The UI modules are plain classic-script source parts with explicit shared state
-in app.js. They retain the exact dev78 source order and function bodies.
+in app.js. web/modules.json fixes their source order.
 web_assets.py concatenates the manifest order into the existing /app.js response;
 there is no eval, framework, network dependency or checked-in generated copy.
 Each file owns a feature group. These are source boundaries sharing the existing
@@ -36,8 +36,14 @@ Further state isolation can be done feature by feature with the same tests.
 PROJECT_MAP.json maps work to code/tests. tools/context.py indexes declarations
 without importing the native toolchain and emits bounded excerpts. Large stable
 scientific adapters remain intact; inspect the needed symbol instead of loading
-the entire file. The current core hash map and frozen contracts protect them.
+the entire file. The immutable original core map, separate current integration review and
+frozen contracts protect their boundaries.
 
 Historical dispatch/delivery/review trees and obsolete agent-delta CLI tooling
 are removed. The active scientific case matrix lives in config/. Scientific
 fixtures remain because regression tests use them, not as product history.
+
+The isolated-transmon starter is declared in transmon_design.py.
+interop/capacitance_identity.py checks declared native pad and ground
+identities; existing reduction and scqubits code perform the calculations.
+testing/native_transmon.py owns the real HTTP/browser reference workflow.

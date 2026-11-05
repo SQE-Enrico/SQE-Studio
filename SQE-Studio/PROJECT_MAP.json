@@ -53,7 +53,8 @@
       "purpose": "Quantum Metal recipes, native QDesign and GDS",
       "code": [
         "src/sqe_studio/adapters/quantum_metal_adapter.py",
-        "src/sqe_studio/design_library.py"
+        "src/sqe_studio/design_library.py",
+        "src/sqe_studio/transmon_design.py"
       ],
       "tests": [
         "tests/adapters/test_quantum_metal*.py"
@@ -65,11 +66,14 @@
         "src/sqe_studio/adapters/sqdmetal_palace_adapter.py",
         "src/sqe_studio/native_em_qualification.py",
         "src/sqe_studio/interop/native_em_evidence.py",
-        "src/sqe_studio/interop/em_convergence.py"
+        "src/sqe_studio/interop/em_convergence.py",
+        "src/sqe_studio/interop/capacitance_identity.py",
+        "src/sqe_studio/interop/native_capacitance_evidence.py"
       ],
       "tests": [
         "tests/adapters/test_sqdmetal*.py",
-        "tests/fields"
+        "tests/fields",
+        "tests/extraction/test_native_capacitance_identity.py"
       ]
     },
     "fields": {
@@ -127,7 +131,8 @@
         "src/sqe_studio/cycle_qualification.py",
         "src/sqe_studio/qualification.py",
         "automatic_test_plan.json",
-        "config/scientific_benchmarks.json"
+        "config/scientific_benchmarks.json",
+        "tests/fixtures/palace_spheres_0_16/*"
       ],
       "tests": [
         "tests/runtime",
@@ -154,7 +159,8 @@
         "src/sqe_studio/governance.py",
         "tools/*.py",
         "DEVELOPMENT_POLICY.json",
-        "config/core_hashes.json"
+        "config/core_hashes.json",
+        "config/core_changes.json"
       ],
       "tests": [
         "tests/core/test_current_*.py",

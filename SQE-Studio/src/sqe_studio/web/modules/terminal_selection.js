@@ -1,17 +1,21 @@
 function transmonFamily(model){return model&&['transmon','multi_qubit'].includes(model.family)}
 function transmonStudies(model){return Array.isArray(model?.studies)?model.studies.filter(s=>s?.engine==='sqdmetal_palace'&&s.kind==='capacitance'):[]}
+function transmonPortLabel(port){return port&&Object.hasOwn(port,'qgeometry')?port.label:port?.component}
 function transmonInventory(study){
  if(!study||study.engine!=='sqdmetal_palace'||study.kind!=='capacitance')return {ok:false,reason:'Select an explicit Palace capacitance study.'};
  const ports=study.inputs?.em?.ports;
  if(!Array.isArray(ports)||ports.length<2)return {ok:false,reason:'The study must provide at least two explicit conductor ports.'};
  const names=[],seen=new Set(),tags=new Set();
  for(const p of ports){
-  if(!p||p.kind!=='conductor'||typeof p.component!=='string'||!p.component||p.component!==p.component.trim()||seen.has(p.component))
+  const label=transmonPortLabel(p);
+  if(!p||p.kind!=='conductor'||typeof p.component!=='string'||!p.component||typeof label!=='string'||!label||label!==label.trim()||seen.has(label))
    return {ok:false,reason:'Port components must be distinct nonempty exact conductor IDs; duplicates are blocked.'};
+  if(Object.hasOwn(p,'qgeometry')&&(!['pad_top','pad_bot'].includes(p.qgeometry)||!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(label)||!Number.isSafeInteger(p.native_terminal_index)))
+   return {ok:false,reason:'Named pad terminals require explicit QGeometry, conductor labels and native indices.'};
   if(!Array.isArray(p.native_attributes)||!p.native_attributes.length||p.native_attributes.some(t=>!Number.isSafeInteger(t)||t<=0||tags.has(t))||
      new Set(p.native_attributes).size!==p.native_attributes.length)
    return {ok:false,reason:'Each conductor must have its own explicit positive native physical tags.'};
-  seen.add(p.component);names.push(p.component);p.native_attributes.forEach(t=>tags.add(t));
+  seen.add(label);names.push(label);p.native_attributes.forEach(t=>tags.add(t));
  }
  return {ok:true,names};
 }
@@ -87,7 +91,7 @@ function transmonSelectionEditor(){
  ${!studies.length?'<div class="callout warn">BLOCKED: create and save a Palace study with kind=capacitance and at least two reviewed conductor ports in EM analysis.</div>':''}
  ${!inv.ok?`<div class="callout warn">BLOCKED: ${esc(inv.reason)}</div>`:`
  <p class="helper">Exact conductor component IDs in the selected study (${inv.names.length}), with physical tags from its saved input:</p>
- <div class="transmon-terminals">${selected[0].inputs.em.ports.map(p=>`<div><code>${esc(p.component)}</code><small> Physical tags: ${esc(p.native_attributes.join(', '))}</small></div>`).join('')}</div>
+ <div class="transmon-terminals">${selected[0].inputs.em.ports.map(p=>`<div><code>${esc(transmonPortLabel(p))}</code><small>${p.qgeometry?' CAD: '+esc(p.component)+'.'+esc(p.qgeometry)+' ·':''} Physical tags: ${esc(p.native_attributes.join(', '))}</small></div>`).join('')}</div>
  <div class="row"><label class="form-field"><span>Island A · component ID</span>${opts('transmonIslandA',islands,draft.island_a)}</label><label class="form-field"><span>Island B · distinct component ID</span>${opts('transmonIslandB',islands,draft.island_b)}</label></div>
  <h3>Remaining modeled conductors · exhaustive partition</h3>
  <p class="helper">Every remaining conductor must be assigned exactly one boundary condition. No other conductor is automatically grounded or floated.</p>

@@ -1,32 +1,34 @@
-name: Incremento di sviluppo
-description: Funzionalita o correzione con criteri verificabili e profili di test.
-title: "[Sviluppo] "
+name: Development increment
+description: Feature or fix with verifiable acceptance criteria and test profiles.
+title: "[Development] "
 body:
   - type: textarea
     id: outcome
     attributes:
-      label: Risultato atteso
-      description: Descrivere il comportamento osservabile e l'area del progetto.
+      label: Expected outcome
+      description: Describe the observable behavior and owning area.
     validations:
       required: true
   - type: textarea
     id: acceptance
     attributes:
-      label: Criteri di completamento
-      description: Inserire una checklist con condizioni misurabili.
-      placeholder: "- [ ] Caso positivo verificato\n- [ ] Errori, provenienza e revisioni obsolete verificati"
+      label: Acceptance criteria
+      description: Add measurable checklist items.
+      placeholder: |
+        - [ ] Positive workflow verified
+        - [ ] Errors, provenance and stale revisions verified
     validations:
       required: true
   - type: textarea
     id: tests
     attributes:
-      label: Test richiesti
-      description: Indicare test mirati, profili Automatic Test e natura delle evidenze native o fixture.
-      value: "Recommended; software prima dell'integrazione. Aggiungere il profilo nativo pertinente."
+      label: Required tests
+      description: List focused tests, Automatic Test profiles and native/fixture evidence.
+      value: "Recommended; software before integration; the relevant native profile."
     validations:
       required: true
   - type: textarea
     id: evidence
     attributes:
-      label: Evidenze e dipendenze
-      description: Collegare PR, report, esempi upstream e issue precedenti. Dichiarare i blocchi.
+      label: Evidence and dependencies
+      description: Link PRs, reports, upstream examples and prerequisite issues. Declare blockers.

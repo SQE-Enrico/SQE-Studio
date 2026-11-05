@@ -109,8 +109,11 @@ def preflight(study, project):
              'Missing reviewed study.inputs.em physical mapping or unexpected input fields')
     em = inputs['em']
     _mapping(em, ('ground', 'boundaries', 'ports', 'mesh', 'execution', 'solver'), 'em')
+    from ..interop.capacitance_identity import named_terminals, validate_named_terminals
+    named = study['kind'] == 'capacitance' and named_terminals(em)
     ground = em['ground']
-    _mapping(ground, ('kind', 'layer', 'verified'), 'ground')
+    ground_keys = ('kind', 'layer', 'verified') + (('native_attributes', 'native_terminal_index') if named else ())
+    _mapping(ground, ground_keys, 'ground')
     _blocked(ground['kind'] == 'qdesign_ground_plane' and ground['verified'] is True
              and type(ground['layer']) is int and ground['layer'] == metal['layer'],
              'Missing reviewed, layer-matched QDesign ground plane')
@@ -168,11 +171,13 @@ def preflight(study, project):
                  'Port numbering must be contiguous 1-based, in native creation order')
         _blocked(p.get('component') in names and isinstance(p.get('component'), str),
                  f'Port {index} refers to a missing QDesign component')
-        key = (p.get('component'), p.get('kind'), p.get('pin'))
+        key = (p.get('component'), p.get('kind'), p.get('qgeometry', p.get('pin')))
         _blocked(key not in seen, 'Duplicate physical port/pin mapping')
         seen.add(key)
         if study['kind'] == 'capacitance':
-            _mapping(p, ('index', 'kind', 'component', 'native_attributes'), f'terminal {index}')
+            keys = ('index', 'kind', 'component', 'native_attributes') + (
+                ('qgeometry', 'label', 'native_terminal_index') if named else ())
+            _mapping(p, keys, f'terminal {index}')
             _blocked(p['kind'] == 'conductor' and isinstance(p['native_attributes'], list)
                      and bool(p['native_attributes']) and all(type(a) is int and a > 0 for a in p['native_attributes']),
                      'Capacitance terminal requires reviewed conductor and explicit native physical tags')
@@ -197,6 +202,8 @@ def preflight(study, project):
     if study['kind'] == 'sparameters':
         _blocked(type(solver['excited_port']) is int and 1 <= solver['excited_port'] <= len(ports),
                  'Driven excitation must reference an existing 1-based native port index')
+    if named:
+        validate_named_terminals(em, layout)
     return em
 
 
@@ -434,6 +441,10 @@ def _make_native(study, project, em, a02, root):
                              max_size=em['mesh']['max_um'] * 1e-6,
                              taper_dist_min=em['mesh']['min_um'] * 1e-6, metals_only=True)
     sim.prepare_simulation()  # Real SQDMetal geometry and gmsh meshing, not a fixture.
+    from ..interop.capacitance_identity import named_terminals, bind_native_terminals
+    if study['kind'] == 'capacitance' and named_terminals(em):
+        import gmsh
+        bind_native_terminals(sim, design, project, em, root, gmsh)
     return sim
 
 
@@ -861,7 +872,8 @@ def run(study, project, output_dir):
                     'eigenmode': 'palace.eigenmodes',
                     'sparameters': 'palace.sparameters'}[study['kind']]
                    if em['execution'] == 'solve' else 'palace.deck')
-    return {'engine_version': 'SQDMetal ' + version['sqdmetal'] + '; Gmsh ' + version['gmsh']
-            + '; Palace ' + str(version['palace'] or 'deck-only'),
+    # The worker compares this field with the installed distribution version.
+    # Full dependency/runtime identities remain in the hash-bound native sidecar.
+    return {'engine_version': version['sqdmetal'],
             'native_files': native, 'kind': study['kind'],
             'artifact_type': result_type, 'scientific_status': 'review_required'}

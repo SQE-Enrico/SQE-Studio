@@ -24,7 +24,7 @@ class CurrentPolicy(unittest.TestCase):
 
     def test_current_development_is_not_physical_approval(self):
         result=gate.check(ROOT)
-        self.assertEqual(result['code_status'],'CURRENT_MODULAR_SOURCE_VERIFIED')
+        self.assertEqual(result['code_status'],'CURRENT_RESEARCH_SOURCE_VERIFIED')
         self.assertEqual(result['science_status'],'NOT_QUALIFIED')
         self.assertEqual(result['independent_review'],'MISSING')
 
@@ -53,6 +53,39 @@ class CurrentPolicy(unittest.TestCase):
     def test_core_pin_map_cannot_be_replaced_with_self_asserted_hashes(self):
         root=self.clone();path=root/gate.CORE;path.write_text('{}')
         with self.assertRaisesRegex(gate.ScienceFirstGateError,'baseline'):gate.check(root)
+
+    def test_original_core_map_is_retained_with_explicit_current_changes(self):
+        original=json.loads((ROOT/gate.CORE).read_bytes())
+        self.assertEqual(gate.sha(gate.canonical(original)),gate.CORE_BASELINE)
+        self.assertEqual(len(original),53)
+        active=gate.active_core_hashes(ROOT)
+        self.assertEqual(active['src/sqe_studio/adapters/scqubits_adapter.py'],
+                         original['src/sqe_studio/adapters/scqubits_adapter.py'])
+        self.assertNotEqual(active['src/sqe_studio/adapters/sqdmetal_palace_adapter.py'],
+                            original['src/sqe_studio/adapters/sqdmetal_palace_adapter.py'])
+        self.assertIn('src/sqe_studio/interop/capacitance_identity.py',active)
+
+    def test_editing_change_record_cannot_authorize_core_mutation(self):
+        root=self.clone();path=root/gate.CORE_CHANGES
+        record=json.loads(path.read_bytes())
+        record['files']['src/sqe_studio/adapters/scqubits_adapter.py']={
+            'baseline_sha256':None,'current_sha256':'a'*64,'reason':'self asserted'}
+        path.write_text(json.dumps(record))
+        policy=root/gate.POLICY;data=json.loads(policy.read_bytes())
+        data['protected_fingerprint']=gate.fingerprint(root);policy.write_text(json.dumps(data))
+        with self.assertRaisesRegex(gate.ScienceFirstGateError,'change review'):gate.check(root)
+
+    def test_current_core_change_still_needs_exact_reviewed_source_bytes(self):
+        root=self.clone();path=root/'src/sqe_studio/interop/capacitance_identity.py'
+        path.write_bytes(path.read_bytes()+b'\n# changed after method review\n')
+        policy=root/gate.POLICY;data=json.loads(policy.read_bytes())
+        data['protected_fingerprint']=gate.fingerprint(root);policy.write_text(json.dumps(data))
+        with self.assertRaisesRegex(gate.ScienceFirstGateError,'numerical/core'):gate.check(root)
+
+    def test_current_review_document_cannot_silently_change(self):
+        root=self.clone();path=root/'docs/SINGLE_TRANSMON.md'
+        path.write_bytes(path.read_bytes()+b'\nChanged scientific method.\n')
+        with self.assertRaisesRegex(gate.ScienceFirstGateError,'change review'):gate.check(root)
 
     def test_historical_sources_are_not_required(self):
         self.assertFalse((ROOT/'agent_cycle').exists())

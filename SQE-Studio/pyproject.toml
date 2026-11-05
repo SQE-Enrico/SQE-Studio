@@ -13,7 +13,7 @@ dependencies = []
 [project.optional-dependencies]
 scqubits = ["scqubits==4.3.1"]
 quantum-metal = ["quantum-metal>=0.8,<1"]
-dev = ["pytest>=8,<10", "build>=1.2,<2", "setuptools==80.9.0", "wheel==0.45.1", "numpy==2.2.6", "scipy==1.17.1"]
+dev = ["pytest>=8,<10", "build>=1.2,<2", "setuptools==80.9.0", "wheel==0.45.1", "numpy==2.2.6", "scipy==1.17.1", "shapely>=2,<3"]
 browser = ["playwright>=1.55,<2"]
 
 [project.scripts]

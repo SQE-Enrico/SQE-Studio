@@ -13,6 +13,8 @@ from pathlib import Path
 import re
 
 from ..orchestration.artifacts import ArtifactInvalid, safe_file
+from ..adapters.base import EngineBlocked
+from .capacitance_identity import terminal_label, verify_saved_identity
 
 SCHEMA = 'sqe.native-capacitance-screen.v1'
 _MAX_BYTES = 128 * 1024
@@ -120,8 +122,12 @@ def native_capacitance_evidence(folder: Path, manifest: dict, project: dict) -> 
                 not isinstance(p.get('component'), str) or not p['component'] or
                 type(p.get('native_attributes')) is not list or not p['native_attributes']
                 for i, p in enumerate(ports, 1)) or
-            len({p['component'] for p in ports}) != len(ports)):
+            len({terminal_label(p) for p in ports}) != len(ports)):
         raise NativeCapacitanceEvidenceError('Reviewed conductor order/components are ambiguous')
+    try:
+        identity = verify_saved_identity(folder, manifest, model, em)
+    except (EngineBlocked, ValueError, OSError, KeyError, TypeError) as exc:
+        raise NativeCapacitanceEvidenceError('Invalid native conductor identity: ' + str(exc)[:300]) from exc
     declared = {a['name'] for a in manifest.get('artifacts', [])}
     required = ('sqe_em/outputFiles/terminal-C.csv', 'sqe_em/sqe_em.json',
                 'sqe_em/sqe_em.msh', 'sqe_em/palace-native.log', 'a03-native-artifacts.json')
@@ -187,13 +193,13 @@ def native_capacitance_evidence(folder: Path, manifest: dict, project: dict) -> 
     return {'schema': SCHEMA, 'status': 'NATIVE_MAXWELL_MATRIX_SCREENED',
             'revision_id': manifest['revision_id'], 'project_digest': manifest['project_digest'],
             'native_matrix_sha256': native_sha, 'native_source_unit': unit,
-            'conductor_order': [p['component'] for p in ports],
+            'conductor_order': [terminal_label(p) for p in ports],
             'terminal_surface_tags': [p['native_attributes'] for p in ports],
             'reference_ground_surface_tags': list(ground['Attributes']),
             'capacitance_matrix_F': [[float(v) for v in row] for row in matrix],
             'symmetry_relative_residual': float(relative_skew),
             'conditional_island_indicators': [
-                {'terminal_index': i, 'component': p['component'],
+                {'terminal_index': i, 'component': terminal_label(p),
                  'C_ii_F': float(matrix[i - 1][i - 1]), 'conditional_EC_over_h_GHz': indicators[i - 1]}
                 for i, p in enumerate(ports, 1)],
             'conditional_assumption': 'ALL_OTHER_MODELED_TERMINALS_AT_ZERO_VOLTAGE_CII_ONLY',

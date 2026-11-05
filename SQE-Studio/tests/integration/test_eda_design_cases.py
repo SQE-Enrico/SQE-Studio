@@ -85,7 +85,10 @@ def test_use_case_registry_is_visible_only_to_authenticated_gui(tmp_path):
                                        'password':'very-long-test-password'})[1]['csrf']
         status, cases = call('/api/design/use-cases')
         assert status == 200 and cases['schema'] == 'sqe.design-cases.v1'
-        assert len(cases['cases']) == 6
+        assert len(cases['cases']) == 7
+        native = next(case for case in cases['cases'] if case['id'] == 'single_transmon_native')
+        assert native['starter_template'] == 'single_transmon_native_v1'
+        assert native['readiness'] == 'editable_native_conditional'
         status, capabilities = call('/api/design/capabilities')
         assert status == 200 and capabilities['schema'] == 'sqe.eda-capability-map.v1'
         assert len(capabilities['edges']) >= 8

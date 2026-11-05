@@ -33,6 +33,20 @@ class DesignCase:
 
 _CASES = (
     DesignCase(
+        id="single_transmon_native", title="Single transmon: native layout to spectrum",
+        family="transmon",
+        purpose="Solve native pad capacitance and quantize the source-bound conditional transmon.",
+        reference_title="SQDMetal Palace capacitance and scqubits Transmon",
+        reference_url="https://sqdlab.github.io/SQDMetal/simulations/simpalace.html",
+        starter_template="single_transmon_native_v1", readiness="editable_native_conditional",
+        science_boundary="Native conditional research; junction assumptions are separate and physical convergence remains unestablished.",
+        steps=("intent", "layout", "em", "quantum", "results"),
+        acceptance=("Verify declared QGeometry pad and ground identities against native mesh groups.",
+                    "Retain original Palace files, immutable revisions and source hashes.",
+                    "Declare additional C_J and E_J/h or L_J; check native charge-basis stability."),
+        next_missing_edge=None,
+    ),
+    DesignCase(
         id="cpw_resonator_eigenmode", title="Quarter-wave CPW resonator: EM eigenmodes",
         family="resonator",
         purpose="Tune CPW routing and compare native eigenfrequencies under mesh refinement.",

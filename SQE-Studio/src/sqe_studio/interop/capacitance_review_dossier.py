@@ -165,7 +165,8 @@ def build_native_capacitance_review_dossier(store: Store, *, owner: str,
             for kind, name in _REQUIRED_FILES
         }
         ports = mapping['ordered_conductors']
-        _require([p['component'] for p in ports] == candidate['terminal_labels'] and
+        from .capacitance_identity import terminal_label
+        _require([terminal_label(p) for p in ports] == candidate['terminal_labels'] and
                  [p['terminal_index'] for p in ports] == list(range(1, len(ports) + 1)),
                  'Mapping order differs from native matrix')
         pair = candidate['proposed_pair']
@@ -182,9 +183,9 @@ def build_native_capacitance_review_dossier(store: Store, *, owner: str,
                 return 'floating_zero_charge'
             raise CapacitanceReviewBlocked('Unclassified terminal')
         terminals = [{'terminal_index': p['terminal_index'],
-                      'component': p['component'],
+                      'component': terminal_label(p),
                       'native_group_ids': list(p['native_group_ids']),
-                      'proposed_role': role(p['component'])} for p in ports]
+                      'proposed_role': role(terminal_label(p))} for p in ports]
         # Last rehash + owner-scoped Store requery prevent an accepted dossier
         # from being assembled across two revisions/runs during inspection.
         final = verify_manifest(folder, revision_id=revision,

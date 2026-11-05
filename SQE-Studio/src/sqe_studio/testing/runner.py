@@ -204,6 +204,12 @@ def run_selected(root, destination, selected, *, notify=None, cancel=None):
                         if evidence.is_symlink() or evidence.stat().st_size>200000:
                             raise ValueError('Unsafe extraction evidence')
                         members['extraction/'+evidence.name]=evidence.read_bytes()
+                if task.id == 'transmon_chain':
+                    evidence = temp/task.id/'native-evidence.zip'
+                    if evidence.is_file():
+                        if evidence.is_symlink() or evidence.stat().st_size > 40_000_000:
+                            raise ValueError('Unsafe native transmon evidence archive')
+                        members['transmon-chain/native-evidence.zip'] = evidence.read_bytes()
                 scope = sha256(_json({'task': task.id, 'plan': plan_sha,
                     'implementation': [sha256(p.read_bytes()).hexdigest() if p.is_file() and not p.is_symlink()
                         else 'MISSING_OR_LINKED' for p in files]})).hexdigest()
@@ -275,7 +281,9 @@ def run_selected(root, destination, selected, *, notify=None, cancel=None):
         lines += [f'| {r["title"]} | {r["status"]} | {r.get("duration_s", "-")} |' for r in rows]
         lines += ['', 'Native execution, basis stability and literature comparison are separate substeps.',
                   'Physical qualification NOT ESTABLISHED; fabrication HOLD.',
-                  'Share this original numbered ZIP. No user projects or raw native fields are included.',
+                  ('This ZIP includes raw native files from the fresh reference case; no user projects or accounts.'
+                   if 'transmon_chain' in selection['resolved']
+                   else 'Share this original numbered ZIP. No user projects or raw native fields are included.'),
                   'Cancellation takes effect after the current bounded task.',
                   'Compare common task scope; changing the selection is not scientific progress.']
         members['SUMMARY.md'] = ('\n'.join(lines)+'\n').encode()

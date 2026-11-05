@@ -31,8 +31,11 @@ python tools/science_first_gate.py .
 The refresh tool writes one current software fingerprint and the source inventory.
 It cannot update numerical/core pins or claim independent scientific approval.
 Source and contract validation remain distinct from a successful numerical test.
-Future numerical changes need a concise current scientific review and validation;
-replace the current policy deliberately instead of recreating approval history.
+Current integration changes are recorded in config/core_changes.json with exact
+baseline/current hashes and the method review in docs/SINGLE_TRANSMON.md. The
+gate preserves the original baseline map and rejects unreviewed edits even after
+fingerprint refresh. Native tests accompany scientific integration changes; this
+source review is not independent physics approval.
 
 Keep tests grouped by behavior. Retain meaningful failure, ownership, stale data,
 units, numerical-boundary and cleanup checks. Retire only tests for mechanisms
@@ -45,3 +48,5 @@ install into an isolated environment and run local HTTP smoke checks. Package
 current source, current evidence and concise instructions. Do not nest previous
 releases, wheels from older versions, prior logs or chat transcripts in the code.
 Use external version control for history when one is available.
+
+Use English for code, documentation, commits, issues and pull requests.

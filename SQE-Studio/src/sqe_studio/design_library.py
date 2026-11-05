@@ -13,6 +13,13 @@ from .adapters.quantum_metal_adapter import COMPONENTS, ROUTES, DIMENSIONS, vali
 
 # Allowlisted literal resources: never interpret names/paths supplied by clients.
 _LIBRARY = {
+    'single_transmon_native_v1': {
+        'title': 'Single transmon / native layout-to-spectrum chain',
+        'family': 'transmon',
+        'description': 'Isolated TransmonPocket with explicit named pad/ground identities and a native Palace capacitance study. Review material and ground assumptions before execution.',
+        'reference': 'https://sqdlab.github.io/SQDMetal/simulations/simpalace.html',
+        'scientific_status': 'conditional_native_research_not_physically_qualified',
+    },
     'cpw_resonator_v1': {
         'title': 'CPW resonator / native EM study',
         'family': 'resonator',
@@ -46,7 +53,10 @@ def instantiate(template_id: str, name: str, family: str):
     entry = _LIBRARY[template_id]
     if family != entry['family']:
         raise ValidationError('Starter design family does not match the selected design family')
-    if template_id == 'cpw_resonator_v1':
+    if template_id == 'single_transmon_native_v1':
+        from .transmon_design import single_transmon_model
+        model = single_transmon_model(name)
+    elif template_id == 'cpw_resonator_v1':
         model = deepcopy(CPW_RESONATOR_V1)
         model['name'] = name
     else:

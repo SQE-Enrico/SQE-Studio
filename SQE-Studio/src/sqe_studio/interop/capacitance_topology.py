@@ -300,7 +300,8 @@ def build_native_capacitance_topology(folder: Path, manifest: dict, project: dic
         ground = _groups(deck['Boundaries']['Ground']['Attributes'], 'Reference ground')
         _require(len(deck['Boundaries']['Terminal']) == len(em['ports']),
                  'Native terminal count inconsistent with saved study')
-        names = [p['component'] for p in em['ports']]
+        from .capacitance_identity import terminal_label
+        names = [terminal_label(p) for p in em['ports']]
         _require(len(set(names)) == len(names), 'Duplicate native conductor identity')
         used = set(ground)
         for i, (p, t) in enumerate(zip(em['ports'], deck['Boundaries']['Terminal']), 1):
@@ -403,6 +404,7 @@ def inspect_native_capacitance_mapping(folder: Path, manifest: dict, project: di
         'source': dict(candidate['source']),
         'ordered_conductors': [
             {'terminal_index': i, 'component': port['component'],
+             **({'label': port['label'], 'qgeometry': port['qgeometry']} if 'qgeometry' in port else {}),
              'native_group_ids': list(port['native_attributes'])}
             for i, port in enumerate(ports, 1)],
         'reference_ground_group_ids': candidate['reference_ground']['native_group_ids'],

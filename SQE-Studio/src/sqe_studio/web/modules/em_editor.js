@@ -32,7 +32,7 @@ function emEditor(){const m=activeModel(),s=selectedEMStudy(),e=s?.inputs?.em,st
 }
 function changeEmSettings(){const s=selectedEMStudy();if(!s)throw Error('Create an EM study first');const em=s.inputs.em;
  const id=readText('emID');if(!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(id)||activeModel().studies.some(x=>x!==s&&x.id===id))throw Error('Study ID invalid or duplicated');
- s.id=id;emSelectedId=id;s.kind=readText('emKind');em.execution=readText('emExecution');em.ground={kind:'qdesign_ground_plane',layer:readNumber('emGround',{integer:true,min:1,max:255}),verified:$('emGroundCheck').value==='true'};
+ s.id=id;emSelectedId=id;s.kind=readText('emKind');em.execution=readText('emExecution');em.ground={...em.ground,kind:'qdesign_ground_plane',layer:readNumber('emGround',{integer:true,min:1,max:255}),verified:$('emGroundCheck').value==='true'};
  for(const k of Object.keys(em.boundaries).filter(x=>x!=='farfield'))em.boundaries[k]=readNumber('em_'+k,{min:0});
  em.boundaries.farfield=$('emFarfield').value;em.mesh={min_um:readNumber('emMeshMin',{min:0.01}),max_um:readNumber('emMeshMax',{min:0.01}),relative_tolerance:readNumber('emMeshTol',{min:0.00000001,max:0.25}),refinement_levels:$('emMeshLevels').value.split(',').map(Number)};
  const solver={order:readNumber('emSolver_order',{integer:true,min:1,max:4}),tolerance:readNumber('emSolver_tolerance',{min:1e-15,max:1e-2}),max_iterations:readNumber('emSolver_max_iterations',{integer:true,min:1,max:1000}),num_cpus:readNumber('emSolver_num_cpus',{integer:true,min:1,max:16})};
@@ -51,12 +51,15 @@ function editEMPort(index){const s=selectedEMStudy();if(!s)return;const e=s.inpu
  ${selection('portComponent','QComponent',activeModel().layout.components.filter(c=>!isRoute(c.kind)||c.kind==='RouteStraight'||c.kind==='RouteMeander').map(c=>c.name),old.component)}
  <div class="row">${field('Route pin (start/end)','portPin',old.pin||'start')}${numeric('portLength','Port length · µm',old.length_um??20)}${numeric('portImpedance','Reference impedance · Ω',old.impedance_ohm??50)}</div>
  <div class="row">${numeric('portL','Junction L · nH',old.L_nH??4.3)}${numeric('portC','Junction C · fF',old.C_fF??10)}${field('Conductor tag(s), comma separated','portTags',(old.native_attributes||[1]).join(','))}</div>
- <p class="helper">Identify the exact physical pin, port and native conductor tags after inspecting QDesign. SQE does not guess correspondences.</p><button class="primary full" id="confirmPort">${index<0?'Add':'Update'} physical mapping</button>`;
+ <div class="row">${selection('portGeometry','Named pad (capacitance only)',[['','Whole component / legacy'],['pad_bot','pad_bot'],['pad_top','pad_top']],old.qgeometry||'')}${field('Conductor label','portLabel',old.label||'')}${numeric('portNativeIndex','Original native terminal index',old.native_terminal_index??'')}</div>
+ <p class="helper">Identify the exact physical pin, named pad and native conductor tags after inspecting QDesign. SQE checks declared identities and blocks mismatches.</p><button class="primary full" id="confirmPort">${index<0?'Add':'Update'} physical mapping</button>`;
  openDialog('Physical port mapping',form);
  $('confirmPort').onclick=()=>{try{
   const kind=readText('portKind'),component=readText('portComponent');let p={index:index<0?e.ports.length+1:index+1,kind,component};
   if(kind==='conductor'){
    p.native_attributes=readText('portTags').split(',').map(v=>{const n=Number(v.trim());if(!Number.isInteger(n)||n<1)throw Error('Positive integer native conductor tags required');return n});
+   const geometry=readText('portGeometry');
+   if(geometry){p.qgeometry=geometry;p.label=readText('portLabel');p.native_terminal_index=readNumber('portNativeIndex',{integer:true,min:1,max:3});if(!/^[A-Za-z][A-Za-z0-9_]{0,47}$/.test(p.label))throw Error('Explicit ASCII conductor label required')}
   }else if(kind==='junction'){p.L_nH=readNumber('portL',{min:0.001});p.C_fF=readNumber('portC',{min:0})}
   else{p.length_um=readNumber('portLength',{min:0.001});p.impedance_ohm=readNumber('portImpedance',{min:0.001});if(kind==='cpw_route')p.pin=readText('portPin')}
   if(index<0)e.ports.push(p);else e.ports[index]=p;

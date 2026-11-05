@@ -1,30 +1,32 @@
 # SQE Studio
 
-Piattaforma locale per progettazione quantum EDA, orchestrazione dei motori
-scientifici, revisioni immutabili e verifica della provenienza dei risultati.
-Il progetto Python e la documentazione tecnica sono nella cartella [SQE-Studio](SQE-Studio/README.md).
+Local quantum EDA platform with native scientific engines, immutable project
+revisions and verified result provenance. The Python project and technical
+documentation are in [SQE-Studio](SQE-Studio/README.md).
 
-## Sviluppo e test
+## Development and tests
 
-Dalla radice del repository:
+Run from the repository root:
 
-```powershell
-.\dev.ps1 -Doctor
-.\dev.ps1 -Watch
-```
+~~~powershell
+./dev.ps1 -Doctor
+./dev.ps1 -Watch
+~~~
 
-Il watcher esegue Recommended dopo i salvataggi. Per la suite completa, arrestare
-il watcher con Ctrl+C e usare `.\dev.ps1 -Profile software`.
+The watcher runs Recommended after saves. Stop it with Ctrl+C before running
+the full suite with ./dev.ps1 -Profile software.
 
-Le modifiche seguono [issue e milestone](.github/ROADMAP.md), una branch dedicata
-e una pull request. [GitHub Actions](https://github.com/SQE-Enrico/SQE-Studio/actions)
-esegue controlli su commit e PR e conserva riepiloghi e report scaricabili.
-Il [protocollo di sviluppo](.github/DEVELOPMENT.md) descrive come collegare test,
-commit, PR e completamento delle issue.
+The native single-transmon workflow uses ./dev.ps1 -Profile single_transmon.
+It requires the configured scientific workstation and a real Palace backend;
+see the [workflow and scientific scope](SQE-Studio/docs/SINGLE_TRANSMON.md).
 
-La [baseline locale verificata](.github/evidence/local-baseline.json) registra
-1757 test superati, 23 saltati e 62 controlli dei controller UI, oltre al browser
-reale e all'installazione isolata della wheel. Le evidenze native e i criteri
-fisici restano distinti dalla CI software.
+Changes follow [issues and milestones](.github/ROADMAP.md), a feature branch
+and a linked pull request. [GitHub Actions](https://github.com/SQE-Enrico/SQE-Studio/actions)
+runs checks on pushes and PRs and retains readable summaries and downloadable
+reports. The [development protocol](.github/DEVELOPMENT.md) defines this cycle.
+
+The [verified local baseline](.github/evidence/local-baseline.json) records its
+report checksum, environment, counts and exclusions. Software checks, native
+execution, numerical convergence and physical qualification remain distinct.
 
 Scientific qualification NOT_ESTABLISHED; fabrication HOLD.

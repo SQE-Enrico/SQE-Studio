@@ -2,7 +2,7 @@
   "schema": "sqe.current-development-state.v2",
   "runtime_version": "0.1.1.dev81",
   "milestone": "M20",
-  "scope": "SOFTWARE_MODULARIZATION_AND_CONTEXT_REDUCTION",
+  "scope": "SINGLE_TRANSMON_NATIVE_WORKFLOW",
   "source_baseline": "0.1.1.dev78",
   "recommended_profile": "recommended",
   "recommended_tasks": [
@@ -28,9 +28,9 @@
     "native_palace_profile": "NOT_SELECTED"
   },
   "next_work": [
-    "Use dev.ps1 -Watch for local development, software before integration and the relevant native profile for scientific changes",
-    "Implement and retain layout-calculated capacitance with explicit conductor/ground identity",
-    "Evaluate mesh/domain/material sensitivity before grounded-chip literature and multimode SQDMetal EPR benchmarks"
+    "Use Recommended during edits, Software before integration and Single transmon for the native chain",
+    "Measure mesh/domain/material sensitivity for the isolated native transmon (GitHub issue #4)",
+    "Add published transmon/readout and multimode SQDMetal EPR benchmarks (GitHub issue #5)"
   ],
   "constraints": [
     "Reuse native packages; no new scientific solver",
@@ -40,15 +40,16 @@
   "github_tracking": {
     "repository": "https://github.com/SQE-Enrico/SQE-Studio",
     "roadmap": "../.github/ROADMAP.md",
-    "active_issue": 1,
+    "active_issue": 3,
     "future_issues": [
-      2,
-      3,
       4,
       5
     ],
     "trigger": "push_and_pull_request",
-    "periodic_chat_checks": false
+    "periodic_chat_checks": false,
+    "related_issues": [
+      2
+    ]
   },
   "context_entry": "python tools/context.py",
   "history_policy": "Current state only; no nested releases or historical permit chain",
@@ -62,6 +63,23 @@
       "0": "PASS_SELECTED_STABLE_SOURCE",
       "1": "FAIL",
       "2": "BLOCKED_OR_INCOMPLETE"
-    }
+    },
+    "native_profile": "single_transmon"
+  },
+  "latest_native_workflow": {
+    "profile": "single_transmon",
+    "report": "qualification-reports/SQE-RC14_12-report-0011.zip",
+    "report_sha256": "f086b9dd8d6d8e4c751d0987766f95a60aead41537fe58d06cc74ebf1db6e454",
+    "duration_s": 136.03,
+    "source_stable": true,
+    "automatic_tasks_passed": 4,
+    "native_palace": "PASS",
+    "native_scqubits": "PASS",
+    "real_browser": "PASS",
+    "source_rejection_checks": "PASS",
+    "official_reference": "PASS_5_PERCENT_PER_ENTRY",
+    "http_f01_GHz": 4.889626372861152,
+    "browser_f01_GHz": 4.647209785953111,
+    "physical_convergence": "NOT_ESTABLISHED"
   }
 }

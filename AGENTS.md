@@ -1,7 +1,15 @@
 # SQE Studio workspace
 
+Use English for code, comments, documentation, GitHub issues/PRs, commit
+messages and user-facing replies. The user may continue writing in Italian.
+
 The Python project is in `SQE-Studio/`. Read its `AGENTS.md` and
 `CURRENT_STATE.json`, then use `tools/context.py` for the relevant area.
+
+The owner's current product objective is a scientifically credible QuantumPro
+competitor. Use QUANTUMPRO_COMPETITOR_MATRIX.md and QUANTUMPRO_DEVELOPMENT_PLAN.md
+for current priorities. Historical architecture and locks are baseline evidence,
+not permanent feature prohibitions; justified changes need meaningful validation.
 
 Run local development checks from this directory with `./dev.ps1` on Windows.
 It selects the existing project scientific runtime, refreshes software-only
@@ -15,7 +23,9 @@ Do not claim completion while required checks are blocked or files changed durin
 the run. Do not start a persistent watcher unless the user requests one.
 
 The active GitHub workflow lives in the repository-root `.github/workflows/`.
-Preserve existing local changes and numerical/core pins.
+Preserve existing local changes and the original numerical/core hash map.
+Current scientific integration changes require the separate source review in
+SQE-Studio/config/core_changes.json; fingerprint refresh alone cannot authorize them.
 Keep Git's byte-preserving attributes: newline conversion changes signed hashes.
 
 Development is tracked on GitHub by issue, milestone and feature PR. Follow

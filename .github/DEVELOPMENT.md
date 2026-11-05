@@ -1,34 +1,39 @@
-# Sviluppo tracciato su GitHub
+# Development tracked on GitHub
 
-Ogni incremento parte da una issue con risultato atteso, criteri di completamento
-e test richiesti. La roadmap raccoglie le issue nelle cinque milestone del progetto.
+Use English for code, comments, documentation, GitHub issues/PRs and commit
+messages. The owner may give instructions in Italian.
 
-1. Lavorare su una branch `codex/<numero-issue>-<argomento>`.
-2. Eseguire test mirati e Recommended nella macchina scientifica. A funzionalita
-   completata eseguire `software` e i profili nativi richiesti dall'issue.
-3. Creare commit descrittivi e pubblicare la branch dopo i controlli pertinenti.
-4. Creare o aggiornare una PR collegata con `Refs #numero`. Usare `Closes #numero`
-   quando tutti i criteri dell'issue sono verificati.
-5. Controllare la CI della revisione corrente, correggere gli errori e aggiornare
-   la PR con report ed esclusioni. L'integrazione avviene mediante merge della PR.
+Each increment starts from an issue with an observable outcome, acceptance
+criteria and required tests. The roadmap groups these issues into five milestones.
 
-Push e pull request avviano GitHub Actions. Ogni job mostra commit, ambiente,
-famiglie di test, domini della regressione e report scaricabili, anche su errore.
-Le issue collegate con `Closes` si chiudono al merge nella branch predefinita;
-GitHub aggiorna automaticamente l'avanzamento della relativa milestone.
+1. Work on a codex/<issue>-<topic> feature branch.
+2. Run focused tests and Recommended on the scientific workstation. Run
+   software before integration and the native profiles required by the issue.
+3. Commit descriptive, verified increments and push the feature branch.
+4. Maintain a linked PR using Refs #number. Use Closes #number only when its
+   acceptance criteria have been verified.
+5. Inspect CI for the current revision, fix failures, and update the issue/PR
+   with reports, checksums and explicit exclusions.
 
-Gli agenti che lavorano su questo repository mantengono issue e PR aggiornate a
-ogni incremento verificato, includendo i risultati locali quando eseguono test
-nativi. La pubblicazione di commit e PR fa parte del ciclo di sviluppo richiesto;
-il merge richiede un'istruzione dell'utente. I controlli periodici da chat non sono
-parte di questa configurazione.
+Pushes and pull requests trigger GitHub Actions. Each job records its commit,
+environment, test families, regression domains and downloadable evidence.
+Linked issues close when a PR containing Closes is merged into the default
+branch; GitHub updates the associated milestone.
 
-La CI ospitata su GitHub installa gli strumenti software e browser. I backend
-scientifici della workstation sono verificati con i profili locali pertinenti.
-Un PASS software e gli skip in CI non costituiscono qualificazione fisica.
-I file numerici/core restano protetti e ogni loro cambiamento richiede una
-revisione scientifica corrente con riferimenti primari e benchmark significativi.
+Agents working in this repository maintain issues and PRs with current evidence
+after each verified increment. Commit/PR publication is part of the authorized
+development cycle. Merge requires an explicit owner instruction. Periodic chat
+monitoring is not configured.
 
-Gli extra `dev` includono NumPy e SciPy nelle versioni della workstation verificata:
-i test di compatibilita delle matrici sparse devono poter essere raccolti anche
-su un runner pulito, indipendentemente dalla presenza di scqubits.
+GitHub-hosted CI installs software/browser test tools. The native scientific
+backends are exercised on the workstation using the relevant local profiles.
+The single_transmon profile uses real Palace and scqubits; extraction remains
+the separately labeled EM-fixture compatibility test.
+
+The original core map stays immutable. Scientific integration changes require
+the current source review and exact active hashes in config/core_changes.json,
+with primary references and meaningful native validation. Fingerprint refresh
+alone does not authorize a numerical change or a physical release.
+
+Development extras include NumPy/SciPy for sparse compatibility tests and
+Shapely for direct declared-geometry identity checks on clean CI runners.

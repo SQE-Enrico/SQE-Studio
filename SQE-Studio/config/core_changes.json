@@ -1,0 +1,49 @@
+{
+  "schema": "sqe.current-core-changes.v1",
+  "scope": "SINGLE_TRANSMON_NATIVE_WORKFLOW",
+  "authorization": "Develop the complete native single-transmon chain with automated local tests and English code, documentation and GitHub tracking, as requested by the owner.",
+  "baseline_core_sha256": "1f9c351168acf26afff4a060e9592d25bf09498f1c685764e28933e70c04fbc2",
+  "review_document": "docs/SINGLE_TRANSMON.md",
+  "review_sha256": "9ddb270e99dbcd2cfee710248948facab8fe33872a8cdac933e6fed399119e3f",
+  "files": {
+    "src/sqe_studio/eda/use_cases.py": {
+      "baseline_sha256": "1fe810403eb3125737a61c06a76201f1c719d888543a06d81cf7f4157ff228f2",
+      "current_sha256": "98eb22e6cd2f793b2a42dce85fe9d895bcc7b78f89fa7b21874f840073541ba4",
+      "reason": "Expose the implemented single-transmon starter in the authenticated design-case catalogue, retaining conditional scientific status."
+    },
+    "src/sqe_studio/adapters/sqdmetal_palace_adapter.py": {
+      "baseline_sha256": "9fc1db57853bc4755ba730f6361959bda2102106596f1273271faea300ab62e5",
+      "current_sha256": "4403631640b0dd158eae1858ac5c1013d89d0c7a226523a837bf620ad2bf3cfe",
+      "reason": "Validate named pads before native work and bind native ground/pad groups after upstream meshing."
+    },
+    "src/sqe_studio/interop/native_capacitance_evidence.py": {
+      "baseline_sha256": "48533f7cef17caf8ce8fb155242b9b80941fee7a1b7703bb695b2d819420545f",
+      "current_sha256": "c9e6258592eec94bbe8a1f84677a6260ce4e8a0139f63c96ee954cca9573fa5a",
+      "reason": "Verify the named-geometry source record and preserve conductor labels during native readback."
+    },
+    "src/sqe_studio/interop/capacitance_topology.py": {
+      "baseline_sha256": "f197a4fa682f7dbe507b555ba1f7a525cb7b1a2b53e09178462c9cdd6d76384c",
+      "current_sha256": "b7f95501d59e38263781da25e74a2b2ac7f647c814c76d414469e4fa5a817617",
+      "reason": "Keep distinct named pad identities within one CAD component; retain existing reduction and physical hold."
+    },
+    "src/sqe_studio/interop/capacitance_review_dossier.py": {
+      "baseline_sha256": "a9135f021a6f25a797e36d046d27e170e2ea97172f71c4d28a6d4e44c4fb84ac",
+      "current_sha256": "ac087c137955b622bb3b5b7a22e8c4071b00b6350824518dd507c50cfd7f20c4",
+      "reason": "Use declared conductor labels in the existing blocked review dossier."
+    },
+    "src/sqe_studio/interop/capacitance_identity.py": {
+      "baseline_sha256": null,
+      "current_sha256": "fe84ff12d0a0a899b0ed9506e6916b2712f35db6cb0f5f310d6a5d36503f5937",
+      "reason": "Check explicit native QGeometry assignments using upstream predicates and ground the declared reference conductor."
+    },
+    "src/sqe_studio/orchestration/artifacts.py": {
+      "baseline_sha256": "e68c31b46b990b5b30ea7c24294b42cf0346b2eae13b7cc1cba4374c4f3ec55b",
+      "current_sha256": "e7aa6653ac213204648c592c18f90246334f4d04229c435abf7667ceee486c10",
+      "reason": "Include native geometry identity code in Palace/scqubits execution fingerprints so changed checks invalidate caches."
+    }
+  },
+  "scientific_qualification": "NOT_ESTABLISHED",
+  "independent_technical_reviewer": "UNASSIGNED",
+  "independent_scientific_reviewer": "UNASSIGNED",
+  "fabrication": "HOLD"
+}

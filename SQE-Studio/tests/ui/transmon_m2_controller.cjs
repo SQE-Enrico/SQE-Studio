@@ -134,5 +134,24 @@ transmonDraft=null;transmonDraftIdentity='';return true;}`);
  assert.match(evaluate('transmonSelectionEditor()'),/BLOCKED_CONFLICT/);
  assert.equal(await evaluate('commitTransmonSelection()'),false);
  assert.equal(calls.length,1);
- console.log('M2_CONTROLLER_PASS exact ports, exhaustive policy, XSS, blocked states, preserved model, optimistic POST, readback, conflict');
+ // Two native pad geometries inside one CAD component remain distinct conductors.
+ const named=JSON.parse(JSON.stringify(model));
+ named.studies[0].inputs.em.ports=[
+  {...port('Q1',1),qgeometry:'pad_bot',label:'Q1_pad_bot',native_terminal_index:2},
+  {...port('Q1',2),qgeometry:'pad_top',label:'Q1_pad_top',native_terminal_index:3}
+ ];
+ ctx.named=named;
+ evaluate('project.model=named;transmonDraft=null;transmonDraftIdentity=""');
+ assert.equal(evaluate('transmonInventory(project.model.studies[0]).ok'),true);
+ assert.equal(JSON.stringify(evaluate('transmonInventory(project.model.studies[0]).names')),
+  '["Q1_pad_bot","Q1_pad_top"]');
+ evaluate(`transmonDraft=newTransmonDraft();transmonDraft.study_id='CStudy';
+ transmonDraft.island_a='Q1_pad_bot';transmonDraft.island_b='Q1_pad_top';
+ transmonDraft.configuration='TWO_ISLAND_CHARGE_TRANSFER';transmonDraft.junctionAccepted=true;`);
+ assert.equal(evaluate('validatedTransmonSelection(project.model,transmonDraft).island_b'),'Q1_pad_top');
+ evaluate("project.model.studies[0].inputs.em.ports[1].label='Q1_pad_bot'");
+ assert.equal(evaluate('transmonInventory(project.model.studies[0]).ok'),false);
+ evaluate("project.model.studies[0].inputs.em.ports[1].label='Q1_pad_top';project.model.studies[0].inputs.em.ports[1].qgeometry='unknown'");
+ assert.equal(evaluate('transmonInventory(project.model.studies[0]).ok'),false);
+ console.log('M2_CONTROLLER_PASS exact ports, named pads, exhaustive policy, XSS, blocked states, preserved model, optimistic POST, readback, conflict');
 })().catch(e=>{console.error(e);process.exitCode=1});

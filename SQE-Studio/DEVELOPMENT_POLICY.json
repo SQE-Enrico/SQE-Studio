@@ -1,9 +1,9 @@
 {
   "schema": "sqe.current-development-policy.v1",
-  "authorization": "Pulisci il codice, ristrutturalo in modo che sia modulare il più possibile, leggibile, espandibile e gestibile da una IA senza consumare troppo contesto; non serve tenere tutto lo storico.",
-  "scope": "SOFTWARE_MODULARIZATION_AND_CONTEXT_REDUCTION",
+  "authorization": "Develop the complete native single-transmon chain with automated local tests and English code, documentation and GitHub tracking, as requested by the owner.",
+  "scope": "SINGLE_TRANSMON_NATIVE_WORKFLOW",
   "baseline_package_sha256": "99022b932487421f8415a503f4267413d881f8ee62ce634350dc9f7095e6ae66",
-  "protected_fingerprint": "ff8f0e9505e524fa05fc598f4c8163e35e2996282fc427c447fd0354e7ffb264",
+  "protected_fingerprint": "8492b29887ec5089ba9336a7b818a518437c95e9132a56d15838a460219f677f",
   "independent_technical_reviewer": "UNASSIGNED",
   "independent_scientific_reviewer": "UNASSIGNED",
   "scientific_release": "NOT_AUTHORIZED"

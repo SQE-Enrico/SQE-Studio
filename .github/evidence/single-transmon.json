@@ -1,0 +1,188 @@
+{
+  "schema": "sqe.native-workflow-checkpoint.v1",
+  "date": "2026-11-05",
+  "base_commit": "d8cf31085ae0bb2b1a9f06a06b15405e7506f244",
+  "source_inventory_sha256": "f412ac4e8e94cdf46b4dd5d33c838c3356c8e7e628f022a8fe947be41555fe4b",
+  "native_profile": {
+    "name": "SQE-RC14_12-report-0011.zip",
+    "sha256": "f086b9dd8d6d8e4c751d0987766f95a60aead41537fe58d06cc74ebf1db6e454",
+    "duration_s": 136.03,
+    "counts": {
+      "BLOCKED": 0,
+      "CANCELLED": 0,
+      "FAIL": 0,
+      "PASS": 4,
+      "SKIPPED_BY_PLAN": 11,
+      "TIMEOUT": 0
+    }
+  },
+  "software_checkpoint": {
+    "name": "SQE-RC14_12-report-0014.zip",
+    "sha256": "9e0db97151b4172f4fe55631afca842d4425ed0a8c9668c627121f3ebd323c72",
+    "duration_s": 518.88,
+    "counts": {
+      "BLOCKED": 0,
+      "CANCELLED": 0,
+      "FAIL": 0,
+      "PASS": 5,
+      "SKIPPED_BY_PLAN": 10,
+      "TIMEOUT": 0
+    },
+    "source_stable": false,
+    "local_exit_code": 2,
+    "passed_tests": 1795,
+    "skipped_tests": 24,
+    "limitation": "All tasks passed, but root agent instructions changed during the run; final stable integration run required"
+  },
+  "environment": {
+    "os": "Windows 11 Pro 10.0.26300 x64",
+    "python": "3.11.9",
+    "SQDMetal": "0.0.1.dev1",
+    "gmsh": "4.15.2",
+    "quantum-metal": "0.9.0",
+    "scqubits": "4.3.1",
+    "shapely": "2.2.0",
+    "sqdmetal_source_sha256": {
+      "PALACE/Capacitance_Simulation.py": "96d5a281acdee323d846327547e12a624394a26b1db6fe09920d348feeab340a",
+      "PALACE/Utilities/GMSH_Geometry_Builder.py": "3b44b2fca41b1bb999facf629e09c1b3947434039bacbac1570ad55b14426a3a",
+      "Utilities/GeometryProcessors/GeomQiskitMetal.py": "aa7026132a1f12f0a18d07a675a4b1d779b06dc5d868bc5c13cf033137916227"
+    },
+    "palace_git_tag": "869ee5c"
+  },
+  "http": {
+    "f01_GHz": 4.889626372861152,
+    "anharmonicity_GHz": -0.2446598219848397,
+    "capacitances": {
+      "additional_junction_F": 2e-15,
+      "matrix_effective_F": 8.672161610468628e-14,
+      "total_F": 8.872161610468628e-14
+    },
+    "parameters": {
+      "EC": 0.21832592974640355,
+      "EJ": 15.0,
+      "ncut": 15,
+      "ng": 0.0,
+      "truncated_dim": 6
+    }
+  },
+  "browser": {
+    "status": "PASS",
+    "f01_GHz": 4.647209785953111,
+    "anharmonicity_GHz": -0.21832490739567767,
+    "capacitances": {
+      "additional_junction_F": 1.2000000000000001e-14,
+      "matrix_effective_F": 8.672161610468628e-14,
+      "total_F": 9.872161610468628e-14
+    },
+    "parameters": {
+      "EC": 0.19621061819043323,
+      "EJ": 14.999999999999998,
+      "ncut": 15,
+      "ng": 0.0,
+      "truncated_dim": 6
+    }
+  },
+  "reference": {
+    "analytic_matrix_F": [
+      [
+        1.230518e-12,
+        -4.945668e-13
+      ],
+      [
+        -4.945668e-13,
+        2.431543e-12
+      ]
+    ],
+    "entry_relative_tolerance": 0.05,
+    "execution_kind": "NATIVE_PALACE",
+    "fabrication": "HOLD",
+    "input_sha256": {
+      "mesh/spheres.msh": "0c1612c70c4644db8085c72a2f6dbaf739a59971cba10bc5423f984e7b6a9988",
+      "spheres.json": "cb60f7e015277808123fa3f845635afbc795e78e72b1f5024cb6acfcb34819d5"
+    },
+    "matrix_F": [
+      [
+        1.237445610524e-12,
+        -4.77097573953e-13
+      ],
+      [
+        -4.77097573953e-13,
+        2.478413460189e-12
+      ]
+    ],
+    "native_execution": {
+      "elapsed_seconds": 23.115,
+      "exit_code": 0,
+      "mpi_ranks": 1,
+      "omp_threads": 1
+    },
+    "palace_git_tag": "869ee5c",
+    "reference": "https://github.com/awslabs/palace/blob/v0.16.0/docs/src/examples/spheres.md",
+    "relative_errors": [
+      [
+        0.005629832740358109,
+        0.03532227809670985
+      ],
+      [
+        0.03532227809670985,
+        0.019276015348690168
+      ]
+    ],
+    "scientific_qualification": "NOT_ESTABLISHED",
+    "status": "PASS"
+  },
+  "guards": [
+    {
+      "id": "missing_csrf",
+      "observed_http_status": 403,
+      "status": "PASS"
+    },
+    {
+      "id": "stale_expected_revision",
+      "observed_http_status": 409,
+      "status": "PASS"
+    },
+    {
+      "id": "wrong_josephson_units",
+      "observed_http_status": 409,
+      "status": "PASS"
+    },
+    {
+      "id": "junction_double_counting",
+      "observed_http_status": 409,
+      "status": "PASS"
+    },
+    {
+      "id": "changed_geometry",
+      "observed_http_status": 409,
+      "status": "PASS"
+    },
+    {
+      "id": "altered_native_csv",
+      "observed_http_status": 409,
+      "status": "PASS"
+    },
+    {
+      "id": "unchanged_physical_context_reusable_after_study_only_revision",
+      "status": "PASS"
+    }
+  ],
+  "additional_CJ_sensitivity": "PASS",
+  "native_archive_sha256": "65afa5db4c48c9dbd417c2051343fe2053c740b147a3fd9cc82b479921ac2bf8",
+  "native_archive_bytes": 32754501,
+  "raw_evidence_scope": "Fresh test-owned model only. Raw solver files, manifests and screenshots stay in the original numbered workstation report.",
+  "excluded_from_git": [
+    "User projects",
+    "Accounts and credentials",
+    "Local runtime paths",
+    "Raw native output",
+    "Local databases"
+  ],
+  "scientific_qualification": "NOT_ESTABLISHED",
+  "fabrication": "HOLD",
+  "remaining": [
+    "Final stable-source Software and feature CI",
+    "Mesh/domain/material convergence",
+    "Coupled transmon/readout integration"
+  ]
+}

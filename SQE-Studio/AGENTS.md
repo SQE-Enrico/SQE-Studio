@@ -31,9 +31,10 @@ PROJECT_MAP.json is the routing index, not an additional document to read in ful
 6. Keep CURRENT_STATE.json short: current facts, blockers and next work.
    Replace obsolete instructions; do not append a chronology.
 
-Numerical/core files are pinned in config/core_hashes.json. This refactor leaves
-them byte-identical to the supplied dev78. Do not relax physical validation or
-modify a core pin merely to pass tests. A scientific change needs a new current
-review with primary references and meaningful validation, not old permit chains.
+The original dev78 core map stays immutable in config/core_hashes.json.
+Current integration changes are separately recorded in config/core_changes.json
+and docs/SINGLE_TRANSMON.md, with exact source hashes, primary references and
+meaningful native validation. Do not relax physical validation or change a pin
+merely to pass tests. Fingerprint refresh alone cannot authorize a core change.
 No fabricated reviewer or physical GO. Scientific qualification NOT_ESTABLISHED;
 fabrication HOLD. See docs/SCIENCE.md for the remaining extraction/EPR work.

@@ -1,22 +1,23 @@
-## Problema e risultato
+## Problem and outcome
 
-Descrivere il comportamento concreto prima e dopo la modifica.
+Describe the concrete trigger and resulting behavior.
 
-Issue: <!-- Refs #numero; usare Closes #numero solo se i criteri sono completati. -->
+Issue: <!-- Refs #number; use Closes #number only after acceptance is verified. -->
 Milestone:
 
-## Verifica
+## Validation
 
-| Controllo | Esito | Evidenza |
+| Check | Result | Evidence |
 |---|---|---|
-| Test mirati / Recommended | | |
-| Suite software / CI | | |
-| Profilo nativo pertinente | | |
+| Focused tests / Recommended | | |
+| Software suite / CI | | |
+| Relevant native profile | | |
 
-Indicare report numerato, hash delle sorgenti, ambiente e motivi degli skip/blocchi.
-Distinguere esecuzione nativa, fixture e replay. Per cambi scientifici collegare
-benchmark, criteri di convergenza e revisione della baseline protetta.
+Include numbered reports, source hashes, environment and reasons for skips or
+blocks. Distinguish native execution, constructed fixtures and recorded replay.
+For scientific changes, link current methods, benchmarks, convergence criteria
+and the active protected-source review.
 
-## Limiti rilevanti
+## Material limits
 
-Indicare gli aspetti richiesti che restano incompleti e le dipendenze successive.
+State required work that remains incomplete and relevant dependencies.

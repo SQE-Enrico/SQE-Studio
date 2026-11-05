@@ -19,6 +19,9 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT/'src'))
+from sqe_studio.testing.process_temp import process_workspace
+
 GROUPS=tuple((folder.name,(folder.relative_to(ROOT).as_posix(),))
              for folder in sorted((ROOT/'tests').iterdir()) if folder.is_dir()
              and any(folder.rglob('test_*.py')))+(('top_level',tuple(
@@ -138,10 +141,11 @@ def _group_environment(label, source=None, *, windows=None):
 
 
 def _run_group_process(command, label, limit):
-    # The outer Automatic Test keeps its temp area in excluded reports/.
     # Browser tests (including nested integration subprocesses) deliberately
-    # require captures outside the entire source root. Preserve that boundary.
-    with tempfile.TemporaryDirectory(prefix='.sqe-regression-', dir=ROOT.parent) as work:
+    # require captures outside the entire source root. Use short POSIX paths
+    # so Chromium can also create its bounded-length Unix IPC sockets.
+    with process_workspace(ROOT) as workspace:
+        work = str(workspace)
         env = _group_environment(label)
         env.update(TMPDIR=work, TEMP=work, TMP=work,
                    SQE_BROWSER_CAPTURE_DIR=str(Path(work) / 'browser-captures'))

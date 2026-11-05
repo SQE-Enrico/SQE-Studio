@@ -16,6 +16,7 @@ import zipfile
 import sys
 
 from .catalog import TASKS, BY_ID, load_plan, resolve_selection
+from .process_temp import process_workspace
 from .scopes import scope_files
 
 STATUSES = ('PASS', 'FAIL', 'BLOCKED', 'TIMEOUT', 'CANCELLED', 'SKIPPED_BY_PLAN')
@@ -130,12 +131,12 @@ def run_selected(root, destination, selected, *, notify=None, cancel=None):
         except (OSError, ValueError, TypeError, KeyError) as exc:
             plan = {'wall_budget_s': 3600, 'packaging_reserve_s': 120}
             plan_error = 'INVALID_RELEASE_PLAN_' + type(exc).__name__
-        # Some locked-down hosts fall back to cwd when their OS temp is not
-        # writable. Keep all transient work in the verified excluded report
-        # area, never inside the inventoried source tree.
-        with tempfile.TemporaryDirectory(prefix='.m17-work-', dir=destination.parent) as td:
+        # Collect reports in the excluded area; give subprocesses a separate,
+        # external temp path short enough for Chromium's Unix IPC sockets.
+        with tempfile.TemporaryDirectory(prefix='.m17-work-', dir=destination.parent) as td, \
+                process_workspace(root) as private_temp:
             temp = Path(td)
-            private = (str(root), str(temp), str(Path.home()), os.environ.get('USERPROFILE', ''))
+            private = (str(root), str(temp), str(private_temp), str(Path.home()), os.environ.get('USERPROFILE', ''))
             def sanitize(obj):
                 if type(obj) is str:
                     return _safe_log(obj, private)
@@ -145,8 +146,6 @@ def run_selected(root, destination, selected, *, notify=None, cancel=None):
                     return {k: sanitize(v) for k, v in obj.items()}
                 return obj
             env = dict(os.environ)
-            private_temp = temp/'process-temp'
-            private_temp.mkdir(mode=0o700)
             env.update(PYTHONPATH=str(root/'src'), PYTHONDONTWRITEBYTECODE='1',
                        OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1',
                        PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', PIP_NO_INDEX='1',

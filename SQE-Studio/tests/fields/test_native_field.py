@@ -338,6 +338,7 @@ def test_incompatible_E_B_field_representations_fail_closed(tmp_path):
 
 def test_windows_1314_skip_is_confined_to_symlink_case(monkeypatch, tmp_path):
     """Simulates Windows standard-user privilege on the Linux CI host."""
+    pytest.importorskip('vtkmodules')  # Fixture availability precedes the expected symlink skip.
     def refuse_symlink(*_args, **_kwargs):
         error = OSError(errno.EPERM, 'simulated standard account')
         error.winerror = 1314
